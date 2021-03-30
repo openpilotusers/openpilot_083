@@ -66,6 +66,13 @@ void HomeWindow::mousePressEvent(QMouseEvent* e) {
   if (ui_state->scene.started && (e->x() >= ui_state->viz_rect.x - bdr_s)) {
     ui_state->sidebar_collapsed = !ui_state->sidebar_collapsed;
   }
+
+  
+  // atom  mouse
+  ui_state->scene.mouse.touch_x = e->x();
+  ui_state->scene.mouse.touch_y = e->y();
+  ui_state->scene.mouse.touched = e->button();
+  ui_state->scene.mouse.touch_cnt++;
 }
 
 

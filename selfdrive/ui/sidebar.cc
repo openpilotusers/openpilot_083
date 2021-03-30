@@ -6,6 +6,8 @@
 #include "paint.hpp"
 #include "sidebar.hpp"
 
+extern float  fFontSize;
+
 static void draw_background(UIState *s) {
   const NVGcolor color = nvgRGBA(0x39, 0x39, 0x39, 0xff);
   ui_fill_rect(s->vg, {0, 0, sbr_w, s->fb_h}, color);
@@ -30,6 +32,24 @@ static void draw_network_strength(UIState *s) {
   ui_draw_image(s, {58, 196, 176, 27}, util::string_format("network_%d", img_idx).c_str(), 1.0f);
 }
 
+static void draw_battery_icon(UIState *s) {
+  const char *battery_img = s->scene.deviceState.getBatteryStatus() == "Charging" ? "battery_charging" : "battery";
+  const Rect rect = {160, 255, 76, 36};
+
+  int batteryPercent = s->scene.deviceState.getBatteryPercent();
+
+  if( batteryPercent <= 0)
+     batteryPercent = 50;
+
+  ui_fill_rect(s->vg, {rect.x + 6, rect.y + 5,
+              int((rect.w - 19) * batteryPercent * 0.01), rect.h - 11}, COLOR_WHITE);
+  ui_draw_image(s, rect, battery_img, 1.0f);
+
+  char temp_value_str1[32];
+  snprintf(temp_value_str1, sizeof(temp_value_str1), "%d", batteryPercent );
+  nvgTextBox(s->vg, rect.x, rect.y - 2, rect.w, temp_value_str1, NULL);   
+}
+
 static void draw_network_type(UIState *s) {
   static std::map<cereal::DeviceState::NetworkType, const char *> network_type_map = {
       {cereal::DeviceState::NetworkType::NONE, "--"},
@@ -43,10 +63,15 @@ static void draw_network_type(UIState *s) {
   const int network_w = 100;
   const char *network_type = network_type_map[s->scene.deviceState.getNetworkType()];
   nvgFillColor(s->vg, COLOR_WHITE);
-  nvgFontSize(s->vg, 48);
+  nvgFontSize(s->vg, 48* fFontSize);
   nvgFontFace(s->vg, "sans-regular");
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
   nvgTextBox(s->vg, network_x, network_y, network_w, network_type ? network_type : "--", NULL);
+
+  nvgFontSize(s->vg, 40*fFontSize);
+  std::string ip = s->scene.deviceState.getWifiIpAddress();
+  nvgTextBox(s->vg, network_x-20, network_y + 50, 250, ip.c_str(), NULL);
+
 }
 
 static void draw_metric(UIState *s, const char *label_str, const char *value_str, const int severity, const int y_offset, const char *message_str) {
@@ -70,19 +95,19 @@ static void draw_metric(UIState *s, const char *label_str, const char *value_str
 
   if (!message_str) {
     nvgFillColor(s->vg, COLOR_WHITE);
-    nvgFontSize(s->vg, 78);
+    nvgFontSize(s->vg, 78* fFontSize);
     nvgFontFace(s->vg, "sans-bold");
     nvgTextAlign(s->vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
     nvgTextBox(s->vg, rect.x + 50, rect.y + 50, rect.w - 60, value_str, NULL);
 
     nvgFillColor(s->vg, COLOR_WHITE);
-    nvgFontSize(s->vg, 48);
+    nvgFontSize(s->vg, 48* fFontSize);
     nvgFontFace(s->vg, "sans-regular");
     nvgTextAlign(s->vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
     nvgTextBox(s->vg, rect.x + 50, rect.y + 50 + 66, rect.w - 60, label_str, NULL);
   } else {
     nvgFillColor(s->vg, COLOR_WHITE);
-    nvgFontSize(s->vg, 48);
+    nvgFontSize(s->vg, 48* fFontSize);
     nvgFontFace(s->vg, "sans-bold");
     nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
     nvgTextBox(s->vg, rect.x + 35, rect.y + (strchr(message_str, '\n') ? 40 : 50), rect.w - 50, message_str, NULL);
@@ -95,7 +120,7 @@ static void draw_temp_metric(UIState *s) {
       {cereal::DeviceState::ThermalStatus::YELLOW, 1},
       {cereal::DeviceState::ThermalStatus::RED, 2},
       {cereal::DeviceState::ThermalStatus::DANGER, 3}};
-  std::string temp_val = std::to_string((int)s->scene.deviceState.getAmbientTempC()) + "°C";
+  std::string temp_val = std::to_string((int)s->scene.deviceState.getAmbientTempC()) + "C";
   draw_metric(s, "TEMP", temp_val.c_str(), temp_severity_map[s->scene.deviceState.getThermalStatus()], 0, NULL);
 }
 
@@ -136,6 +161,7 @@ void ui_draw_sidebar(UIState *s) {
   draw_settings_button(s);
   draw_home_button(s);
   draw_network_strength(s);
+  draw_battery_icon(s);
   draw_network_type(s);
   draw_temp_metric(s);
   draw_panda_metric(s);

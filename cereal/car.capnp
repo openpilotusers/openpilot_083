@@ -187,6 +187,10 @@ struct CarState {
   leftBlindspot @33 :Bool; # Is there something blocking the left lane change
   rightBlindspot @34 :Bool; # Is there something blocking the right lane change
 
+  # atom
+  tpms @37 :WheelSpeeds;
+  modelSpeed @38 :Float32;
+
   struct WheelSpeeds {
     # optional wheel speeds
     fl @0 :Float32;
@@ -202,6 +206,9 @@ struct CarState {
     speedOffset @3 :Float32;
     standstill @4 :Bool;
     nonAdaptive @5 :Bool;
+
+    modeSel @6 :Int16;
+    cruiseSwState @7 :Int16;    
   }
 
   enum GearShifter {
@@ -416,6 +423,20 @@ struct CarParams {
   communityFeature @46: Bool;  # true if a community maintained feature is detected
   fingerprintSource @49: FingerprintSource;
   networkLocation @50 :NetworkLocation;  # Where Panda/C2 is integrated into the car's CAN network
+
+
+  # atom
+  atomTuning @55 :AtomTuning;
+
+  struct AtomTuning {
+    cvKPH @0 :List(Float32);
+    cvBPV @1 :List(List(Float32));
+    cvsMaxV @2 :List(List(Float32));
+    cvsdUpV @3 :List(List(Float32));
+    cvsdDnV @4 :List(List(Float32));
+    cvsteerRatioV @5 :List(List(Float32));
+    cvsteerActuatorDelayV @6 :List(List(Float32));
+  }
 
   struct LateralParams {
     torqueBP @0 :List(Int32);

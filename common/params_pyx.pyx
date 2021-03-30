@@ -83,6 +83,12 @@ keys = {
   b"Offroad_UpdateFailed": [TxType.CLEAR_ON_MANAGER_START],
   b"Offroad_HardwareUnsupported": [TxType.CLEAR_ON_MANAGER_START],
   b"ForcePowerDown": [TxType.CLEAR_ON_MANAGER_START],
+  
+  b"IsOpenpilotViewEnabled": [TxType.CLEAR_ON_MANAGER_START],
+  b"OpkrAutoResume": [TxType.PERSISTENT],
+  b"OpkrLiveSteerRatio": [TxType.PERSISTENT],
+  b"OpkrTurnSteeringDisable": [TxType.PERSISTENT],
+  b"OpkrPrebuilt": [TxType.PERSISTENT],
 }
 
 def ensure_bytes(v):

@@ -39,6 +39,12 @@ def manager_init():
     ("OpenpilotEnabledToggle", "1"),
     ("VisionRadarToggle", "0"),
     ("IsDriverViewEnabled", "0"),
+
+    ("IsOpenpilotViewEnabled", "0"),
+    ("OpkrAutoResume", "0"),
+    ("OpkrLiveSteerRatio", "0"),
+    ("OpkrTurnSteeringDisable", "0"),
+    ("OpkrPrebuilt", "0"),
   ]
 
   if params.get("RecordFrontLock", encoding='utf-8') == "1":
@@ -100,7 +106,7 @@ def manager_thread():
   cloudlog.info({"environ": os.environ})
 
   # save boot log
-  subprocess.call("./bootlog", cwd=os.path.join(BASEDIR, "selfdrive/loggerd"))
+  #subprocess.call("./bootlog", cwd=os.path.join(BASEDIR, "selfdrive/loggerd"))
 
   ignore = []
   if os.getenv("NOBOARD") is not None:
@@ -112,6 +118,26 @@ def manager_thread():
 
   started_prev = False
   params = Params()
+
+
+#params = Params()
+  EnableLogger = int(params.get("RecordFront"))
+  
+  if not EnableLogger:
+    ignore.append("loggerd")
+    ignore.append("logcatd")
+    ignore.append("logmessaged")
+    ignore.append("uploader")
+    ignore.append("updated")
+    ignore.append("deleter")
+    ignore.append("tombstoned")
+  else:
+    # save boot log
+    subprocess.call("./bootlog", cwd=os.path.join(BASEDIR, "selfdrive/loggerd"))
+
+
+
+
   sm = messaging.SubMaster(['deviceState'])
   pm = messaging.PubMaster(['managerState'])
 

@@ -177,6 +177,7 @@ def thermald_thread():
 
   network_type = NetworkType.none
   network_strength = NetworkStrength.unknown
+  wifiIpAddress = 'N/A'
 
   current_filter = FirstOrderFilter(0., CURRENT_TAU, DT_TRML)
   cpu_temp_filter = FirstOrderFilter(0., CPU_TEMP_TAU, DT_TRML)
@@ -205,6 +206,7 @@ def thermald_thread():
   cloudlog.event("CPR", data=cpr_data)
 
   while 1:
+    ts = sec_since_boot()
     pandaState = messaging.recv_sock(pandaState_sock, wait=True)
     msg = read_thermal(thermal_config)
 
@@ -250,6 +252,7 @@ def thermald_thread():
       try:
         network_type = HARDWARE.get_network_type()
         network_strength = HARDWARE.get_network_strength(network_type)
+        wifiIpAddress = HARDWARE.get_ip_address()
       except Exception:
         cloudlog.exception("Error getting network status")
 
@@ -258,6 +261,7 @@ def thermald_thread():
     msg.deviceState.cpuUsagePercent = int(round(psutil.cpu_percent()))
     msg.deviceState.networkType = network_type
     msg.deviceState.networkStrength = network_strength
+    msg.deviceState.wifiIpAddress = wifiIpAddress
     msg.deviceState.batteryPercent = HARDWARE.get_battery_capacity()
     msg.deviceState.batteryStatus = HARDWARE.get_battery_status()
     msg.deviceState.batteryCurrent = HARDWARE.get_battery_current()
@@ -323,7 +327,11 @@ def thermald_thread():
     update_failed_count = 0 if update_failed_count is None else int(update_failed_count)
     last_update_exception = params.get("LastUpdateException", encoding='utf8')
 
-    if update_failed_count > 15 and last_update_exception is not None:
+
+    EnableLogger = int(params.get("RecordFront"))
+    if not EnableLogger:
+      pass
+    elif update_failed_count > 15 and last_update_exception is not None:
       if current_branch in ["release2", "dashcam"]:
         extra_text = "Ensure the software is correctly installed"
       else:
@@ -366,7 +374,12 @@ def thermald_thread():
     set_offroad_alert_if_changed("Offroad_TemperatureTooHigh", (not startup_conditions["device_temp_good"]))
 
     # Handle offroad/onroad transition
-    should_start = all(startup_conditions.values())
+    is_rhd_region = int(Params().get("IsOpenpilotViewEnabled"))  # IsRHD
+    if is_rhd_region:
+      should_start = True   # user video
+    else:
+      should_start = all(startup_conditions.values())    
+    #should_start = all(startup_conditions.values())
     if should_start:
       if not should_start_prev:
         params.delete("IsOffroad")
@@ -425,6 +438,10 @@ def thermald_thread():
 
     should_start_prev = should_start
     startup_conditions_prev = startup_conditions.copy()
+
+
+    if usb_power:
+      power_monitor.charging_ctrl( msg, ts, 60, 40 )    
 
     # report to server once per minute
     if (count % int(60. / DT_TRML)) == 0:
