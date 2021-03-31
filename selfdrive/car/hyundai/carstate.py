@@ -70,7 +70,7 @@ class CarState(CarStateBase):
 
     ret.standstill = ret.vEgoRaw < 0.1
 
-    ret.steeringAngleDeg = cp.vl["SAS11"]['SAS_Angle']  - self.CP.lateralsRatom.steerOffset
+    ret.steeringAngleDeg = cp.vl["SAS11"]['SAS_Angle']  # - self.CP.lateralsRatom.steerOffset
     ret.steeringRateDeg = cp.vl["SAS11"]['SAS_Speed']
     ret.yawRate = cp.vl["ESP12"]['YAW_RATE']
     #ret.leftBlinker, ret.rightBlinker = self.update_blinker(50, cp.vl["CGW1"]['CF_Gway_TurnSigLh'],
