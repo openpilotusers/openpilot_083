@@ -63,7 +63,7 @@ class CarInterface(CarInterfaceBase):
   
       ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kpV = [[0.], [0.20]]
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kiV = [[0.], [0.02]]
-      ret.lateralTuning.pid.kdBP, ret.lateralTuning.pid.kdV = [[0.],[2.5]]
+      #ret.lateralTuning.pid.kdBP, ret.lateralTuning.pid.kdV = [[0.],[2.5]]
 
       
       ret.lateralTuning.init('lqr')
