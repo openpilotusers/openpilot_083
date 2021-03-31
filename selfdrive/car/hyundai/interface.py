@@ -6,10 +6,10 @@ from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness,
 from selfdrive.car.interfaces import CarInterfaceBase, MAX_CTRL_SPEED
 
 
-from selfdrive.atom_conf import AtomConf
+from selfdrive.conf_atom import ConfAtom
 from common.params import Params
 
-ATOMC = AtomConf()
+ATOMC = ConfAtom()
 params = Params()
 
 EventName = car.CarEvent.EventName
