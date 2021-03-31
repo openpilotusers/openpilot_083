@@ -189,7 +189,7 @@ struct CarState {
 
   # atom
   tpms @37 :WheelSpeeds;
-  modelSpeed @38 :Float32;
+
 
   struct WheelSpeeds {
     # optional wheel speeds

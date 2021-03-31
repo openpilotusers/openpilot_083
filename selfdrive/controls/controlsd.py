@@ -154,6 +154,8 @@ class Controls:
     self.rk = Ratekeeper(100, print_delay_threshold=None)
     self.prof = Profiler(False)  # off by default
 
+    self.model_speed = 0    
+
   def update_events(self, CS):
     """Compute carEvents from carState"""
 
@@ -378,7 +380,7 @@ class Controls:
     # Update VehicleModel
     params = self.sm['liveParameters']
     x = max(params.stiffnessFactor, 0.1)
-    sr = max(params.steerRatio, 0.1)
+    sr = max(params.steerRatioCV, 0.1)
     self.VM.update_params(x, sr)
 
     lat_plan = self.sm['lateralPlan']
@@ -490,6 +492,7 @@ class Controls:
     if not self.read_only:
       # send car controls over can
       can_sends = self.CI.apply(CC)
+      self.model_speed  = self.CI.CC.model_speed      
       self.pm.send('sendcan', can_list_to_can_capnp(can_sends, msgtype='sendcan', valid=CS.canValid))
 
     force_decel = (self.sm['driverMonitoringState'].awarenessStatus < 0.) or \
@@ -539,7 +542,7 @@ class Controls:
     controlsState.output = float(lac_log.output)
     controlsState.alertTextMsg1 = str(log_alertTextMsg1)
     controlsState.alertTextMsg2 = str(log_alertTextMsg2)
-
+    controlsState.modelSpeed = float(self.model_speed) 
 
 
     if self.CP.steerControlType == car.CarParams.SteerControlType.angle:

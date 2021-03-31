@@ -498,7 +498,7 @@ static void ui_draw_debug(UIState *s)
   float  angleOffsetAverage = scene.liveParameters.getAngleOffsetAverageDeg();
   float  stiffnessFactor = scene.liveParameters.getStiffnessFactor();
 
-  float  modelSpeed = scene.car_state.getModelSpeed();
+  float  modelSpeed = scene.controls_state.getModelSpeed();
 
   float  laneWidth = scene.lateralPlan.getLaneWidth();
   //float  cpuPerc = scene.deviceState.getCpuUsagePercent();
