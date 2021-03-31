@@ -102,6 +102,11 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     processNotRunning @95;
     dashcamMode @96;
 
+    # atom
+    steerTorqueOver @97;
+    steerTorqueLow @98;
+
+
     radarCanErrorDEPRECATED @15;
     radarCommIssueDEPRECATED @67;
     gasUnavailableDEPRECATED @3;

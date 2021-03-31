@@ -25,6 +25,7 @@ from selfdrive.controls.lib.longitudinal_planner import LON_MPC_STEP
 from selfdrive.locationd.calibrationd import Calibration
 from selfdrive.hardware import HARDWARE, TICI
 
+from selfdrive.car.hyundai.interface import CarInterface
 import common.log as  trace1
 
 
@@ -154,7 +155,15 @@ class Controls:
     self.rk = Ratekeeper(100, print_delay_threshold=None)
     self.prof = Profiler(False)  # off by default
 
-    self.model_speed = 0    
+    # atom
+    self.startup_event_init = None
+    self.model_speed = 0
+
+    self.hyundai_lkas = self.read_only  #read_only
+    self.init_flag = True
+
+    self.timer_alloowed = 1500
+    self.timer_start = 1500
 
   def update_events(self, CS):
     """Compute carEvents from carState"""
@@ -166,6 +175,7 @@ class Controls:
     # Handle startup event
     if self.startup_event is not None:
       self.events.add(self.startup_event)
+      self.startup_event_init = self.startup_event
       self.startup_event = None
 
     # Create events for battery, temperature, disk space, and memory
@@ -489,9 +499,9 @@ class Controls:
     self.AM.process_alerts(self.sm.frame, clear_event)
     CC.hudControl.visualAlert = self.AM.visual_alert
 
-    if not self.read_only:
+    if not self.hyundai_lkas:
       # send car controls over can
-      can_sends = self.CI.apply(CC)
+      can_sends = self.CI.apply(CC, self.sm, self.CP)
       self.model_speed  = self.CI.CC.model_speed      
       self.pm.send('sendcan', can_list_to_can_capnp(can_sends, msgtype='sendcan', valid=CS.canValid))
 
@@ -593,12 +603,26 @@ class Controls:
     CS = self.data_sample()
     self.prof.checkpoint("Sample")
 
+    # atom
+    if self.read_only:
+      self.hyundai_lkas = self.read_only
+    elif CS.cruiseState.enabled and self.hyundai_lkas:
+      self.CP = CarInterface.live_tune( self.CP, True )      
+      self.hyundai_lkas = False
+      self.init_flag = True
+
+      cp_send = messaging.new_message('carParams')
+      cp_send.carParams = self.CP
+      self.pm.send('carParams', cp_send)    
+
     self.update_events(CS)
 
-    if not self.read_only:
+    if not self.hyundai_lkas:
       # Update control state
       self.state_transition(CS)
       self.prof.checkpoint("State transition")
+    else:
+      self.enabled = False   
 
     # Compute actuators (runs PID loops and lateral MPC)
     actuators, v_acc, a_acc, lac_log = self.state_control(CS)
@@ -608,6 +632,9 @@ class Controls:
     # Publish data
     self.publish_logs(CS, start_time, actuators, v_acc, a_acc, lac_log)
     self.prof.checkpoint("Sent")
+
+    if not CS.cruiseState.enabled and not self.hyundai_lkas:
+      self.hyundai_lkas = True    
 
   def controlsd_thread(self):
     while True:
