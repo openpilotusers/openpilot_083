@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 from cereal import car
 from selfdrive.config import Conversions as CV
 from selfdrive.car.hyundai.values import CAR
@@ -45,7 +45,7 @@ class CarInterface(CarInterfaceBase):
     ret.steerLimitTimer = 0.4
     tire_stiffness_factor = 1.1
 
-    ret.maxSteeringAngleDeg = 180.
+    ret.maxSteeringAngleDeg = 90.
     ret.startAccel = 1.0
 
     eps_modified = False

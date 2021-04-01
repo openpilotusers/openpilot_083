@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 import math
 
 import json
@@ -171,6 +171,8 @@ def main(sm=None, pm=None):
       if sm['carParams'].steerRateCost > 0:
         atomTuning = sm['carParams'].atomTuning
         cv_value = sm['controlsState'].modelSpeed
+        if cv_value <= 10: 
+          cv_value = 255
         steerRatioCV, actuatorDelayCV = learner.atom_tune( v_ego_kph, cv_value,  atomTuning )
 
 

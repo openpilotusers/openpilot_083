@@ -1,4 +1,4 @@
-from cereal import car, log
+﻿from cereal import car, log
 from common.realtime import DT_CTRL
 from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, create_lfahda_mfc, create_mdps12
@@ -77,7 +77,7 @@ class CarController():
     return value
 
 
-  def process_hud_alert(self, enabled, c, Navi_SCC_Camera_Act ):
+  def process_hud_alert(self, enabled, c ):
     visual_alert = c.hudControl.visualAlert
     left_lane = c.hudControl.leftLaneVisible
     right_lane = c.hudControl.rightLaneVisible
@@ -99,8 +99,7 @@ class CarController():
 
     # initialize to no line visible
     sys_state = 1
-    #if Navi_SCC_Camera_Act:
-    #  sys_state = 4
+
     if self.hud_timer_left and self.hud_timer_right or sys_warning:  # HUD alert only display when LKAS status is active
       if (self.steer_torque_ratio > 0.7) and (enabled or sys_warning):
         sys_state = 3
@@ -164,33 +163,31 @@ class CarController():
       param.STEER_DELTA_UP = min( param.STEER_DELTA_UP, nUP)
       param.STEER_DELTA_DOWN = min( param.STEER_DELTA_DOWN, nDN )
 
-    sec_mval = 5  # 오파 => 운전자.  (sec)
-    sec_pval = 3 #  운전자 => 오파  (sec)
-    # streer over check
 
+             
+    if abs(CS.out.steeringAngleDeg) >= CS.CP.maxSteeringAngleDeg: # and CS.out.steeringPressed:
+      sec_mval = 0.5  # 오파 => 운전자.  (sec)
+      sec_pval = 10   #  운전자 => 오파  (sec)
+      self.timer1.startTime( 5000 )
+      self.steer_torque_over_timer = 50
+    elif self.timer1.endTime():
+      sec_mval = 5    # 오파 => 운전자.  (sec)
+      sec_pval = 3    #  운전자 => 오파  (sec)  
+    else:
+      sec_mval = 0.5  # 오파 => 운전자.  (sec)
+      sec_pval = 10   #  운전자 => 오파 
 
+    
     if path_plan.laneChangeState != LaneChangeState.off:
       self.steer_torque_over_timer = 0
     elif CS.out.leftBlinker or CS.out.rightBlinker:
-      sec_mval = 0.5 # 오파 => 운전자.
-      sec_pval = 10  # 운전자 => 오파  (sec)
+      sec_mval = 0.5  # 오파 => 운전자.
+      sec_pval = 10 # 운전자 => 오파  (sec)
 
-    if v_ego_kph > 5 and CS.out.steeringPressed and CS.out.cruiseState.enabled:
-      if abs_angle_steers > 5 and CS.out.steeringTorque < -10:   #right
-        if dst_steer < 0:
-          self.steer_torque_over_timer = 0
-        else:
-          #sec_mval = 1
-          self.steer_torque_over_timer = 50
-      elif abs_angle_steers > 5 and CS.out.steeringTorque > 10:  #left
-        if dst_steer > 0:
-          self.steer_torque_over_timer = 0
-        else:
-          #sec_mval = 1
-          self.steer_torque_over_timer = 50       
-      else:
-        self.steer_torque_over_timer = 50
-
+    if not CS.out.cruiseState.enabled:
+      self.steer_torque_over_timer = 0
+    elif v_ego_kph > 5 and abs(CS.out.steeringTorque) > 250:  #사용자 핸들 토크
+      self.steer_torque_over_timer = 50
     elif self.steer_torque_over_timer:
       self.steer_torque_over_timer -= 1
 
@@ -241,7 +238,7 @@ class CarController():
 
 
     # disable if steer angle reach 90 deg, otherwise mdps fault in some models
-    lkas_active = enabled and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
+    lkas_active = enabled   #and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
 
     if not lkas_active:
       apply_steer = 0
@@ -249,7 +246,7 @@ class CarController():
     steer_req = 1 if apply_steer else 0
     self.apply_steer_last = apply_steer
 
-    sys_warning, self.hud_sys_state = self.process_hud_alert( lkas_active, c, CS.Navi_SCC_Camera_Act )
+    sys_warning, self.hud_sys_state = self.process_hud_alert( lkas_active, c )
 
     if frame == 0: # initialize counts from last received count signals
       self.lkas11_cnt = CS.lkas11["CF_Lkas_MsgCount"] + 1
