@@ -1,4 +1,4 @@
-import os
+﻿import os
 import math
 import numpy as np
 from common.params import Params
@@ -12,6 +12,7 @@ from selfdrive.config import Conversions as CV
 import cereal.messaging as messaging
 from cereal import log
 
+from common.numpy_fast import interp
 from selfdrive.car.hyundai.values import Buttons
 
 LaneChangeState = log.LateralPlan.LaneChangeState
@@ -166,7 +167,10 @@ class LateralPlanner():
       # starting
       elif self.lane_change_state == LaneChangeState.laneChangeStarting:
         # fade out over .5s
-        self.lane_change_ll_prob = max(self.lane_change_ll_prob - 2*DT_MDL, 0.0)
+        xp = [40,80]
+        fp2 = [1,2]
+        lane_time = interp( v_ego_kph, xp, fp2 )        
+        self.lane_change_ll_prob = max(self.lane_change_ll_prob - lane_time*DT_MDL, 0.0)
         # 98% certainty
         if lane_change_prob < 0.02 and self.lane_change_ll_prob < 0.01:
           self.lane_change_state = LaneChangeState.laneChangeFinishing
