@@ -36,6 +36,10 @@ class CarInterfaceBase():
     if CarController is not None:
       self.CC = CarController(self.cp.dbc_name, CP, self.VM)
 
+
+    # atom
+    self.cruise_enabled_prev = True      
+
   @staticmethod
   def calc_accel_override(a_ego, a_target, v_ego, v_target):
     return 1.
@@ -135,6 +139,9 @@ class CarInterfaceBase():
         events.add(EventName.pcmEnable)
       elif not cs_out.cruiseState.enabled:
         events.add(EventName.pcmDisable)
+
+    if self.cruise_enabled_prev != cs_out.cruiseState.enabled:
+      self.cruise_enabled_prev = cs_out.cruiseState.enabled
 
     return events
 
