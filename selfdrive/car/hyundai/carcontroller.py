@@ -184,7 +184,9 @@ class CarController():
       sec_mval = 0.5  # 오파 => 운전자.
       sec_pval = 10 # 운전자 => 오파  (sec)
 
-    if not CS.out.cruiseState.enabled:
+    if CS.out.cruiseState.cruiseSwState == Buttons.CANCEL:
+      self.steer_torque_over_timer = 0
+    elif not CS.out.cruiseState.enabled:
       self.steer_torque_over_timer = 0
     elif v_ego_kph > 5 and abs(CS.out.steeringTorque) > 250:  #사용자 핸들 토크
       self.steer_torque_over_timer = 50
