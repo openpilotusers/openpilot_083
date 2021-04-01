@@ -157,11 +157,11 @@ class CarController():
       self.steer_torque_ratio = 1
       return param, dst_steer
 
-    if self.CP.lateralsRatom.learnerParams != 1:
-      nMAX, nUP, nDN = self.atom_tune( v_ego_kph, self.model_speed )
-      param.STEER_MAX = min( param.STEER_MAX, nMAX)
-      param.STEER_DELTA_UP = min( param.STEER_DELTA_UP, nUP)
-      param.STEER_DELTA_DOWN = min( param.STEER_DELTA_DOWN, nDN )
+
+    nMAX, nUP, nDN = self.atom_tune( v_ego_kph, self.model_speed )
+    param.STEER_MAX = min( param.STEER_MAX, nMAX)
+    param.STEER_DELTA_UP = min( param.STEER_DELTA_UP, nUP)
+    param.STEER_DELTA_DOWN = min( param.STEER_DELTA_DOWN, nDN )
 
 
              
@@ -277,7 +277,7 @@ class CarController():
       can_sends.append(create_clu11(self.packer, frame, CS.clu11, Buttons.CANCEL))
     if CS.out.cruiseState.standstill:
       # run only first time when the car stopped
-      if self.last_lead_distance == 0 or not CP.lateralsRatom.opkrAutoResume:
+      if self.last_lead_distance == 0:  
         # get the lead distance from the Radar
         self.last_lead_distance = CS.lead_distance
         self.resume_cnt = 0
