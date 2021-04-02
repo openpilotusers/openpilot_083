@@ -1230,6 +1230,8 @@ struct LiveParametersData {
   posenetSpeed @8 :Float32;
   posenetValid @9 :Bool;
 
+
+  # atom
   steerRatioCV @10 :Float32;
   steerActuatorDelayCV @11 :Float32;
 }

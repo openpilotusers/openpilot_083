@@ -475,6 +475,33 @@ static void screen_menu_button(UIState *s, int touch_x, int touch_y, int touched
     }
 }
 
+static void ui_draw_modeSel(UIState *s) 
+{
+  UIScene &scene = s->scene;
+  NVGcolor nColor = COLOR_WHITE;
+  char str_msg[512];
+
+  int ui_viz_rx = s->viz_rect.x;
+  int ui_viz_rw = s->viz_rect.w; 
+  const int viz_speed_x = ui_viz_rx+((ui_viz_rw/2)-(280/2));
+  int x_pos = viz_speed_x + 300;
+  int y_pos = 120;
+
+  int modeSel = scene.car_state.cruiseState.getModeSel();
+  nvgFontSize(s->vg, 80);
+  switch( modeSel  )
+  {
+    case 0: strcpy( str_msg, "0.OP MODE" ); nColor = COLOR_WHITE; break;
+    case 1: strcpy( str_msg, "1.CURVE" );    nColor = nvgRGBA(200, 200, 255, 255);  break;
+    case 2: strcpy( str_msg, "2.FWD CAR" );  nColor = nvgRGBA(200, 255, 255, 255);  break;
+    case 3: strcpy( str_msg, "3.HYUNDAI" );  nColor = nvgRGBA(200, 255, 255, 255);  break;
+    case 4: strcpy( str_msg, "4.CURVATURE" );   nColor = nvgRGBA(200, 255, 255, 255);  break;
+    default :  sprintf( str_msg, "%d.NORMAL", modeSel ); nColor = COLOR_WHITE;  break;
+  }
+  nvgFillColor(s->vg, nColor);  
+  ui_print( s, x_pos, y_pos+80, str_msg );
+}
+
 
 static void ui_draw_debug(UIState *s) 
 {
@@ -538,16 +565,16 @@ static void ui_draw_debug(UIState *s)
     ui_print( s, x_pos, y_pos+350, "tpms:%.0f,%.0f,%.0f,%.0f", fl, fr, rl, rr );
 
 
+
    // int  lensPos = scene.frame.getLensPos();
    // int  lensTruePos = scene.frame.getLensTruePos();
     //int  lensErr = scene.frame.getLensErr();
   //  ui_print( s, x_pos, y_pos+400, "frame:%d,%d", lensPos, lensTruePos );
 
 
-
     ui_print( s, 0, 1020, "%s", scene.alert.text1 );
     ui_print( s, 0, 1078, "%s", scene.alert.text2 );
-
+    ui_draw_modeSel(s);
 }
 
 /*
