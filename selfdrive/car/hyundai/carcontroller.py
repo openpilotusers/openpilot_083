@@ -177,7 +177,6 @@ class CarController():
       sec_mval = 0.5  # 오파 => 운전자.  (sec)
       sec_pval = 10   #  운전자 => 오파 
 
-    
     if path_plan.laneChangeState != LaneChangeState.off:
       self.steer_torque_over_timer = 0
     elif CS.out.leftBlinker or CS.out.rightBlinker:
