@@ -487,7 +487,7 @@ static void ui_draw_modeSel(UIState *s)
   int x_pos = viz_speed_x + 300;
   int y_pos = 120;
 
-  int modeSel = scene.car_state.cruiseState.getModeSel();
+  int modeSel = scene.car_state.getCruiseState().getModeSel();
   nvgFontSize(s->vg, 80);
   switch( modeSel  )
   {
