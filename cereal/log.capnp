@@ -660,6 +660,18 @@ struct ModelDataV2 {
 
   meta @12 :MetaData;
 
+  # atom
+  path @18 :PathData;
+
+  struct PathData {
+    points @0 :List(Float32);
+    prob @1 :Float32;
+    std @2 :Float32;
+    stds @3 :List(Float32);
+    poly @4 :List(Float32);
+    validLen @5 :Float32;
+  }
+
   # All SI units and in device frame
   struct XYZTData {
     x @0 :List(Float32);
