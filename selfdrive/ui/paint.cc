@@ -596,7 +596,7 @@ static void ui_draw_vision_event(UIState *s) {
   }
   
   //draw compass by opkr
-  if (scene->gpsAccuracyUblox != 0.00) {
+  if (s->scene.gpsAccuracyUblox != 0.00) {
     const int compass_x = s->viz_rect.x + s->viz_rect.w - 167 - (bdr_s);
     const int compass_y = (s->viz_rect.y + (bdr_s)) + 713;
     const int direction_x = compass_x + 74;
