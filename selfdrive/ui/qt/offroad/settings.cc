@@ -246,7 +246,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
     {"Network", network_panel(this)},
     {"Toggles", toggles_panel()},
     {"Developer", new DeveloperPanel()},
-    {"User", new UserPanel(this)},
+    {"User", new CUserPanel(this)},
   };
 
   sidebar_layout->addSpacing(45);
