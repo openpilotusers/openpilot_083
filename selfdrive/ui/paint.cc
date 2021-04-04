@@ -610,6 +610,16 @@ static void ui_draw_vision_event(UIState *s) {
     else if (s->scene.limitSpeedCamera < 110) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_100", img_speedlimit_alpha);}
     else if (s->scene.limitSpeedCamera < 120) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_110", img_speedlimit_alpha);}
   }
+  
+  //draw compass by opkr
+  if (scene->gpsAccuracyUblox != 0.00) {
+    const int compass_x = s->viz_rect.x + s->viz_rect.w - 167 - (bdr_s);
+    const int compass_y = (s->viz_rect.y + (bdr_s)) + 713;
+    const int direction_x = compass_x + 74;
+    const int direction_y = compass_y + 74;
+    ui_draw_image(s, {compass_x, compass_y, 150, 150}, "compass", 0.6f);
+    ui_draw_circle_image(s, direction_x, direction_y - (bdr_s+7), 90, "direction", nvgRGBA(0x0, 0x0, 0x0, 0x0), 0.6f, -(s->scene.bearingUblox));
+  }
 
   // draw steering wheel
   const int bg_wheel_size = 90;
@@ -838,20 +848,6 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
     snprintf(val_str, sizeof(val_str), "%.0f", (s->scene.altitudeUblox));
     snprintf(uom_str, sizeof(uom_str), "m");
     bb_h +=bb_ui_draw_measure(s,  val_str, uom_str, "고도",
-        bb_rx, bb_ry, bb_uom_dx,
-        val_color, lab_color, uom_color,
-        value_fontSize, label_fontSize, uom_fontSize );
-    bb_ry = bb_y + bb_h;
-  }
-  //add direction
-  if (scene->gpsAccuracyUblox != 0.00) {
-    //char val_str[16];
-    char uom_str[3];
-    std::string bearing_val = std::to_string(int(s->scene.bearingUblox)) + "°";
-    NVGcolor val_color = COLOR_WHITE_ALPHA(200);
-    //snprintf(val_str, sizeof(val_str), "%.0f", (s->scene.bearingUblox));
-    snprintf(uom_str, sizeof(uom_str), "");
-    bb_h +=bb_ui_draw_measure(s, bearing_val.c_str(), uom_str, "주행방향",
         bb_rx, bb_ry, bb_uom_dx,
         val_color, lab_color, uom_color,
         value_fontSize, label_fontSize, uom_fontSize );
@@ -1453,6 +1449,8 @@ void ui_nvg_init(UIState *s) {
       {"speed_110", "../assets/img_110_speedahead.png"},
       {"car_left", "../assets/img_car_left.png"},
       {"car_right", "../assets/img_car_right.png"},
+      {"compass", "../assets/img_compass.png"},
+      {"direction", "../assets/img_direction.png"},
   };
   for (auto [name, file] : images) {
     s->images[name] = nvgCreateImage(s->vg, file, 1);

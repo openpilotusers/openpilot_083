@@ -83,7 +83,7 @@ void HomeWindow::mousePressEvent(QMouseEvent* e) {
     return;
   }
   // Laneless mode
-  if (ui_state->scene.started && ui_state->sidebar_collapsed && !ui_state->scene.map_on_top && laneless_btn.ptInRect(e->x(), e->y())) {
+  if (ui_state->scene.started && ui_state->sidebar_collapsed && !ui_state->scene.map_on_top && ui_state->scene.end_to_end && laneless_btn.ptInRect(e->x(), e->y())) {
     ui_state->scene.laneless_mode = ui_state->scene.laneless_mode + 1;
     if (ui_state->scene.laneless_mode > 2) {
       ui_state->scene.laneless_mode = 0;
