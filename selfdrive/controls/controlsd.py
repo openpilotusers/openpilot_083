@@ -32,7 +32,7 @@ import common.log as trace1
 LDW_MIN_SPEED = 50 * CV.KPH_TO_MS
 LANE_DEPARTURE_THRESHOLD = 0.1
 STEER_ANGLE_SATURATION_TIMEOUT = 1.0 / DT_CTRL
-STEER_ANGLE_SATURATION_THRESHOLD = 30  # Degrees
+STEER_ANGLE_SATURATION_THRESHOLD = 15  # Degrees
 
 SIMULATION = "SIMULATION" in os.environ
 NOSENSOR = "NOSENSOR" in os.environ
@@ -172,7 +172,7 @@ class Controls:
     self.mpc_frame = 0
 
     self.steerRatio_Max = float(int(Params().get("SteerRatioMaxAdj", encoding='utf8')) * 0.01)
-    self.angle_differ_range = [0, 30]
+    self.angle_differ_range = [0, 15]
     self.steerRatio_range = [self.CP.steerRatio, self.steerRatio_Max]
     self.new_steerRatio = self.CP.steerRatio
     self.new_steerRatio_prev = self.CP.steerRatio
