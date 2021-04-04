@@ -11,6 +11,7 @@ from selfdrive.locationd.models.car_kf import CarKalman, ObservationKind, States
 from selfdrive.locationd.models.constants import GENERATED_DIR
 from selfdrive.swaglog import cloudlog
 
+# atom
 from common.numpy_fast import interp
 from selfdrive.config import Conversions as CV
 
@@ -143,6 +144,9 @@ def main(sm=None, pm=None):
   params['stiffnessFactor'] = 1.1
   params['angleOffsetAverageDeg'] = 0
 
+  opkrLiveSteerRatio = int(params_reader.get("OpkrLiveSteerRatio"))
+  
+
   learner = ParamsLearner(CP, params['steerRatio'], params['stiffnessFactor'], math.radians(params['angleOffsetAverageDeg']))
 
   while True:
@@ -168,7 +172,9 @@ def main(sm=None, pm=None):
       v_ego_kph = sm['carState'].vEgo * CV.MS_TO_KPH
 
 
-      if sm['carParams'].steerRateCost > 0:
+      if opkrLiveSteerRatio:
+        pass
+      elif sm['carParams'].steerRateCost > 0:
         atomTuning = sm['carParams'].atomTuning
         cv_value = sm['controlsState'].modelSpeed
         if cv_value <= 10: 

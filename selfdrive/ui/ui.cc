@@ -162,6 +162,9 @@ static void update_sockets(UIState *s) {
   }
   if (sm.updated("carState")) {
     scene.car_state = sm["carState"].getCarState();
+
+    auto cruiseState = scene.car_state.getCruiseState();
+    scene.scr.awake = cruiseState.getCruiseSwState();
   }
   if (sm.updated("radarState")) {
     std::optional<cereal::ModelDataV2::XYZTData::Reader> line;

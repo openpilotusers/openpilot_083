@@ -814,8 +814,9 @@ void ui_draw(UIState *s) {
   ui_draw_sidebar(s);
   if (draw_vision) {
     ui_draw_vision(s);
-    update_dashcam(s); 
   }
+
+  update_dashcam(s, draw_vision);
 
   if (draw_alerts && s->scene.alert_size != cereal::ControlsState::AlertSize::NONE) {
     ui_draw_vision_alert(s);

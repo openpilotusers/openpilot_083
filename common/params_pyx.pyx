@@ -89,6 +89,8 @@ keys = {
   b"OpkrLiveSteerRatio": [TxType.PERSISTENT],
   b"OpkrTurnSteeringDisable": [TxType.PERSISTENT],
   b"OpkrPrebuilt": [TxType.PERSISTENT],
+  b"OpkrAutoScreenOff": [TxType.PERSISTENT],
+  b"OpkrUIBrightness": [TxType.PERSISTENT],
 }
 
 def ensure_bytes(v):

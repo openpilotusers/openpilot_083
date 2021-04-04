@@ -14,18 +14,20 @@
 #include "selfdrive/ui/qt/widgets/controls.hpp"
 
 
-class UserPanel : public QFrame 
+class CUserPanel : public QFrame 
 {
   Q_OBJECT
 public:
-  explicit UserPanel(QWidget* parent = nullptr);
+  explicit CUserPanel(QWidget* parent = nullptr);
 
 private:
-   
+
+
 protected:
   void showEvent(QShowEvent *event) override;
- // QList<LabelControl *> labels;
+
 };
+
 
 
 
@@ -79,4 +81,35 @@ public:
       Params().write_db_value("OpkrPrebuilt", &value, 1);
     });
   }
+};
+
+
+class BrightnessControl : public AbstractControl 
+{
+  Q_OBJECT
+
+public:
+  BrightnessControl();
+
+private:
+  QPushButton btnplus;
+  QPushButton btnminus;
+  QLabel label;
+
+  void refresh();
+};
+
+
+class AutoScreenOff : public AbstractControl {
+  Q_OBJECT
+
+public:
+  AutoScreenOff();
+
+private:
+  QPushButton btnplus;
+  QPushButton btnminus;
+  QLabel label;
+
+  void refresh();
 };

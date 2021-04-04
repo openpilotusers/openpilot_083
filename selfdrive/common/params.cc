@@ -213,6 +213,11 @@ cleanup:
   return result;
 }
 
+int Params::put(const char* key, const char* value, size_t value_size) 
+{
+   return  write_db_value( key, value, value_size);
+}
+
 int Params::delete_db_value(std::string key) {
   int lock_fd = -1;
   int result;

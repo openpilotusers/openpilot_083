@@ -206,6 +206,21 @@ static void handle_display_state(UIState* s, bool user_input) {
   static float accel_prev = 0., gyro_prev = 0.;
 
   bool should_wake = s->scene.started || s->scene.ignition || user_input;
+
+  if( s->scene.scr.nTime > 0 )
+  {
+     s->scene.scr.nTime--;
+  }
+
+  if( user_input )
+  {
+     //printf("touched  user_input=%d  %d  %d\n", user_input, s->awake, should_wake);
+     s->scene.scr.nTime = s->scene.scr.autoScreenOff * 60 * 20;
+  }
+  else if( s->scene.scr.autoScreenOff && s->scene.scr.nTime == 0)
+  {
+    should_wake = false;
+  }  
   if (!should_wake) {
     // tap detection while display is off
     bool accel_trigger = abs(s->scene.accel_sensor - accel_prev) > 0.2;
@@ -223,8 +238,10 @@ static void handle_display_state(UIState* s, bool user_input) {
 
   // handle state transition
   if (s->awake != should_wake) {
+    printf("setting  user_input=%d  %d  %d\n", user_input, s->awake, should_wake);
     s->awake = should_wake;
-    Hardware::set_display_power(s->awake);
+
+    //Hardware::set_display_power(s->awake);
     LOGD("setting display power %d", s->awake);
   }
 }
@@ -285,6 +302,10 @@ void GLWindow::backlightUpdate() {
     brightness = 0;
     emit screen_shutoff();
   }
+  else if( ui_state.scene.scr.brightness )
+  {
+    brightness = 255 * (ui_state.scene.scr.brightness * 0.01);
+  }
 
   if (brightness != last_brightness) {
     std::thread{Hardware::set_brightness, brightness}.detach();
@@ -334,8 +355,35 @@ void GLWindow::paintGL() {
     }
     prev_draw_t = cur_draw_t;
   }
+
+   ScreenAwake();
 }
 
 void GLWindow::wake() {
   handle_display_state(&ui_state, true);
+}
+
+
+
+void GLWindow::ScreenAwake() 
+{
+  const bool draw_alerts = ui_state.scene.started;
+  //const bool draw_vision = draw_alerts && ui_state.vipc_client->connected;
+
+  
+  int  cur_key = ui_state.scene.scr.awake;
+
+  if (draw_alerts && ui_state.scene.alert_size != cereal::ControlsState::AlertSize::NONE) 
+  {
+      cur_key += 1;
+  }
+
+
+  static int old_key;
+  if( cur_key != old_key )
+  {
+    old_key = cur_key;
+    if(cur_key)
+        GLWindow::wake();
+  }     
 }

@@ -14,6 +14,7 @@ from cereal import log
 
 from common.numpy_fast import interp
 from selfdrive.car.hyundai.values import Buttons
+import common.log as trace1
 
 LaneChangeState = log.LateralPlan.LaneChangeState
 LaneChangeDirection = log.LateralPlan.LaneChangeDirection
@@ -72,6 +73,7 @@ class LateralPlanner():
     self.y_pts = np.zeros(TRAJECTORY_SIZE)
 
     self.m_wait_time = 0
+    self.log1 = trace1.Loger("LateralPlanner")
 
   def setup_mpc(self):
     self.libmpc = libmpc_py.libmpc
@@ -90,11 +92,11 @@ class LateralPlanner():
     self.safe_desired_curvature_rate = 0.0
 
   def update(self, sm, CP):
-    cruiseState  = sm['carState'].cruiseState
     v_ego = sm['carState'].vEgo
     active = sm['controlsState'].active
     measured_curvature = sm['controlsState'].curvature
 
+    cruiseState  = sm['carState'].cruiseState
     self.m_wait_time += 1
     if (self.m_wait_time % 100) == 0:
       self.use_lanelines = Params().get('EndToEndToggle') != b'1'
@@ -135,6 +137,8 @@ class LateralPlanner():
       blindspot_detected = ((sm['carState'].leftBlindspot and self.lane_change_direction == LaneChangeDirection.left) or
                             (sm['carState'].rightBlindspot and self.lane_change_direction == LaneChangeDirection.right))
 
+      lane_change_prob = self.LP.l_lane_change_prob + self.LP.r_lane_change_prob
+
       # auto
       if torque_applied or self.lane_change_timer < LANE_CHANGE_AUTO_TIME:
         pass
@@ -145,7 +149,10 @@ class LateralPlanner():
         if ll_probs[3] > 0.5:
           torque_applied = True
 
-      lane_change_prob = self.LP.l_lane_change_prob + self.LP.r_lane_change_prob
+
+
+      str_log2 = 'll_probs={:.1f}{:.1f}  {:.2f}  {:.0f}'.format( ll_probs[0],ll_probs[3], lane_change_prob, blindspot_detected )
+      self.log1.add( str_log2 )
 
       # State transitions
       # off
@@ -167,6 +174,7 @@ class LateralPlanner():
       # starting
       elif self.lane_change_state == LaneChangeState.laneChangeStarting:
         # fade out over .5s
+        v_ego_kph = v_ego * CV.MS_TO_KPH
         xp = [40,80]
         fp2 = [1,2]
         lane_time = interp( v_ego_kph, xp, fp2 )        

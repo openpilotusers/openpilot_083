@@ -45,6 +45,8 @@ def manager_init():
     ("OpkrLiveSteerRatio", "0"),
     ("OpkrTurnSteeringDisable", "0"),
     ("OpkrPrebuilt", "0"),
+    ("OpkrAutoScreenOff", "0"),
+    ("OpkrUIBrightness", "0"),    
   ]
 
   if params.get("RecordFrontLock", encoding='utf-8') == "1":

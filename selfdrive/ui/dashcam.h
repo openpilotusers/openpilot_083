@@ -3,6 +3,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "common/params.h"
+#include "home.hpp"
+
 #define CAPTURE_STATE_NONE 0
 #define CAPTURE_STATE_CAPTURING 1
 #define CAPTURE_STATE_NOT_CAPTURING 2
@@ -37,6 +40,7 @@ bool locked_files[RECORD_FILES]; // Track which files are locked
 int lock_image;                  // Stores reference to the PNG
 int files_created = 0;
 int  capture_cnt = 0;
+int  program_start = 1;
 
 
 void ui_print(UIState *s, int x, int y,  const char* fmt, ... )
@@ -74,6 +78,12 @@ struct tm get_time_struct()
   struct tm tm = *localtime(&t);
   return tm;
 }
+
+void reset_time(UIState *s)
+{
+  GLWindow::wake();
+}
+    
 
 void remove_file(char *videos_dir, char *filename)
 {
@@ -156,17 +166,6 @@ void start_capture()
   {
     mkdir(videos_dir, 0700);
   }
-  /*if (captureNum == 0 && files_created == 0) {
-    DIR *dir;
-    struct dirent *ent;
-    if ((dir = opendir ("/storage/emulated/0/videos")) != NULL) {
-      while ((ent = readdir (dir)) != NULL) {
-        strcpy(filenames[files_created++], ent->d_name);
-      }
-      captureNum = files_created;
-      closedir (dir);
-    }
-  }*/
 
   if (strlen(filenames[captureNum]) && files_created >= RECORD_FILES)
   {
@@ -331,84 +330,6 @@ void screen_toggle_record_state()
 }
 
 
-static int draw_measure(UIState *s,  const char* bb_value, const char* bb_uom, const char* bb_label,
-    int bb_x, int bb_y, int bb_uom_dx,
-    NVGcolor bb_valueColor, NVGcolor bb_labelColor, NVGcolor bb_uomColor,
-    int bb_valueFontSize, int bb_labelFontSize, int bb_uomFontSize )
-    {
-  //const UIScene *scene = &s->scene;
-  //const UIScene *scene = &s->scene;
-  nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
-  int dx = 0;
-  if (strlen(bb_uom) > 0) {
-    dx = (int)(bb_uomFontSize*2.5/2);
-   }
-  //print value
-  nvgFontFace(s->vg, "sans-semibold");
-  nvgFontSize(s->vg, bb_valueFontSize*2*fFontSize);
-  nvgFillColor(s->vg, bb_valueColor);
-  nvgText(s->vg, bb_x-dx/2, bb_y+ (int)(bb_valueFontSize*2.5)+5, bb_value, NULL);
-  //print label
-  nvgFontFace(s->vg, "sans-regular");
-  nvgFontSize(s->vg, bb_labelFontSize*2*fFontSize);
-  nvgFillColor(s->vg, bb_labelColor);
-  nvgText(s->vg, bb_x, bb_y + (int)(bb_valueFontSize*2.5)+5 + (int)(bb_labelFontSize*2.5)+5, bb_label, NULL);
-  //print uom
-  if (strlen(bb_uom) > 0) {
-      nvgSave(s->vg);
-    int rx =bb_x + bb_uom_dx + bb_valueFontSize -3;
-    int ry = bb_y + (int)(bb_valueFontSize*2.5/2)+25;
-    nvgTranslate(s->vg,rx,ry);
-    nvgRotate(s->vg, -1.5708); //-90deg in radians
-    nvgFontFace(s->vg, "sans-regular");
-    nvgFontSize(s->vg, (int)(bb_uomFontSize*2*fFontSize));
-    nvgFillColor(s->vg, bb_uomColor);
-    nvgText(s->vg, 0, 0, bb_uom, NULL);
-    nvgRestore(s->vg);
-  }
-  return (int)((bb_valueFontSize + bb_labelFontSize)*2.5) + 5;
-}
-
-static void draw_menu(UIState *s, int bb_x, int bb_y, int bb_w ) 
-{
-  UIScene &scene = s->scene;
-  int bb_rx = bb_x + (int)(bb_w/2);
-  int bb_ry = bb_y;
-  int bb_h = 5;
-  NVGcolor lab_color = nvgRGBA(255, 255, 255, 200);
-  NVGcolor uom_color = nvgRGBA(255, 255, 255, 200);
-  int value_fontSize=25;
-  int label_fontSize=15;
-  int uom_fontSize = 15;
-  int bb_uom_dx =  (int)(bb_w /2 - uom_fontSize*2.5) ;
-
-
-
-  //add visual radar relative distance
-  if( true )
-  {
-    char val_str[50];
-    char uom_str[20];
-    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
-
-    snprintf(val_str, sizeof(val_str), "git pull");
-    snprintf(uom_str, sizeof(uom_str), "%d", scene.dash_menu_no );
-    bb_h +=draw_measure(s,  val_str, uom_str, "git pull",
-        bb_rx, bb_ry, bb_uom_dx,
-        val_color, lab_color, uom_color,
-        value_fontSize, label_fontSize, uom_fontSize );
-    bb_ry = bb_y + bb_h;
-  }
-
-
-  //finally draw the frame
-  bb_h += 20;
-  nvgBeginPath(s->vg);
-    nvgRoundedRect(s->vg, bb_x, bb_y, bb_w, bb_h, 20);
-    nvgStrokeColor(s->vg, nvgRGBA(255,255,255,80));
-    nvgStrokeWidth(s->vg, 6);
-    nvgStroke(s->vg);
-}
 
 static void screen_menu_button(UIState *s, int touch_x, int touch_y, int touched)
 {
@@ -457,22 +378,6 @@ static void screen_menu_button(UIState *s, int touch_x, int touch_y, int touched
     char  szText[50];
     sprintf( szText, "%d", scene.dash_menu_no );
     nvgText(s->vg, btn_x - 50, btn_y + 50, szText, NULL);
-
-    if( scene.dash_menu_no == 2 )
-    {
-      const int bb_dmr_w = 300;
-      const int bb_dmr_x = s->viz_rect.x + (s->viz_rect.w * 0.9) - bb_dmr_w - (bdr_s * 2);
-      const int bb_dmr_y = (bdr_s + (bdr_s * 1.5)) + 220;
-
-      draw_menu( s, bb_dmr_x, bb_dmr_y, bb_dmr_w );
-      if( touched && screen_button_clicked(touch_x, touch_y, bb_dmr_x, bb_dmr_y, bb_dmr_w, 100) )
-      { 
-        
-         scene.dash_menu_no = 0;
-         printf("git pull\n");
-         system("git pull");
-      }
-    }
 }
 
 static void ui_draw_modeSel(UIState *s) 
@@ -487,11 +392,13 @@ static void ui_draw_modeSel(UIState *s)
   int x_pos = viz_speed_x + 300;
   int y_pos = 120;
 
-  int modeSel = scene.car_state.getCruiseState().getModeSel();
+
+  auto  cruiseState = scene.car_state.getCruiseState();
+  int modeSel = cruiseState.getModeSel();
   nvgFontSize(s->vg, 80);
   switch( modeSel  )
   {
-    case 0: strcpy( str_msg, "0.OP MODE" ); nColor = COLOR_WHITE; break;
+    case 0: strcpy( str_msg, "0.OP" ); nColor = COLOR_WHITE; break;
     case 1: strcpy( str_msg, "1.CURVE" );    nColor = nvgRGBA(200, 200, 255, 255);  break;
     case 2: strcpy( str_msg, "2.FWD CAR" );  nColor = nvgRGBA(200, 255, 255, 255);  break;
     case 3: strcpy( str_msg, "3.HYUNDAI" );  nColor = nvgRGBA(200, 255, 255, 255);  break;
@@ -545,6 +452,8 @@ static void ui_draw_debug(UIState *s)
     ui_print( s, x_pos, y_pos+50,  "aO:%.2f, %.2f", angleOffset, angleOffsetAverage );
     ui_print( s, x_pos, y_pos+100, "sF:%.2f Fan:%.0f", stiffnessFactor, fanSpeed/1000. );
     ui_print( s, x_pos, y_pos+150, "lW:%.2f CV:%.0f", laneWidth, modelSpeed );
+    ui_print( s, x_pos, y_pos+200, "time:%d", scene.scr.nTime/20 );
+
 
     ui_print( s, x_pos, y_pos+250, "prob:%.2f, %.2f, %.2f, %.2f", lane_line_probs[0], lane_line_probs[1], lane_line_probs[2], lane_line_probs[3] );
 
@@ -614,8 +523,18 @@ void ui_draw_gear( UIState *s )
   ui_print( s, x_pos, y_pos, str_msg );
 }
 
+int get_param( const std::string &key )
+{
+    auto str = QString::fromStdString(Params().get( key ));
+    int value = str.toInt();
 
-void update_dashcam(UIState *s)
+
+    return value;
+}
+
+
+
+void update_dashcam(UIState *s, int draw_vision)
 {
   if (!s->awake) return;
   int touch_x = s->scene.mouse.touch_x;
@@ -623,15 +542,25 @@ void update_dashcam(UIState *s)
   int touched = s->scene.mouse.touched;
   //int touch_cnt = s->scene.mouse.touch_cnt;
 
-  if ( touched  ) 
+  
+
+  if ( program_start )
   {
-    s->scene.mouse.touched = 0;    
-    printf("touched x,y: (%d,%d) %d  %d\n", touch_x, touch_y, touched, s->sidebar_collapsed);
-
-    printf(" %d, %ld  %d \n", s->scene.started,  s->scene.started_frame,  s->vipc_client->connected);
-
+    program_start = 0;
+    s->scene.scr.autoScreenOff = get_param("OpkrAutoScreenOff");
+    s->scene.scr.brightness = get_param("OpkrUIBrightness");
+        
+    reset_time(s);
+    printf("autoScreenOff=%d, brightness=%d \n", s->scene.scr.autoScreenOff, s->scene.scr.brightness);       
+  }
+  else if ( touched  ) 
+  {
+    s->scene.mouse.touched = 0; 
+    printf("touched:(%d,%d) %d  %d \n", touch_x, touch_y, touched, s->sidebar_collapsed);
   }
 
+
+  if (!draw_vision) return;
   if (!s->scene.started) return;
   if (s->scene.driver_view) return;
 
