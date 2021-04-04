@@ -140,19 +140,19 @@ class LateralPlanner():
       lane_change_prob = self.LP.l_lane_change_prob + self.LP.r_lane_change_prob
 
       # auto
-      str_log2 = 'll_probs={:.1f},{:.1f}  {:.3f}  {:.0f}'.format( ll_probs[0],ll_probs[3], lane_change_prob, blindspot_detected )
+      #str_log2 = 'll_probs={:.1f},{:.1f}  {:.3f}  {:.0f}'.format( ll_probs[0],ll_probs[3], lane_change_prob, blindspot_detected )
       if torque_applied or self.lane_change_timer < LANE_CHANGE_AUTO_TIME:
         pass
       elif self.lane_change_direction == LaneChangeDirection.left:
         if ll_probs[0] > 0.5:
           torque_applied = True
-        str_log2 += 'left {:.1f}  torque_applied={}'.format( ll_probs[0], torque_applied )
+        #str_log2 += 'left {:.1f}  torque_applied={}'.format( ll_probs[0], torque_applied )
       elif self.lane_change_direction == LaneChangeDirection.right:
         if ll_probs[3] > 0.5:
           torque_applied = True
-        str_log2 += 'right {:.1f}  torque_applied={}'.format( ll_probs[3], torque_applied )
+        #str_log2 += 'right {:.1f}  torque_applied={}'.format( ll_probs[3], torque_applied )
 
-      self.log1.add( str_log2 )
+      #self.log1.add( str_log2 )
 
       # State transitions
       # off
