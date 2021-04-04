@@ -105,12 +105,12 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
                                    "운전자 모니터링 카메라를 미리 보고 장치 장착 위치를 최적화하여 최상의 운전자 모니터링 환경을 제공하십시오. (차량이 꺼져 있어야 합니다.)",
                                    [=]() { Params().write_db_value("IsDriverViewEnabled", "1", 1); }));
 
-  offroad_btns.append(new ButtonControl("캘리브레이션 초기화", "리셋",
-                                   "오픈파일럿을 사용하려면 장치를 왼쪽 또는 오른쪽으로 4°, 위 또는 아래로 5° 이내에 장착해야 합니다. 오픈파일럿이 지속적으로 보정되고 있으므로 재설정할 필요가 거의 없습니다.", [=]() {
-    if (ConfirmationDialog::confirm("캘리브레이션을 초기화 하시겠습니까?")) {
-      Params().delete_db_value("CalibrationParams");
-    }
-  }));
+//  offroad_btns.append(new ButtonControl("캘리브레이션 초기화", "리셋",
+//                                   "오픈파일럿을 사용하려면 장치를 왼쪽 또는 오른쪽으로 4°, 위 또는 아래로 5° 이내에 장착해야 합니다. 오픈파일럿이 지속적으로 보정되고 있으므로 재설정할 필요가 거의 없습니다.", [=]() {
+//    if (ConfirmationDialog::confirm("캘리브레이션을 초기화 하시겠습니까?")) {
+//      Params().delete_db_value("CalibrationParams");
+//    }
+//  }));
 
   offroad_btns.append(new ButtonControl("트레이닝가이드 보기", "다시보기",
                                         "오픈파일럿에 대한 규칙, 기능, 제한내용 등을 확인하세요.", [=]() {
@@ -134,6 +134,27 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   }
 
   device_layout->addWidget(horizontal_line());
+
+  // cal reset and param init buttons
+  QHBoxLayout *cal_param_init_layout = new QHBoxLayout();
+  cal_param_init_layout->setSpacing(50);
+
+  QPushButton *calinit_btn = new QPushButton("캘리브레이션 리셋");
+  cal_param_init_layout->addWidget(calinit_btn);
+  QObject::connect(calinit_btn, &QPushButton::released, [=]() {
+    if (ConfirmationDialog::confirm("캘리브레이션을 초기화할까요? 자동 재부팅됩니다.")) {
+      Params().delete_db_value("CalibrationParams");
+      QProcess::execute("reboot");
+    }
+  });
+
+  QPushButton *paraminit_btn = new QPushButton("파라미터 초기화");
+  cal_param_init_layout->addWidget(paraminit_btn);
+  QObject::connect(paraminit_btn, &QPushButton::released, [=]() {
+    if (ConfirmationDialog::confirm("파라미터를 초기상태로 되돌립니다. 진행하시겠습니까?")) {
+      QProcess::execute("/data/openpilot/init_param.sh");
+    }
+  });
 
   // preset1 buttons
   QHBoxLayout *presetone_layout = new QHBoxLayout();
@@ -195,6 +216,10 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
       Hardware::poweroff();
     }
   });
+
+  device_layout->addLayout(cal_param_init_layout);
+
+  device_layout->addWidget(horizontal_line());
 
   device_layout->addLayout(presetone_layout);
   device_layout->addLayout(presettwo_layout);
@@ -305,15 +330,15 @@ QWidget * network_panel(QWidget * parent) {
 
   layout->addWidget(horizontal_line());
 
-  const char* param_init = "/data/openpilot/init_param.sh ''";
-  layout->addWidget(new ButtonControl("파라미터 초기화", "실행", "파라미터를 처음 설치한 상태로 되돌립니다.",
-                                      [=]() { 
-                                        if (ConfirmationDialog::confirm("파라미터를 처음 설치한 상태로 되돌립니다. 진행하시겠습니까?")){
-                                          std::system(param_init);
-                                        }
-                                      }));
-
-  layout->addWidget(horizontal_line());
+//  const char* param_init = "/data/openpilot/init_param.sh ''";
+//  layout->addWidget(new ButtonControl("파라미터 초기화", "실행", "파라미터를 처음 설치한 상태로 되돌립니다.",
+//                                      [=]() { 
+//                                        if (ConfirmationDialog::confirm("파라미터를 처음 설치한 상태로 되돌립니다. 진행하시겠습니까?")){
+//                                          std::system(param_init);
+//                                        }
+//                                      }));
+//
+//  layout->addWidget(horizontal_line());
 
   const char* panda_flashing = "/data/openpilot/panda_flashing.sh ''";
   layout->addWidget(new ButtonControl("판다 플래싱", "실행", "판다플래싱이 진행되면 판다의 녹색LED가 빠르게 깜빡이며 완료되면 자동 재부팅 됩니다. 절대로 장치의 전원을 끄거나 임의로 분리하지 마시기 바랍니다.",
