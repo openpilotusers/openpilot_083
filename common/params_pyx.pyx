@@ -153,6 +153,7 @@ keys = {
   b"JustDoGearD": [TxType.PERSISTENT],
   b"LanelessMode": [TxType.PERSISTENT],
   b"ComIssueGone": [TxType.PERSISTENT],
+  b"RTDelta": [TxType.PERSISTENT],
 }
 
 def ensure_bytes(v):
