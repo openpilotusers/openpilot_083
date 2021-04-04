@@ -1375,8 +1375,8 @@ void ui_nvg_init(UIState *s) {
       {"speed_110", "../assets/img_110_speedahead.png"},
       {"car_left", "../assets/img_car_left.png"},
       {"car_right", "../assets/img_car_right.png"},
-      {"compass", "../assets/compass.png"},
-      {"direction", "../assets/direction.png"},
+      {"compass", "../assets/img_compass.png"},
+      {"direction", "../assets/img_direction.png"},
   };
   for (auto [name, file] : images) {
     s->images[name] = nvgCreateImage(s->vg, file, 1);
