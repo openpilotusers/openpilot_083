@@ -925,3 +925,17 @@ private:
 
   void refresh();
 };
+
+class RTDelta : public AbstractControl {
+  Q_OBJECT
+
+public:
+  RTDelta();
+
+private:
+  QPushButton btnplus;
+  QPushButton btnminus;
+  QLabel label;
+
+  void refresh();
+};

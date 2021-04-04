@@ -1088,6 +1088,67 @@ void SpeedLimitOffset::refresh() {
   btnplus.setText("＋");
 }
 
+RTDelta::RTDelta() : AbstractControl("RT_DELTA 조정", "판다 RT_DELTA 값을 수정합니다. 적용하려면 아래 실행 버튼을 누르세요.", "../assets/offroad/icon_shell.png") {
+
+  label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+  label.setStyleSheet("color: #e0e879");
+  hlayout->addWidget(&label);
+
+  btnminus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnplus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnminus.setFixedSize(150, 100);
+  btnplus.setFixedSize(150, 100);
+  hlayout->addWidget(&btnminus);
+  hlayout->addWidget(&btnplus);
+
+  QObject::connect(&btnminus, &QPushButton::released, [=]() {
+    auto str = QString::fromStdString(Params().get("RTDelta"));
+    int value = str.toInt();
+    value = value - 1;
+    if (value <= 50 ) {
+      value = 50;
+    } else {
+    }
+    QString values = QString::number(value);
+    Params().write_db_value("RTDelta", values.toStdString());
+    refresh();
+  });
+  
+  QObject::connect(&btnplus, &QPushButton::released, [=]() {
+    auto str = QString::fromStdString(Params().get("RTDelta"));
+    int value = str.toInt();
+    value = value + 1;
+    if (value >= 500 ) {
+      value = 500;
+    } else {
+    }
+    QString values = QString::number(value);
+    Params().write_db_value("RTDelta", values.toStdString());
+    refresh();
+  });
+  refresh();
+}
+
+void RTDelta::refresh() {
+  label.setText(QString::fromStdString(Params().get("RTDelta")));
+  btnminus.setText("－");
+  btnplus.setText("＋");
+}
+
 //튜닝
 CameraOffset::CameraOffset() : AbstractControl("CameraOffset", "CameraOffset값을 설정합니다.", "../assets/offroad/icon_shell.png") {
 

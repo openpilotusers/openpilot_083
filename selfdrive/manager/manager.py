@@ -112,6 +112,7 @@ def manager_init():
     ("JustDoGearD", "0"),
     ("LanelessMode", "0"),
     ("ComIssueGone", "0"),
+    ("RTDelta", "112"),
   ]
 
   if params.get("RecordFrontLock", encoding='utf-8') == "1":
