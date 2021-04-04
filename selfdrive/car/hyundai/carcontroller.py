@@ -181,10 +181,10 @@ class CarController():
 
     #self.model_speed = 255 - self.SC.calc_va(sm, CS.out.vEgo)
     #atom model_speed
-    self.model_speed = self.SC.cal_model_speed(sm, CS.out.vEgo)
+    #self.model_speed = self.SC.cal_model_speed(sm, CS.out.vEgo)
     lateral_plan = sm['lateralPlan']
     self.outScale = lateral_plan.outputScale
-    #self.model_speed = interp(abs(lateral_plan.vCurvature), [0.0002, 0.01], [255, 30])
+    self.model_speed = interp(abs(lateral_plan.vCurvature), [0.0002, 0.01], [255, 30])
 
     if CS.out.vEgo > 8:
       if self.variable_steer_max:
