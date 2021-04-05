@@ -520,7 +520,6 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w )
     const int direction_y = compass_y + 74;
     ui_draw_image(s, {compass_x, compass_y, 150, 150}, "compass", 0.6f);
     ui_draw_circle_image(s, direction_x, direction_y - (bdr_s+7), 90, "direction", nvgRGBA(0x0, 0x0, 0x0, 0x0), 0.6f, -bearingUblox);
-
   }
 
 
