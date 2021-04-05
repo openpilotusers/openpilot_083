@@ -413,6 +413,8 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w )
   float  gpsAccuracyUblox = scene->gpsLocationExternal.getAccuracy();
   float  altitudeUblox = scene->gpsLocationExternal.getAltitude();
   float  bearingUblox = scene->gpsLocationExternal.getBearingDeg();
+
+
   //float  bearingUblox = scene.gpsLocationExternal.getBearing();    
   //float  latitudeUblox = scene.gpsLocationExternal.getLatitude();
   //float  longitudeUblox = scene.gpsLocationExternal.getLongitude();
