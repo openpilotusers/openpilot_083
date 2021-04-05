@@ -485,7 +485,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w )
     // gps accuracy is always in meters
     if(gpsAccuracyUblox > 99 || gpsAccuracyUblox == 0) {
        snprintf(val_str, sizeof(val_str), "None");
-    }else if(gpsAccuracyUblox > 9.99) {
+    } else if(gpsAccuracyUblox > 9.99) {
       snprintf(val_str, sizeof(val_str), "%.1f", (gpsAccuracyUblox));
     }
     else {
