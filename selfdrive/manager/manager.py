@@ -78,9 +78,11 @@ def manager_init():
     ("SteerRateCostAdj", "45"),
     ("SteerLimitTimerAdj", "40"),
     ("TireStiffnessFactorAdj", "85"),
-    ("SteerMaxAdj", "384"),
     ("SteerMaxBaseAdj", "300"),
+    ("SteerMaxAdj", "384"),
+    ("SteerDeltaUpBaseAdj", "3"),
     ("SteerDeltaUpAdj", "3"),
+    ("SteerDeltaDownBaseAdj", "7"),
     ("SteerDeltaDownAdj", "7"),
     ("SteerMaxvAdj", "10"),
     ("OpkrBatteryChargingControl", "1"),
@@ -112,7 +114,11 @@ def manager_init():
     ("JustDoGearD", "0"),
     ("LanelessMode", "0"),
     ("ComIssueGone", "0"),
-    ("RTDelta", "112"),
+    ("MaxSteer", "384"),
+    ("MaxRTDelta", "112"),
+    ("MaxRateUp", "3"),
+    ("MaxRateDown", "7"),
+    ("SteerThreshold", "150"),
   ]
 
   if params.get("RecordFrontLock", encoding='utf-8') == "1":

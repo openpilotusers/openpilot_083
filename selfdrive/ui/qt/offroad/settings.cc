@@ -406,12 +406,17 @@ QWidget * user_panel(QWidget * parent) {
   QString car_model = QString::fromStdString(Params().get("CarModel", false));
   layout->addWidget(new LabelControl("현재차량모델", ""));
   layout->addWidget(new LabelControl(car_model, ""));
-  layout->addWidget(new RTDelta());
-  const char* rt_delta_edit_go = "/data/openpilot/edit_rt_delta.sh ''";
-  layout->addWidget(new ButtonControl("RT_DELTA 적용", "실행", "변경된 RT_DELTA값을 적용합니다.",
+  layout->addWidget(horizontal_line());
+  layout->addWidget(new LabelControl("판다 값", "주의要"));
+  layout->addWidget(new MaxSteer());
+  layout->addWidget(new MaxRTDelta());
+  layout->addWidget(new MaxRateUp());
+  layout->addWidget(new MaxRateDown());
+  const char* p_edit_go = "/data/openpilot/p_edit.sh ''";
+  layout->addWidget(new ButtonControl("판다 값 일괄 변경 적용", "실행", "변경된 판다값을 적용합니다. 콤마가 좋아하지 않으니 사용에 주의를 요합니다.",
                                       [=]() { 
-                                        if (ConfirmationDialog::confirm("변경된 RT_DELTA값을 적용합니다. 진행하시겠습니까? 자동 재부팅 됩니다.")){
-                                          std::system(rt_delta_edit_go);
+                                        if (ConfirmationDialog::confirm("변경된 판다값을 적용합니다. 콤마가 안좋아합니다. 적용후 자동 재부팅 됩니다.")){
+                                          std::system(p_edit_go);
                                         }
                                       }));
   //layout->addWidget(horizontal_line());
@@ -441,9 +446,12 @@ QWidget * tuning_panel(QWidget * parent) {
   layout->addWidget(new SteerMaxMax());
   layout->addWidget(new SteerMaxv());
   layout->addWidget(new VariableSteerMaxToggle());
-  layout->addWidget(new SteerDeltaUp());
-  layout->addWidget(new SteerDeltaDown());
+  layout->addWidget(new SteerDeltaUpBase());
+  layout->addWidget(new SteerDeltaUpMax());
+  layout->addWidget(new SteerDeltaDownBase());
+  layout->addWidget(new SteerDeltaDownMax());
   layout->addWidget(new VariableSteerDeltaToggle());
+  layout->addWidget(new SteerThreshold());
 
   layout->addWidget(horizontal_line());
 
