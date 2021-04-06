@@ -34,10 +34,10 @@ SteerActuatorDelayAdj:0
 SteerRateCostAdj:45
 SteerLimitTimerAdj:40
 TireStiffnessFactorAdj:85
-SteerMaxAdj:500
-SteerMaxBaseAdj:385
+SteerMaxAdj:384
+SteerMaxBaseAdj:300
 SteerDeltaUpAdj:3
-SteerDeltaDownAdj:6
+SteerDeltaDownAdj:7
 SteerMaxvAdj:10
 OpkrBatteryChargingControl:1
 OpkrBatteryChargingMin:70
