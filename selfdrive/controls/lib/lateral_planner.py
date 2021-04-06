@@ -58,6 +58,8 @@ class LateralPlanner():
     self.laneless_mode = 0
     self.laneless_mode_status = False
     self.laneless_mode_status_buffer = False
+    self.laneless_mode_at_stopping = False
+    self.laneless_mode_at_stopping_timer = 0
 
     if int(Params().get("OpkrAutoLaneChangeDelay", encoding='utf8')) == 0:
       self.lane_change_auto_delay = 0.0
@@ -209,6 +211,16 @@ class LateralPlanner():
     elif not self.use_lanelines and self.laneless_mode == 0:
       d_path_xyz = self.LP.get_d_path(v_ego, self.t_idxs, self.path_xyz)
       self.laneless_mode_status = False
+    # use laneless, it might mitigate abrubt steering at stopping?
+    elif not self.use_lanelines and sm['radarState'].leadOne.dRel < 25 and sm['radarState'].leadOne.vRel < 0 and (abs(sm['controlsState'].steeringAngleDesiredDeg) - abs(sm['carState'].steeringAngleDeg)) > 2.5 and self.lane_change_state == LaneChangeState.off:
+      d_path_xyz = self.path_xyz
+      self.laneless_mode_status = True
+      self.laneless_mode_at_stopping = True
+      self.laneless_mode_at_stopping_timer = 800
+    elif self.laneless_mode_at_stopping and (v_ego < 1 or not self.laneless_mode_at_stopping_timer):
+      d_path_xyz = self.LP.get_d_path(v_ego, self.t_idxs, self.path_xyz)
+      self.laneless_mode_status = False
+      self.laneless_mode_at_stopping = False
     elif not self.use_lanelines and self.laneless_mode == 1:
       d_path_xyz = self.path_xyz
       self.laneless_mode_status = True
@@ -216,7 +228,7 @@ class LateralPlanner():
       d_path_xyz = self.path_xyz
       self.laneless_mode_status = True
       self.laneless_mode_status_buffer = True
-    elif not self.use_lanelines and self.laneless_mode == 2 and (self.LP.lll_prob > 0.5 and self.LP.rll_prob > 0.5) and self.laneless_mode_status_buffer == True and self.lane_change_state == LaneChangeState.off:
+    elif not self.use_lanelines and self.laneless_mode == 2 and (self.LP.lll_prob > 0.5 and self.LP.rll_prob > 0.5) and self.laneless_mode_status_buffer and not self.laneless_mode_at_stopping and self.lane_change_state == LaneChangeState.off:
       d_path_xyz = self.LP.get_d_path(v_ego, self.t_idxs, self.path_xyz)
       self.laneless_mode_status = False
       self.laneless_mode_status_buffer = False
@@ -227,6 +239,9 @@ class LateralPlanner():
       d_path_xyz = self.LP.get_d_path(v_ego, self.t_idxs, self.path_xyz)
       self.laneless_mode_status = False
       self.laneless_mode_status_buffer = False
+
+    if self.laneless_mode_at_stopping_timer > 0:
+      self.laneless_mode_at_stopping_timer -= 1
 
     y_pts = np.interp(v_ego * self.t_idxs[:MPC_N + 1], np.linalg.norm(d_path_xyz, axis=1), d_path_xyz[:,1])
     heading_pts = np.interp(v_ego * self.t_idxs[:MPC_N + 1], np.linalg.norm(self.path_xyz, axis=1), self.plan_yaw)
