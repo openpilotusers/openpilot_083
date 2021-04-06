@@ -298,7 +298,6 @@ QWidget * network_panel(QWidget * parent) {
                                       [=]() { 
                                         if (ConfirmationDialog::confirm("Git에서 변경사항 적용 후 자동 재부팅 됩니다. 없으면 재부팅하지 않습니다. 진행하시겠습니까?")){
                                           std::system(gitpull);
-                                          closeSettings();
                                         }
                                       }));
 
