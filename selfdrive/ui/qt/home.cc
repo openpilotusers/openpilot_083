@@ -60,7 +60,11 @@ void HomeWindow::mousePressEvent(QMouseEvent* e) {
 
   // Settings button click
   if (!ui_state->sidebar_collapsed && settings_btn.ptInRect(e->x(), e->y())) {
-    emit openSettings();
+    ui_state->setbtn_count = ui_state->setbtn_count + 1;
+    if (ui_state->setbtn_count > 1) {
+      emit openSettings();
+    }
+    return;
   }
 
   // OPKR add map
@@ -102,6 +106,8 @@ void HomeWindow::mousePressEvent(QMouseEvent* e) {
   if (ui_state->scene.started && (e->x() >= ui_state->viz_rect.x - bdr_s)) {
     ui_state->sidebar_collapsed = !ui_state->sidebar_collapsed;
   }
+
+  ui_state->setbtn_count = 0;
 }
 
 

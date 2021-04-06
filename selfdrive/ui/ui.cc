@@ -68,6 +68,7 @@ void ui_init(UIState *s) {
 
   s->scene.started = false;
   s->status = STATUS_OFFROAD;
+  s->setbtn_count = 0;
 
   s->scene.satelliteCount = -1;
   read_param(&s->nOpkrAutoScreenDimming, "OpkrAutoScreenDimming");

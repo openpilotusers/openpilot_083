@@ -295,7 +295,10 @@ QWidget * network_panel(QWidget * parent) {
 
   const char* run_mixplorer = "/data/openpilot/run_mixplorer.sh ''";
   layout->addWidget(new ButtonControl("믹스플로러", "실행", "파일 및 기타 유지관리를 위해 믹스플로러를 실행합니다. 믹스플로러는 다양한 기능(앱실행, 코드수정 등)을 이용할 수 있습니다.",
-                                      [=]() { std::system(run_mixplorer); }));
+                                      [=]() {
+                                        std::system(run_mixplorer);
+                                        emit closeSettings();
+                                      }));
 
   layout->addWidget(horizontal_line());
   
