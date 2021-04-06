@@ -216,7 +216,7 @@ class LateralPlanner():
       d_path_xyz = self.path_xyz
       self.laneless_mode_status = True
       self.laneless_mode_at_stopping = True
-      self.laneless_mode_at_stopping_timer = 800
+      self.laneless_mode_at_stopping_timer = 200
     elif self.laneless_mode_at_stopping and (v_ego < 1 or not self.laneless_mode_at_stopping_timer):
       d_path_xyz = self.LP.get_d_path(v_ego, self.t_idxs, self.path_xyz)
       self.laneless_mode_status = False
