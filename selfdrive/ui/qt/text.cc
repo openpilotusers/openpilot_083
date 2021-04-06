@@ -24,6 +24,7 @@ int main(int argc, char *argv[]) {
   btn->setText("MixPlorer");
   QObject::connect(btn, &QPushButton::released, [=]() {
     QProcess::execute("/data/openpilot/run_mixplorer.sh");
+    btn->setEnabled(false);
     //Hardware::reboot();
   });
 #else
