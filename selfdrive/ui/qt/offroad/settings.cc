@@ -293,14 +293,6 @@ QWidget * network_panel(QWidget * parent) {
   layout->addWidget(new SshLegacyToggle());
   layout->addWidget(horizontal_line());
 
-  const char* run_mixplorer = "/data/openpilot/run_mixplorer.sh ''";
-  layout->addWidget(new ButtonControl("믹스플로러", "실행", "파일 및 기타 유지관리를 위해 믹스플로러를 실행합니다. 믹스플로러는 다양한 기능(앱실행, 코드수정 등)을 이용할 수 있습니다.",
-                                      [=]() {
-                                        std::system(run_mixplorer);
-                                      }));
-
-  layout->addWidget(horizontal_line());
-  
   const char* gitpull = "/data/openpilot/gitpull.sh ''";
   layout->addWidget(new ButtonControl("Git Pull", "실행", "리모트 Git에서 변경사항이 있으면 로컬에 반영 후 자동 재부팅 됩니다. 변경사항이 없으면 재부팅하지 않습니다. 로컬 파일이 변경된경우 리모트Git 내역을 반영 못할수도 있습니다. 참고바랍니다.",
                                       [=]() { 
@@ -404,6 +396,7 @@ QWidget * user_panel(QWidget * parent) {
   layout->addWidget(new LDWSToggle());
   layout->addWidget(new GearDToggle());
   layout->addWidget(new ComIssueToggle());
+  layout->addWidget(horizontal_line());
   layout->addWidget(new CarForceSet());
   QString car_model = QString::fromStdString(Params().get("CarModel", false));
   layout->addWidget(new LabelControl("현재차량모델", ""));

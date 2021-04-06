@@ -265,6 +265,7 @@ typedef struct UIState {
   int lat_control;
   int driving_record;
   int setbtn_count;
+  int homebtn_count;
 
   bool sidebar_collapsed;
   Rect video_rect, viz_rect;
