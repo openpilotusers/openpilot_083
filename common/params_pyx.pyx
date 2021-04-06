@@ -123,7 +123,9 @@ keys = {
   b"SteerMaxAdj": [TxType.PERSISTENT],
   b"SteerMaxBaseAdj": [TxType.PERSISTENT],
   b"SteerDeltaUpAdj": [TxType.PERSISTENT],
+  b"SteerDeltaUpBaseAdj": [TxType.PERSISTENT],
   b"SteerDeltaDownAdj": [TxType.PERSISTENT],
+  b"SteerDeltaDownBaseAdj": [TxType.PERSISTENT],
   b"SteerMaxvAdj": [TxType.PERSISTENT],
   b"OpkrBatteryChargingControl": [TxType.PERSISTENT],
   b"OpkrBatteryChargingMin": [TxType.PERSISTENT],
@@ -154,7 +156,11 @@ keys = {
   b"JustDoGearD": [TxType.PERSISTENT],
   b"LanelessMode": [TxType.PERSISTENT],
   b"ComIssueGone": [TxType.PERSISTENT],
-  b"RTDelta": [TxType.PERSISTENT],
+  b"MaxSteer": [TxType.PERSISTENT],
+  b"MaxRTDelta": [TxType.PERSISTENT],
+  b"MaxRateUp": [TxType.PERSISTENT],
+  b"MaxRateDown": [TxType.PERSISTENT],
+  b"SteerThreshold": [TxType.PERSISTENT],
 }
 
 def ensure_bytes(v):
