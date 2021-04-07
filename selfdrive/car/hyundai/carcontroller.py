@@ -224,7 +224,7 @@ class CarController():
     self.outScale = lateral_plan.outputScale
     self.vCruiseSet = lateral_plan.vCruiseSet
     
-    self.model_speed = interp(abs(lateral_plan.vCurvature), [0.0002, 0.01], [255, 30])
+    #self.model_speed = interp(abs(lateral_plan.vCurvature), [0.0002, 0.01], [255, 30])
     #Hoya
     self.model_speed = interp(abs(lateral_plan.vCurvature), [0.0, 0.0002, 0.00074, 0.0025, 0.008, 0.02], [255, 255, 130, 90, 60, 20])
 
