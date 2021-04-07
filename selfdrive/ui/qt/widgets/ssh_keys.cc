@@ -2196,8 +2196,8 @@ SteerDeltaDownBase::SteerDeltaDownBase() : AbstractControl("SteerDeltaDown기본
     auto str = QString::fromStdString(Params().get("SteerDeltaDownBaseAdj"));
     int value = str.toInt();
     value = value - 1;
-    if (value <= 5 ) {
-      value = 5;
+    if (value <= 3 ) {
+      value = 3;
     } else {
     }
     QString values = QString::number(value);
