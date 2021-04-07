@@ -166,7 +166,7 @@ class Controls:
     
     self.mpc_frame = 0
 
-    self.steerRatio_Max = float(int(Params().get("SteerRatioMaxAdj", encoding='utf8')) * 0.01)
+    self.steerRatio_Max = float(int(Params().get("SteerRatioMaxAdj", encoding='utf8')) * 0.1)
     self.angle_differ_range = [0, 15]
     self.steerRatio_range = [self.CP.steerRatio, self.steerRatio_Max]
     self.new_steerRatio = self.CP.steerRatio
@@ -430,7 +430,7 @@ class Controls:
 
     if not live_sr:
       angle_diff = abs(anglesteer_desire) - abs(anglesteer_current)
-      if abs(output_scale) >= 1 and CS.vEgo > 8:
+      if abs(output_scale) >= 1.0 and CS.vEgo > 8:
         self.new_steerRatio_prev = interp(angle_diff, self.angle_differ_range, self.steerRatio_range)
         if self.new_steerRatio_prev > self.new_steerRatio:
           self.new_steerRatio = self.new_steerRatio_prev
