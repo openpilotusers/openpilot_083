@@ -1156,7 +1156,7 @@ void SpeedLimitOffset::refresh() {
   btnplus.setText("＋");
 }
 
-RTDelta::RTDelta() : AbstractControl("RT_DELTA 조정", "판다 RT_DELTA 값을 수정합니다. 적용하려면 아래 실행 버튼을 누르세요.", "../assets/offroad/icon_shell.png") {
+MaxSteer::MaxSteer() : AbstractControl("MAX_STEER", "판다 MAX_STEER 값을 수정합니다. 적용하려면 아래 실행 버튼을 누르세요.", "../assets/offroad/icon_shell.png") {
 
   label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
   label.setStyleSheet("color: #e0e879");
@@ -1184,7 +1184,68 @@ RTDelta::RTDelta() : AbstractControl("RT_DELTA 조정", "판다 RT_DELTA 값을 
   hlayout->addWidget(&btnplus);
 
   QObject::connect(&btnminus, &QPushButton::released, [=]() {
-    auto str = QString::fromStdString(Params().get("RTDelta"));
+    auto str = QString::fromStdString(Params().get("MaxSteer"));
+    int value = str.toInt();
+    value = value - 1;
+    if (value <= 384 ) {
+      value = 384;
+    } else {
+    }
+    QString values = QString::number(value);
+    Params().write_db_value("MaxSteer", values.toStdString());
+    refresh();
+  });
+  
+  QObject::connect(&btnplus, &QPushButton::released, [=]() {
+    auto str = QString::fromStdString(Params().get("MaxSteer"));
+    int value = str.toInt();
+    value = value + 1;
+    if (value >= 1000 ) {
+      value = 1000;
+    } else {
+    }
+    QString values = QString::number(value);
+    Params().write_db_value("MaxSteer", values.toStdString());
+    refresh();
+  });
+  refresh();
+}
+
+void MaxSteer::refresh() {
+  label.setText(QString::fromStdString(Params().get("MaxSteer")));
+  btnminus.setText("－");
+  btnplus.setText("＋");
+}
+
+MaxRTDelta::MaxRTDelta() : AbstractControl("RT_DELTA", "판다 RT_DELTA 값을 수정합니다. 적용하려면 아래 실행 버튼을 누르세요.", "../assets/offroad/icon_shell.png") {
+
+  label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+  label.setStyleSheet("color: #e0e879");
+  hlayout->addWidget(&label);
+
+  btnminus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnplus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnminus.setFixedSize(150, 100);
+  btnplus.setFixedSize(150, 100);
+  hlayout->addWidget(&btnminus);
+  hlayout->addWidget(&btnplus);
+
+  QObject::connect(&btnminus, &QPushButton::released, [=]() {
+    auto str = QString::fromStdString(Params().get("MaxRTDelta"));
     int value = str.toInt();
     value = value - 1;
     if (value <= 50 ) {
@@ -1192,12 +1253,12 @@ RTDelta::RTDelta() : AbstractControl("RT_DELTA 조정", "판다 RT_DELTA 값을 
     } else {
     }
     QString values = QString::number(value);
-    Params().write_db_value("RTDelta", values.toStdString());
+    Params().write_db_value("MaxRTDelta", values.toStdString());
     refresh();
   });
   
   QObject::connect(&btnplus, &QPushButton::released, [=]() {
-    auto str = QString::fromStdString(Params().get("RTDelta"));
+    auto str = QString::fromStdString(Params().get("MaxRTDelta"));
     int value = str.toInt();
     value = value + 1;
     if (value >= 500 ) {
@@ -1205,14 +1266,136 @@ RTDelta::RTDelta() : AbstractControl("RT_DELTA 조정", "판다 RT_DELTA 값을 
     } else {
     }
     QString values = QString::number(value);
-    Params().write_db_value("RTDelta", values.toStdString());
+    Params().write_db_value("MaxRTDelta", values.toStdString());
     refresh();
   });
   refresh();
 }
 
-void RTDelta::refresh() {
-  label.setText(QString::fromStdString(Params().get("RTDelta")));
+void MaxRTDelta::refresh() {
+  label.setText(QString::fromStdString(Params().get("MaxRTDelta")));
+  btnminus.setText("－");
+  btnplus.setText("＋");
+}
+
+MaxRateUp::MaxRateUp() : AbstractControl("MAX_RATE_UP", "판다 MAX_RATE_UP 값을 수정합니다. 적용하려면 아래 실행 버튼을 누르세요.", "../assets/offroad/icon_shell.png") {
+
+  label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+  label.setStyleSheet("color: #e0e879");
+  hlayout->addWidget(&label);
+
+  btnminus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnplus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnminus.setFixedSize(150, 100);
+  btnplus.setFixedSize(150, 100);
+  hlayout->addWidget(&btnminus);
+  hlayout->addWidget(&btnplus);
+
+  QObject::connect(&btnminus, &QPushButton::released, [=]() {
+    auto str = QString::fromStdString(Params().get("MaxRateUp"));
+    int value = str.toInt();
+    value = value - 1;
+    if (value <= 3 ) {
+      value = 3;
+    } else {
+    }
+    QString values = QString::number(value);
+    Params().write_db_value("MaxRateUp", values.toStdString());
+    refresh();
+  });
+  
+  QObject::connect(&btnplus, &QPushButton::released, [=]() {
+    auto str = QString::fromStdString(Params().get("MaxRateUp"));
+    int value = str.toInt();
+    value = value + 1;
+    if (value >= 7 ) {
+      value = 7;
+    } else {
+    }
+    QString values = QString::number(value);
+    Params().write_db_value("MaxRateUp", values.toStdString());
+    refresh();
+  });
+  refresh();
+}
+
+void MaxRateUp::refresh() {
+  label.setText(QString::fromStdString(Params().get("MaxRateUp")));
+  btnminus.setText("－");
+  btnplus.setText("＋");
+}
+
+MaxRateDown::MaxRateDown() : AbstractControl("MAX_RATE_DOWN", "판다 MAX_RATE_DOWN 값을 수정합니다. 적용하려면 아래 실행 버튼을 누르세요.", "../assets/offroad/icon_shell.png") {
+
+  label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+  label.setStyleSheet("color: #e0e879");
+  hlayout->addWidget(&label);
+
+  btnminus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnplus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnminus.setFixedSize(150, 100);
+  btnplus.setFixedSize(150, 100);
+  hlayout->addWidget(&btnminus);
+  hlayout->addWidget(&btnplus);
+
+  QObject::connect(&btnminus, &QPushButton::released, [=]() {
+    auto str = QString::fromStdString(Params().get("MaxRateDown"));
+    int value = str.toInt();
+    value = value - 1;
+    if (value <= 7 ) {
+      value = 7;
+    } else {
+    }
+    QString values = QString::number(value);
+    Params().write_db_value("MaxRateDown", values.toStdString());
+    refresh();
+  });
+  
+  QObject::connect(&btnplus, &QPushButton::released, [=]() {
+    auto str = QString::fromStdString(Params().get("MaxRateDown"));
+    int value = str.toInt();
+    value = value + 1;
+    if (value >= 15 ) {
+      value = 15;
+    } else {
+    }
+    QString values = QString::number(value);
+    Params().write_db_value("MaxRateDown", values.toStdString());
+    refresh();
+  });
+  refresh();
+}
+
+void MaxRateDown::refresh() {
+  label.setText(QString::fromStdString(Params().get("MaxRateDown")));
   btnminus.setText("－");
   btnplus.setText("＋");
 }
@@ -1860,7 +2043,68 @@ void SteerMaxv::refresh() {
   btnplus.setText("＋");
 }
 
-SteerDeltaUp::SteerDeltaUp() : AbstractControl("SteerDeltaUp", "SteerDeltaUp값을 조정합니다.", "../assets/offroad/icon_shell.png") {
+SteerDeltaUpBase::SteerDeltaUpBase() : AbstractControl("SteerDeltaUp기본값", "SteerDeltaUp기본값을 조정합니다.", "../assets/offroad/icon_shell.png") {
+
+  label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+  label.setStyleSheet("color: #e0e879");
+  hlayout->addWidget(&label);
+
+  btnminus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnplus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnminus.setFixedSize(150, 100);
+  btnplus.setFixedSize(150, 100);
+  hlayout->addWidget(&btnminus);
+  hlayout->addWidget(&btnplus);
+
+  QObject::connect(&btnminus, &QPushButton::released, [=]() {
+    auto str = QString::fromStdString(Params().get("SteerDeltaUpBaseAdj"));
+    int value = str.toInt();
+    value = value - 1;
+    if (value <= 2 ) {
+      value = 2;
+    } else {
+    }
+    QString values = QString::number(value);
+    Params().write_db_value("SteerDeltaUpBaseAdj", values.toStdString());
+    refresh();
+  });
+  
+  QObject::connect(&btnplus, &QPushButton::released, [=]() {
+    auto str = QString::fromStdString(Params().get("SteerDeltaUpBaseAdj"));
+    int value = str.toInt();
+    value = value + 1;
+    if (value >= 7 ) {
+      value = 7;
+    } else {
+    }
+    QString values = QString::number(value);
+    Params().write_db_value("SteerDeltaUpBaseAdj", values.toStdString());
+    refresh();
+  });
+  refresh();
+}
+
+void SteerDeltaUpBase::refresh() {
+  label.setText(QString::fromStdString(Params().get("SteerDeltaUpBaseAdj")));
+  btnminus.setText("－");
+  btnplus.setText("＋");
+}
+
+SteerDeltaUpMax::SteerDeltaUpMax() : AbstractControl("SteerDeltaUp최대값", "SteerDeltaUp최대값을 조정합니다.", "../assets/offroad/icon_shell.png") {
 
   label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
   label.setStyleSheet("color: #e0e879");
@@ -1891,8 +2135,8 @@ SteerDeltaUp::SteerDeltaUp() : AbstractControl("SteerDeltaUp", "SteerDeltaUp값�
     auto str = QString::fromStdString(Params().get("SteerDeltaUpAdj"));
     int value = str.toInt();
     value = value - 1;
-    if (value <= 2 ) {
-      value = 2;
+    if (value <= 3 ) {
+      value = 3;
     } else {
     }
     QString values = QString::number(value);
@@ -1915,13 +2159,74 @@ SteerDeltaUp::SteerDeltaUp() : AbstractControl("SteerDeltaUp", "SteerDeltaUp값�
   refresh();
 }
 
-void SteerDeltaUp::refresh() {
+void SteerDeltaUpMax::refresh() {
   label.setText(QString::fromStdString(Params().get("SteerDeltaUpAdj")));
   btnminus.setText("－");
   btnplus.setText("＋");
 }
 
-SteerDeltaDown::SteerDeltaDown() : AbstractControl("SteerDeltaDown", "SteerDeltaDown값을 조정합니다.", "../assets/offroad/icon_shell.png") {
+SteerDeltaDownBase::SteerDeltaDownBase() : AbstractControl("SteerDeltaDown기본값", "SteerDeltaDown기본값을 조정합니다.", "../assets/offroad/icon_shell.png") {
+
+  label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+  label.setStyleSheet("color: #e0e879");
+  hlayout->addWidget(&label);
+
+  btnminus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnplus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnminus.setFixedSize(150, 100);
+  btnplus.setFixedSize(150, 100);
+  hlayout->addWidget(&btnminus);
+  hlayout->addWidget(&btnplus);
+
+  QObject::connect(&btnminus, &QPushButton::released, [=]() {
+    auto str = QString::fromStdString(Params().get("SteerDeltaDownBaseAdj"));
+    int value = str.toInt();
+    value = value - 1;
+    if (value <= 5 ) {
+      value = 5;
+    } else {
+    }
+    QString values = QString::number(value);
+    Params().write_db_value("SteerDeltaDownBaseAdj", values.toStdString());
+    refresh();
+  });
+  
+  QObject::connect(&btnplus, &QPushButton::released, [=]() {
+    auto str = QString::fromStdString(Params().get("SteerDeltaDownBaseAdj"));
+    int value = str.toInt();
+    value = value + 1;
+    if (value >= 15 ) {
+      value = 15;
+    } else {
+    }
+    QString values = QString::number(value);
+    Params().write_db_value("SteerDeltaDownBaseAdj", values.toStdString());
+    refresh();
+  });
+  refresh();
+}
+
+void SteerDeltaDownBase::refresh() {
+  label.setText(QString::fromStdString(Params().get("SteerDeltaDownBaseAdj")));
+  btnminus.setText("－");
+  btnplus.setText("＋");
+}
+
+SteerDeltaDownMax::SteerDeltaDownMax() : AbstractControl("SteerDeltaDown최대값", "SteerDeltaDown최대값을 조정합니다.", "../assets/offroad/icon_shell.png") {
 
   label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
   label.setStyleSheet("color: #e0e879");
@@ -1952,8 +2257,8 @@ SteerDeltaDown::SteerDeltaDown() : AbstractControl("SteerDeltaDown", "SteerDelta
     auto str = QString::fromStdString(Params().get("SteerDeltaDownAdj"));
     int value = str.toInt();
     value = value - 1;
-    if (value <= 5 ) {
-      value = 5;
+    if (value <= 7 ) {
+      value = 7;
     } else {
     }
     QString values = QString::number(value);
@@ -1976,8 +2281,69 @@ SteerDeltaDown::SteerDeltaDown() : AbstractControl("SteerDeltaDown", "SteerDelta
   refresh();
 }
 
-void SteerDeltaDown::refresh() {
+void SteerDeltaDownMax::refresh() {
   label.setText(QString::fromStdString(Params().get("SteerDeltaDownAdj")));
+  btnminus.setText("－");
+  btnplus.setText("＋");
+}
+
+SteerThreshold::SteerThreshold() : AbstractControl("SteerThreshold", "SteerThreshold값을 조정합니다.", "../assets/offroad/icon_shell.png") {
+
+  label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+  label.setStyleSheet("color: #e0e879");
+  hlayout->addWidget(&label);
+
+  btnminus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnplus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnminus.setFixedSize(150, 100);
+  btnplus.setFixedSize(150, 100);
+  hlayout->addWidget(&btnminus);
+  hlayout->addWidget(&btnplus);
+
+  QObject::connect(&btnminus, &QPushButton::released, [=]() {
+    auto str = QString::fromStdString(Params().get("SteerThreshold"));
+    int value = str.toInt();
+    value = value - 10;
+    if (value <= 50 ) {
+      value = 50;
+    } else {
+    }
+    QString values = QString::number(value);
+    Params().write_db_value("SteerThreshold", values.toStdString());
+    refresh();
+  });
+  
+  QObject::connect(&btnplus, &QPushButton::released, [=]() {
+    auto str = QString::fromStdString(Params().get("SteerThreshold"));
+    int value = str.toInt();
+    value = value + 10;
+    if (value >= 300 ) {
+      value = 300;
+    } else {
+    }
+    QString values = QString::number(value);
+    Params().write_db_value("SteerThreshold", values.toStdString());
+    refresh();
+  });
+  refresh();
+}
+
+void SteerThreshold::refresh() {
+  label.setText(QString::fromStdString(Params().get("SteerThreshold")));
   btnminus.setText("－");
   btnplus.setText("＋");
 }

@@ -293,12 +293,6 @@ QWidget * network_panel(QWidget * parent) {
   layout->addWidget(new SshLegacyToggle());
   layout->addWidget(horizontal_line());
 
-  const char* run_mixplorer = "/data/openpilot/run_mixplorer.sh ''";
-  layout->addWidget(new ButtonControl("믹스플로러", "실행", "파일 및 기타 유지관리를 위해 믹스플로러를 실행합니다. 믹스플로러는 다양한 기능(앱실행, 코드수정 등)을 이용할 수 있습니다.",
-                                      [=]() { std::system(run_mixplorer); }));
-
-  layout->addWidget(horizontal_line());
-  
   const char* gitpull = "/data/openpilot/gitpull.sh ''";
   layout->addWidget(new ButtonControl("Git Pull", "실행", "리모트 Git에서 변경사항이 있으면 로컬에 반영 후 자동 재부팅 됩니다. 변경사항이 없으면 재부팅하지 않습니다. 로컬 파일이 변경된경우 리모트Git 내역을 반영 못할수도 있습니다. 참고바랍니다.",
                                       [=]() { 
@@ -403,16 +397,22 @@ QWidget * user_panel(QWidget * parent) {
   layout->addWidget(new LDWSToggle());
   layout->addWidget(new GearDToggle());
   layout->addWidget(new ComIssueToggle());
+  layout->addWidget(horizontal_line());
   layout->addWidget(new CarForceSet());
   QString car_model = QString::fromStdString(Params().get("CarModel", false));
   layout->addWidget(new LabelControl("현재차량모델", ""));
   layout->addWidget(new LabelControl(car_model, ""));
-  layout->addWidget(new RTDelta());
-  const char* rt_delta_edit_go = "/data/openpilot/edit_rt_delta.sh ''";
-  layout->addWidget(new ButtonControl("RT_DELTA 적용", "실행", "변경된 RT_DELTA값을 적용합니다.",
+  layout->addWidget(horizontal_line());
+  layout->addWidget(new LabelControl("판다 값", "주의要"));
+  layout->addWidget(new MaxSteer());
+  layout->addWidget(new MaxRTDelta());
+  layout->addWidget(new MaxRateUp());
+  layout->addWidget(new MaxRateDown());
+  const char* p_edit_go = "/data/openpilot/p_edit.sh ''";
+  layout->addWidget(new ButtonControl("판다 값 일괄 변경 적용", "실행", "변경된 판다값을 적용합니다. 콤마가 좋아하지 않으니 사용에 주의를 요합니다.",
                                       [=]() { 
-                                        if (ConfirmationDialog::confirm("변경된 RT_DELTA값을 적용합니다. 진행하시겠습니까? 자동 재부팅 됩니다.")){
-                                          std::system(rt_delta_edit_go);
+                                        if (ConfirmationDialog::confirm("변경된 판다값을 적용합니다. 콤마가 안좋아합니다. 적용후 자동 재부팅 됩니다.")){
+                                          std::system(p_edit_go);
                                         }
                                       }));
   //layout->addWidget(horizontal_line());
@@ -442,9 +442,12 @@ QWidget * tuning_panel(QWidget * parent) {
   layout->addWidget(new SteerMaxMax());
   layout->addWidget(new SteerMaxv());
   layout->addWidget(new VariableSteerMaxToggle());
-  layout->addWidget(new SteerDeltaUp());
-  layout->addWidget(new SteerDeltaDown());
+  layout->addWidget(new SteerDeltaUpBase());
+  layout->addWidget(new SteerDeltaUpMax());
+  layout->addWidget(new SteerDeltaDownBase());
+  layout->addWidget(new SteerDeltaDownMax());
   layout->addWidget(new VariableSteerDeltaToggle());
+  layout->addWidget(new SteerThreshold());
 
   layout->addWidget(horizontal_line());
 

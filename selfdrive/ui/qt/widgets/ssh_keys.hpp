@@ -701,11 +701,11 @@ private:
   void refresh();
 };
 
-class SteerDeltaUp : public AbstractControl {
+class SteerDeltaUpBase : public AbstractControl {
   Q_OBJECT
 
 public:
-  SteerDeltaUp();
+  SteerDeltaUpBase();
 
 private:
   QPushButton btnplus;
@@ -715,11 +715,11 @@ private:
   void refresh();
 };
 
-class SteerDeltaDown : public AbstractControl {
+class SteerDeltaUpMax : public AbstractControl {
   Q_OBJECT
 
 public:
-  SteerDeltaDown();
+  SteerDeltaUpMax();
 
 private:
   QPushButton btnplus;
@@ -728,6 +728,35 @@ private:
 
   void refresh();
 };
+
+class SteerDeltaDownBase : public AbstractControl {
+  Q_OBJECT
+
+public:
+  SteerDeltaDownBase();
+
+private:
+  QPushButton btnplus;
+  QPushButton btnminus;
+  QLabel label;
+
+  void refresh();
+};
+
+class SteerDeltaDownMax : public AbstractControl {
+  Q_OBJECT
+
+public:
+  SteerDeltaDownMax();
+
+private:
+  QPushButton btnplus;
+  QPushButton btnminus;
+  QLabel label;
+
+  void refresh();
+};
+
 
 // 제어 설정
 class LateralControl : public AbstractControl {
@@ -940,11 +969,67 @@ private:
   void refresh();
 };
 
-class RTDelta : public AbstractControl {
+class MaxSteer : public AbstractControl {
   Q_OBJECT
 
 public:
-  RTDelta();
+  MaxSteer();
+
+private:
+  QPushButton btnplus;
+  QPushButton btnminus;
+  QLabel label;
+
+  void refresh();
+};
+
+class MaxRTDelta : public AbstractControl {
+  Q_OBJECT
+
+public:
+  MaxRTDelta();
+
+private:
+  QPushButton btnplus;
+  QPushButton btnminus;
+  QLabel label;
+
+  void refresh();
+};
+
+class MaxRateUp : public AbstractControl {
+  Q_OBJECT
+
+public:
+  MaxRateUp();
+
+private:
+  QPushButton btnplus;
+  QPushButton btnminus;
+  QLabel label;
+
+  void refresh();
+};
+
+class MaxRateDown : public AbstractControl {
+  Q_OBJECT
+
+public:
+  MaxRateDown();
+
+private:
+  QPushButton btnplus;
+  QPushButton btnminus;
+  QLabel label;
+
+  void refresh();
+};
+
+class SteerThreshold : public AbstractControl {
+  Q_OBJECT
+
+public:
+  SteerThreshold();
 
 private:
   QPushButton btnplus;

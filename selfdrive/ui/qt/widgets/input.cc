@@ -142,7 +142,7 @@ ConfirmationDialog::ConfirmationDialog(const QString &prompt_text, const QString
     QObject::connect(confirm_btn, SIGNAL(released()), this, SLOT(accept()));
   }
 
-  setFixedSize(900, 350);
+  setFixedSize(900, 450);
   setStyleSheet(R"(
     * {
       color: black;

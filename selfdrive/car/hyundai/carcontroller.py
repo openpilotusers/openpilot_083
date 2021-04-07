@@ -139,16 +139,16 @@ class CarController():
 
     self.model_speed_range = [30, 90, 255]
     self.steerMax_range = [CarControllerParams.STEER_MAX, int(self.params.get("SteerMaxBaseAdj", encoding='utf8')), int(self.params.get("SteerMaxBaseAdj", encoding='utf8'))]
-    self.steerDeltaUp_range = [5, int(self.params.get("SteerDeltaUpAdj", encoding='utf8')), int(self.params.get("SteerDeltaUpAdj", encoding='utf8'))]
-    self.steerDeltaDown_range = [10, int(self.params.get("SteerDeltaDownAdj", encoding='utf8')), int(self.params.get("SteerDeltaDownAdj", encoding='utf8'))]
+    self.steerDeltaUp_range = [CarControllerParams.STEER_DELTA_UP, int(self.params.get("SteerDeltaUpBaseAdj", encoding='utf8')), int(self.params.get("SteerDeltaUpBaseAdj", encoding='utf8'))]
+    self.steerDeltaDown_range = [CarControllerParams.STEER_DELTA_DOWN, int(self.params.get("SteerDeltaDownBaseAdj", encoding='utf8')), int(self.params.get("SteerDeltaDownBaseAdj", encoding='utf8'))]
     #self.model_speed_range = [0, 30, 255]
     #self.steerMax_range = [int(self.params.get('SteerMaxBaseAdj')), int(self.params.get('SteerMaxBaseAdj')), CarControllerParams.STEER_MAX]
     #self.steerDeltaUp_range = [int(self.params.get('SteerDeltaUpAdj')), int(self.params.get('SteerDeltaUpAdj')), 5]
     #self.steerDeltaDown_range = [int(self.params.get('SteerDeltaDownAdj')), int(self.params.get('SteerDeltaDownAdj')), 10]
 
     self.steerMax = int(self.params.get("SteerMaxBaseAdj", encoding='utf8'))
-    self.steerDeltaUp = int(self.params.get("SteerDeltaUpAdj", encoding='utf8'))
-    self.steerDeltaDown = int(self.params.get("SteerDeltaDownAdj", encoding='utf8'))
+    self.steerDeltaUp = int(self.params.get("SteerDeltaUpBaseAdj", encoding='utf8'))
+    self.steerDeltaDown = int(self.params.get("SteerDeltaDownBaseAdj", encoding='utf8'))
 
     self.variable_steer_max = self.params.get('OpkrVariableSteerMax', encoding='utf8') == "1"
     self.variable_steer_delta = self.params.get('OpkrVariableSteerDelta', encoding='utf8') == "1"
@@ -184,7 +184,9 @@ class CarController():
     #self.model_speed = self.SC.cal_model_speed(sm, CS.out.vEgo)
     lateral_plan = sm['lateralPlan']
     self.outScale = lateral_plan.outputScale
-    self.model_speed = interp(abs(lateral_plan.vCurvature), [0.0002, 0.01], [255, 30])
+    #self.model_speed = interp(abs(lateral_plan.vCurvature), [0.0002, 0.01], [255, 30])
+
+    self.model_speed = interp(abs(lateral_plan.vCurvature), [0.0, 0.0002, 0.00074, 0.0025, 0.008, 0.02], [255, 255, 130, 90, 60, 20])
 
     if CS.out.vEgo > 8:
       if self.variable_steer_max:
@@ -195,16 +197,16 @@ class CarController():
         self.steerDeltaUp = interp(int(abs(self.model_speed)), self.model_speed_range, self.steerDeltaUp_range)
         self.steerDeltaDown = interp(int(abs(self.model_speed)), self.model_speed_range, self.steerDeltaDown_range)
       else:
-        self.steerDeltaUp = int(self.params.get("SteerDeltaUpAdj", encoding='utf8'))
-        self.steerDeltaDown = int(self.params.get("SteerDeltaDownAdj", encoding='utf8'))
+        self.steerDeltaUp = int(self.params.get("SteerDeltaUpBaseAdj", encoding='utf8'))
+        self.steerDeltaDown = int(self.params.get("SteerDeltaDownBaseAdj", encoding='utf8'))
     else:
       self.steerMax = int(self.params.get("SteerMaxBaseAdj", encoding='utf8'))
-      self.steerDeltaUp = int(self.params.get("SteerDeltaUpAdj", encoding='utf8'))
-      self.steerDeltaDown = int(self.params.get("SteerDeltaDownAdj", encoding='utf8'))
+      self.steerDeltaUp = int(self.params.get("SteerDeltaUpBaseAdj", encoding='utf8'))
+      self.steerDeltaDown = int(self.params.get("SteerDeltaDownBaseAdj", encoding='utf8'))
 
     param.STEER_MAX = min(CarControllerParams.STEER_MAX, self.steerMax) # variable steermax
-    param.STEER_DELTA_UP = max(int(self.params.get("SteerDeltaUpAdj", encoding='utf8')), self.steerDeltaUp) # variable deltaUp
-    param.STEER_DELTA_DOWN = max(int(self.params.get("SteerDeltaDownAdj", encoding='utf8')), self.steerDeltaDown) # variable deltaDown
+    param.STEER_DELTA_UP = min(CarControllerParams.STEER_DELTA_UP, self.steerDeltaUp) # variable deltaUp
+    param.STEER_DELTA_DOWN = min(CarControllerParams.STEER_DELTA_DOWN, self.steerDeltaDown) # variable deltaDown
     #param.STEER_DELTA_UP = CarControllerParams.STEER_DELTA_UP # fixed deltaUp
     #param.STEER_DELTA_DOWN = CarControllerParams.STEER_DELTA_DOWN # fixed deltaDown
 
@@ -233,7 +235,7 @@ class CarController():
     if self.emergency_manual_timer > 0:
       self.emergency_manual_timer -= 1
 
-    if abs(CS.out.steeringTorque) > 200 and CS.out.vEgo < LANE_CHANGE_SPEED_MIN:
+    if abs(CS.out.steeringTorque) > 180 and CS.out.vEgo < LANE_CHANGE_SPEED_MIN:
       self.driver_steering_torque_above = True
     else:
       self.driver_steering_torque_above = False

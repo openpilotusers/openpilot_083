@@ -32,9 +32,11 @@ SteerActuatorDelayAdj:0
 SteerRateCostAdj:45
 SteerLimitTimerAdj:40
 TireStiffnessFactorAdj:85
-SteerMaxAdj:384
 SteerMaxBaseAdj:300
+SteerMaxAdj:384
+SteerDeltaUpBaseAdj:3
 SteerDeltaUpAdj:3
+SteerDeltaDownBaseAdj:7
 SteerDeltaDownAdj:7
 SteerMaxvAdj:10
 OpkrBatteryChargingControl:1
@@ -61,3 +63,4 @@ OpkrHotspotOnBoot:0
 ShaneFeedForward:0
 JustDoGearD:0
 ComIssueGone:0
+SteerThreshold:150

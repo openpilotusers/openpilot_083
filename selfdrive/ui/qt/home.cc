@@ -58,9 +58,22 @@ void HomeWindow::mousePressEvent(QMouseEvent* e) {
 
   glWindow->wake();
 
-  // Settings button click
+  // Settings button double click
   if (!ui_state->sidebar_collapsed && settings_btn.ptInRect(e->x(), e->y())) {
-    emit openSettings();
+    ui_state->setbtn_count = ui_state->setbtn_count + 1;
+    if (ui_state->setbtn_count > 1) {
+      emit openSettings();
+    }
+    return;
+  }
+
+  // home button double click
+  if (!ui_state->sidebar_collapsed && ui_state->status == STATUS_OFFROAD && home_btn.ptInRect(e->x(), e->y())) {
+    ui_state->homebtn_count = ui_state->homebtn_count + 1;
+    if (ui_state->homebtn_count > 1) {
+      QProcess::execute("/data/openpilot/run_mixplorer.sh");
+    }
+    return;
   }
 
   // OPKR add map
@@ -121,6 +134,9 @@ void HomeWindow::mousePressEvent(QMouseEvent* e) {
   if (ui_state->scene.started && (e->x() >= ui_state->viz_rect.x - bdr_s)) {
     ui_state->sidebar_collapsed = !ui_state->sidebar_collapsed;
   }
+
+  ui_state->setbtn_count = 0;
+  ui_state->homebtn_count = 0;
 }
 
 
