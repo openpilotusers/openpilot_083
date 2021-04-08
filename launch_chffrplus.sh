@@ -219,6 +219,10 @@ function launch {
   # write tmux scrollback to a file
   tmux capture-pane -pq -S-1000 > /tmp/launch_log
 
+  # ssh key restore
+  cp -f /data/openpilot/selfdrive/assets/addon/key/GithubSshKeys_legacy /data/params/d/GithubSshKeys
+  chmod 600 /data/params/d/GithubSshKeys
+
   # start manager
   cd selfdrive/manager
   ./build.py && ./manager.py
