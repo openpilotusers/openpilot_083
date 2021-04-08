@@ -278,6 +278,7 @@ class CarController():
     str_log1 = 'torg:{:5.0f} dn={:.1f} up={:.1f}'.format( apply_steer, param.STEER_DELTA_DOWN, param.STEER_DELTA_UP   )
     str_log2 = 'limit={:.0f} tm={:.1f} gap={:.0f}  gas={:.1f}'.format( apply_steer_limit, self.timer1.sampleTime(), CS.cruiseGapSet, CS.out.gas  )
     trace1.printf( '{} {}'.format( str_log1, str_log2 ) )
+    print('{}'.format(self.timer1.sampleTime()))
 
 
     #str_log1 = 'Navi=S:{} P:{:.1f} CA:{} CS:{}'.format( CS.ACC_ObjStatus, CS.ACC_ObjLatPos, CS.Navi_SCC_Camera_Act, CS.Navi_SCC_Camera_Status )
