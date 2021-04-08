@@ -1118,7 +1118,7 @@ MaxSteer::MaxSteer() : AbstractControl("MAX_STEER", "판다 MAX_STEER 값을 수
   QObject::connect(&btnminus, &QPushButton::released, [=]() {
     auto str = QString::fromStdString(Params().get("MaxSteer"));
     int value = str.toInt();
-    value = value - 1;
+    value = value - 2;
     if (value <= 384 ) {
       value = 384;
     } else {
@@ -1131,7 +1131,7 @@ MaxSteer::MaxSteer() : AbstractControl("MAX_STEER", "판다 MAX_STEER 값을 수
   QObject::connect(&btnplus, &QPushButton::released, [=]() {
     auto str = QString::fromStdString(Params().get("MaxSteer"));
     int value = str.toInt();
-    value = value + 1;
+    value = value + 2;
     if (value >= 1000 ) {
       value = 1000;
     } else {
