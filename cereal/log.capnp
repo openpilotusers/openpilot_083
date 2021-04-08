@@ -527,10 +527,6 @@ struct ControlsState @0x97ff69c53601abf1 {
   limitSpeedCameraDist @63 :Float32;
   steerRatio @64 :Float32;
 
-  # atom
-  output @65 :Float32;
-  modelSpeed @66 :Float32;
-
   lateralControlState :union {
     indiState @52 :LateralINDIState;
     pidState @53 :LateralPIDState;
@@ -1251,11 +1247,6 @@ struct LiveParametersData {
   yawRate @7 :Float32;
   posenetSpeed @8 :Float32;
   posenetValid @9 :Bool;
-
-
-  # atom
-  steerRatioCV @10 :Float32;
-  steerActuatorDelayCV @11 :Float32;
 }
 
 struct LiveMapDataDEPRECATED {
