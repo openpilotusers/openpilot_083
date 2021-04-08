@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 import math
 
 import json
@@ -11,9 +11,6 @@ from selfdrive.locationd.models.car_kf import CarKalman, ObservationKind, States
 from selfdrive.locationd.models.constants import GENERATED_DIR
 from selfdrive.swaglog import cloudlog
 
-# atom
-from common.numpy_fast import interp
-from selfdrive.config import Conversions as CV
 
 class ParamsLearner:
   def __init__(self, CP, steer_ratio, stiffness_factor, angle_offset):
@@ -33,34 +30,6 @@ class ParamsLearner:
     self.steering_angle = 0
 
     self.valid = True
-
-
-
-  # atom
-  def atom_tune( self, v_ego_kph, cv_value,  atomTuning ):  
-    self.cv_KPH = atomTuning.cvKPH
-    self.cv_BPV = atomTuning.cvBPV
-    self.cv_steerRatioV = atomTuning.cvsteerRatioV
-    self.cv_SteerRatio = []
-
-    self.cv_ActuatorDelayV = atomTuning.cvsteerActuatorDelayV
-    self.cv_ActuatorDelay = []
-
-
-    nPos = 0
-    for steerRatio in self.cv_BPV:  # steerRatio
-      self.cv_SteerRatio.append( interp( cv_value, steerRatio, self.cv_steerRatioV[nPos] ) )
-      self.cv_ActuatorDelay.append( interp( cv_value, steerRatio, self.cv_ActuatorDelayV[nPos] ) )
-      nPos += 1
-      if nPos > 20:
-        break
-
-    steerRatio = interp( v_ego_kph, self.cv_KPH, self.cv_SteerRatio )
-    actuatorDelay = interp( v_ego_kph, self.cv_KPH, self.cv_ActuatorDelay )
-
-    return steerRatio, actuatorDelay
-
-   
 
   def handle_log(self, t, which, msg):
     if which == 'liveLocationKalman':
@@ -97,7 +66,7 @@ class ParamsLearner:
 
 def main(sm=None, pm=None):
   if sm is None:
-    sm = messaging.SubMaster(['liveLocationKalman', 'carState', 'carParams', 'controlsState'], poll=['liveLocationKalman'])
+    sm = messaging.SubMaster(['liveLocationKalman', 'carState'], poll=['liveLocationKalman'])
   if pm is None:
     pm = messaging.PubMaster(['liveParameters'])
 
@@ -141,11 +110,8 @@ def main(sm=None, pm=None):
 
   # When driving in wet conditions the stiffness can go down, and then be too low on the next drive
   # Without a way to detect this we have to reset the stiffness every drive
-  params['stiffnessFactor'] = 1.1
-  params['angleOffsetAverageDeg'] = 0
-
-  opkrLiveSteerRatio = int(params_reader.get("OpkrLiveSteerRatio"))
-  
+  #params['stiffnessFactor'] = 1.0
+  params['stiffnessFactor'] = float(int(Params().get("TireStiffnessFactorAdj", encoding='utf8')) * 0.01)
 
   learner = ParamsLearner(CP, params['steerRatio'], params['stiffnessFactor'], math.radians(params['angleOffsetAverageDeg']))
 
@@ -165,34 +131,10 @@ def main(sm=None, pm=None):
       msg.liveParameters.sensorValid = True
 
       x = learner.kf.x
-
-      actuatorDelayCV = CP.steerActuatorDelay
-      steerRatioCV = float(x[States.STEER_RATIO])
-      angle_offset_fast = math.degrees(x[States.ANGLE_OFFSET_FAST])
-      v_ego_kph = sm['carState'].vEgo * CV.MS_TO_KPH
-
-
-      if opkrLiveSteerRatio:
-        pass
-      elif sm['carParams'].steerRateCost > 0:
-        atomTuning = sm['carParams'].atomTuning
-        cv_value = sm['controlsState'].modelSpeed
-        if cv_value <= 10: 
-          cv_value = 255
-        steerRatioCV, actuatorDelayCV = learner.atom_tune( v_ego_kph, cv_value,  atomTuning )
-
-
-      if v_ego_kph < 50:  # 50 km/h
-         v_ego_BP = [10,50]
-         angle_rate = [0,1]
-         angle_offset_fast *= interp( v_ego_kph, v_ego_BP, angle_rate )
-
-      msg.liveParameters.steerRatioCV = steerRatioCV
-      msg.liveParameters.steerActuatorDelayCV = actuatorDelayCV
       msg.liveParameters.steerRatio = float(x[States.STEER_RATIO])
       msg.liveParameters.stiffnessFactor = float(x[States.STIFFNESS])
       msg.liveParameters.angleOffsetAverageDeg = math.degrees(x[States.ANGLE_OFFSET])
-      msg.liveParameters.angleOffsetDeg = msg.liveParameters.angleOffsetAverageDeg + angle_offset_fast
+      msg.liveParameters.angleOffsetDeg = msg.liveParameters.angleOffsetAverageDeg + math.degrees(x[States.ANGLE_OFFSET_FAST])
       msg.liveParameters.valid = all((
         abs(msg.liveParameters.angleOffsetAverageDeg) < 10.0,
         abs(msg.liveParameters.angleOffsetDeg) < 10.0,

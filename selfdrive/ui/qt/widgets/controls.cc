@@ -1,4 +1,4 @@
-﻿#include "controls.hpp"
+#include "controls.hpp"
 
 QFrame *horizontal_line(QWidget *parent) {
   QFrame *line = new QFrame(parent);

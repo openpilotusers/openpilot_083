@@ -4,12 +4,12 @@ import common.CTime1000 as tm
 ROOT_LOG = '/data/media/0/videos/'
 
 
-global_alertTextMsg1 = 'T1'
-global_alertTextMsg2 = 'T2'
+global_alertTextMsg1 = ''
+global_alertTextMsg2 = ''
 
 
 
-def printf( txt ):
+def printf1( txt ):
     global global_alertTextMsg1
     global_alertTextMsg1 = txt
 

@@ -7,6 +7,7 @@ from common.numpy_fast import clip, interp
 from selfdrive.car.toyota.values import CarControllerParams
 from selfdrive.car import apply_toyota_steer_torque_limits
 from selfdrive.controls.lib.drive_helpers import get_steer_max
+from common.params import Params
 
 
 class LatControlINDI():
@@ -36,37 +37,43 @@ class LatControlINDI():
 
     self.enforce_rate_limit = CP.carName == "toyota"
 
+    self.mpc_frame = 0
+    self.params = Params()
+
     self._RC = (CP.lateralTuning.indi.timeConstantBP, CP.lateralTuning.indi.timeConstantV)
     self._G = (CP.lateralTuning.indi.actuatorEffectivenessBP, CP.lateralTuning.indi.actuatorEffectivenessV)
     self._outer_loop_gain = (CP.lateralTuning.indi.outerLoopGainBP, CP.lateralTuning.indi.outerLoopGainV)
     self._inner_loop_gain = (CP.lateralTuning.indi.innerLoopGainBP, CP.lateralTuning.indi.innerLoopGainV)
+
+    self.RC = 0
+    self.G = 0
+    self.outer_loop_gain = 0
+    self.inner_loop_gain = 0
 
     self.sat_count_rate = 1.0 * DT_CTRL
     self.sat_limit = CP.steerLimitTimer
 
     self.reset()
 
-  @property
-  def RC(self):
-    return interp(self.speed, self._RC[0], self._RC[1])
-
-  @property
-  def G(self):
-    return interp(self.speed, self._G[0], self._G[1])
-
-  @property
-  def outer_loop_gain(self):
-    return interp(self.speed, self._outer_loop_gain[0], self._outer_loop_gain[1])
-
-  @property
-  def inner_loop_gain(self):
-    return interp(self.speed, self._inner_loop_gain[0], self._inner_loop_gain[1])
-
   def reset(self):
     self.delayed_output = 0.
     self.output_steer = 0.
     self.sat_count = 0.0
     self.speed = 0.
+
+  def live_tune(self, CP):
+    self.mpc_frame += 1
+    if self.mpc_frame % 300 == 0:
+      self.outerLoopGain = float(int(self.params.get("OuterLoopGain", encoding='utf8')) * 0.1)
+      self.innerLoopGain = float(int(self.params.get("InnerLoopGain", encoding='utf8')) * 0.1)
+      self.timeConstant = float(int(self.params.get("TimeConstant", encoding='utf8')) * 0.1)
+      self.actuatorEffectiveness = float(int(self.params.get("ActuatorEffectiveness", encoding='utf8')) * 0.1)
+      self.RC = interp(self.speed, [0., 9.], [2.0, self.timeConstant]) 
+      self.G = interp(self.speed, [0., 9.], [3.0, self.actuatorEffectiveness])
+      self.outer_loop_gain = interp(self.speed, [0., 9.], [1.5, self.outerLoopGain])
+      self.inner_loop_gain = interp(self.speed, [0., 9.], [3.0, self.innerLoopGain])
+        
+      self.mpc_frame = 0
 
   def _check_saturation(self, control, check_saturation, limit):
     saturated = abs(control) == limit
@@ -82,6 +89,15 @@ class LatControlINDI():
 
   def update(self, active, CS, CP, VM, params, lat_plan):
     self.speed = CS.vEgo
+
+    self.RC = interp(self.speed, self._RC[0], self._RC[1])
+    self.G = interp(self.speed, self._G[0], self._G[1])
+    self.outer_loop_gain = interp(self.speed, self._outer_loop_gain[0], self._outer_loop_gain[1])
+    self.inner_loop_gain = interp(self.speed, self._inner_loop_gain[0], self._inner_loop_gain[1])
+
+    if self.params.get('OpkrLiveTune') == b'1':
+      self.live_tune(CP)
+
     # Update Kalman filter
     y = np.array([[math.radians(CS.steeringAngleDeg)], [math.radians(CS.steeringRateDeg)]])
     self.x = np.dot(self.A_K, self.x) + np.dot(self.K, y)

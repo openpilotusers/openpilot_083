@@ -284,9 +284,6 @@ struct DeviceState @0xa4d8b5af2aa492eb {
   networkStrength @24 :NetworkStrength;
   carBatteryCapacityUwh @25 :UInt32;
 
-  # atom
-  wifiIpAddress @31 :Text;
-  
   fanSpeedPercentDesired @10 :UInt16;
   started @11 :Bool;
   startedMonoTime @13 :UInt64;
@@ -306,6 +303,8 @@ struct DeviceState @0xa4d8b5af2aa492eb {
   batteryTempC @29 :Float32;
   ambientTempC @30 :Float32;
   thermalStatus @14 :ThermalStatus;
+
+  ipAddr @31 :Text;
 
   enum ThermalStatus {
     green @0;
@@ -521,11 +520,12 @@ struct ControlsState @0x97ff69c53601abf1 {
   cumLagMs @15 :Float32;
   canErrorCounter @57 :UInt32;
 
-  # atom
-  output @59 :Float32;
-  alertTextMsg1  @60 :Text;
-  alertTextMsg2  @61 :Text;
-  modelSpeed @62 :Float32;
+  alertTextMsg1  @59 :Text;
+  alertTextMsg2  @60 :Text;
+  lateralControlMethod  @61 :UInt8;
+  limitSpeedCamera @62 :Float32;
+  limitSpeedCameraDist @63 :Float32;
+  steerRatio @64 :Float32;
 
   lateralControlState :union {
     indiState @52 :LateralINDIState;
@@ -670,7 +670,7 @@ struct ModelDataV2 {
     stds @3 :List(Float32);
     poly @4 :List(Float32);
     validLen @5 :Float32;
-  } 
+  }
 
   # All SI units and in device frame
   struct XYZTData {
@@ -759,6 +759,16 @@ struct LongitudinalPlan @0xe00b5b3eba12876c {
 
   processingDelay @29 :Float32;
 
+  dRel1 @32 :Float32;
+  yRel1 @33 :Float32;
+  vRel1 @34 :Float32;
+  dRel2 @35 :Float32;
+  yRel2 @36 :Float32;
+  vRel2 @37 :Float32;
+  status2 @38 :Bool;
+  targetSpeedCamera @39 :Float32;
+  targetSpeedCameraDist @40 :Float32;
+
   enum LongitudinalPlanSource {
     cruise @0;
     mpc1 @1;
@@ -810,6 +820,14 @@ struct LateralPlan @0xe1e9318e2ae8b51e {
   curvatureRate @23 :Float32;
   rawCurvature @24 :Float32;
   rawCurvatureRate @25 :Float32;
+
+  outputScale @26 :Float32;
+  steerRateCost @27 :Float32;
+  standstillElapsedTime @28 :Float32;
+  vCruiseSet @29 :Float32;
+  vCurvature @30 :Float32;
+  steerAngleDesireDeg @31 :Float32;
+  lanelessMode @32 :Bool;
 
   enum Desire {
     none @0;
@@ -1229,11 +1247,6 @@ struct LiveParametersData {
   yawRate @7 :Float32;
   posenetSpeed @8 :Float32;
   posenetValid @9 :Bool;
-
-
-  # atom
-  steerRatioCV @10 :Float32;
-  steerActuatorDelayCV @11 :Float32;
 }
 
 struct LiveMapDataDEPRECATED {

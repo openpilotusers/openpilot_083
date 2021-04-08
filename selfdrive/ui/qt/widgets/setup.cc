@@ -2,6 +2,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QLabel>
+#include <QPixmap>
 #include <QPushButton>
 #include <QStackedWidget>
 #include <QTimer>
@@ -34,7 +35,7 @@ void PairingQRWidget::refresh(){
   if (std::min(IMEI.length(), serial.length()) <= 5) {
     qrCode->setText("Error getting serial: contact support");
     qrCode->setWordWrap(true);
-    qrCode->setStyleSheet(R"(font-size: 60px;)");
+    qrCode->setStyleSheet(R"(font-size: 48px;)");
     return;
   }
   QVector<QPair<QString, QJsonValue>> payloads;
@@ -77,7 +78,7 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
   mainLayout->addWidget(commaPrime, 0, Qt::AlignTop);
 
   username = new QLabel();
-  username->setStyleSheet("font-size: 55px;"); // TODO: fit width
+  username->setStyleSheet("font-size: 48px;"); // TODO: fit width
   mainLayout->addWidget(username, 0, Qt::AlignTop);
 
   mainLayout->addSpacing(100);
@@ -134,22 +135,13 @@ PrimeAdWidget::PrimeAdWidget(QWidget* parent) : QWidget(parent) {
   vlayout->setMargin(30);
   vlayout->setSpacing(15);
 
-  vlayout->addWidget(new QLabel("Upgrade now"), 1, Qt::AlignTop);
+  vlayout->addWidget(new QLabel("오픈파일럿"), 1, Qt::AlignCenter);
 
-  QLabel* description = new QLabel("Become a comma prime member in the comma connect app and get premium features!");
-  description->setStyleSheet(R"(
-    font-size: 50px;
-    color: #b8b8b8;
-  )");
-  description->setWordWrap(true);
-  vlayout->addWidget(description, 2, Qt::AlignTop);
-
-  QVector<QString> features = {"✓ REMOTE ACCESS", "✓ 14 DAYS OF STORAGE", "✓ DEVELOPER PERKS"};
-  for (auto &f: features) {
-    QLabel* feature = new QLabel(f);
-    feature->setStyleSheet(R"(font-size: 40px;)");
-    vlayout->addWidget(feature, 0, Qt::AlignBottom);
-  }
+  QPixmap hkgpix("../assets/offroad/hkg.png");
+  QLabel *hkg = new QLabel();
+  hkg->setPixmap(hkgpix.scaledToWidth(430, Qt::SmoothTransformation));
+  hkg->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+  vlayout->addWidget(hkg, 0, Qt::AlignCenter);
 
   setLayout(vlayout);
 }
@@ -163,21 +155,21 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
   QVBoxLayout* finishRegistationLayout = new QVBoxLayout;
   finishRegistationLayout->setMargin(30);
 
-  QLabel* registrationDescription = new QLabel("Pair your device with the comma connect app");
+  QLabel* registrationDescription = new QLabel("COMMA CONNECT 앱을 이용하여 장치를 페어링 하세요");
   registrationDescription->setWordWrap(true);
   registrationDescription->setAlignment(Qt::AlignCenter);
   registrationDescription->setStyleSheet(R"(
-    font-size: 55px;
+    font-size: 45px;
     font-weight: 400;
   )");
 
   finishRegistationLayout->addWidget(registrationDescription);
 
-  QPushButton* finishButton = new QPushButton("Finish setup");
+  QPushButton* finishButton = new QPushButton("설정 및 완료");
   finishButton->setFixedHeight(200);
   finishButton->setStyleSheet(R"(
     border-radius: 30px;
-    font-size: 55px;
+    font-size: 45px;
     font-weight: 500;
     background: #585858;
   )");
@@ -193,11 +185,11 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
   QVBoxLayout* qrLayout = new QVBoxLayout;
 
   qrLayout->addSpacing(40);
-  QLabel* qrLabel = new QLabel("Scan with comma connect!");
+  QLabel* qrLabel = new QLabel("장치를 스캔하세요!");
   qrLabel->setWordWrap(true);
   qrLabel->setAlignment(Qt::AlignHCenter);
   qrLabel->setStyleSheet(R"(
-    font-size: 55px;
+    font-size: 45px;
     font-weight: 400;
   )");
   qrLayout->addWidget(qrLabel, 0, Qt::AlignTop);
@@ -270,7 +262,9 @@ void SetupWidget::replyFinished(QString response) {
   bool is_prime = json["prime"].toBool();
 
   if (!is_paired) {
-    mainLayout->setCurrentIndex(showQr);
+    //mainLayout->setCurrentIndex(showQr);
+    showQr = false;
+    mainLayout->setCurrentWidget(primeAd);
   } else if (!is_prime) {
     showQr = false;
     mainLayout->setCurrentWidget(primeAd);

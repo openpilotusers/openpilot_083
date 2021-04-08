@@ -48,9 +48,6 @@ constexpr int OUTPUT_SIZE =  POSE_IDX + POSE_SIZE;
 
 // #define DUMP_YUV
 
-// atom
-#include "pathData.h"
-
 void model_init(ModelState* s, cl_device_id device_id, cl_context context) {
   frame_init(&s->frame, MODEL_WIDTH, MODEL_HEIGHT, device_id, context);
   s->input_frames = std::make_unique<float[]>(MODEL_FRAME_SIZE * 2);
@@ -77,9 +74,6 @@ void model_init(ModelState* s, cl_device_id device_id, cl_context context) {
   s->traffic_convention[idx] = 1.0;
   s->m->addTrafficConvention(s->traffic_convention, TRAFFIC_CONVENTION_LEN);
 #endif
-
-  // atom
-  model_matrix_init();
 
   s->q = CL_CHECK_ERR(clCreateCommandQueue(context, device_id, 0, &err));
 }
@@ -265,29 +259,6 @@ void fill_model(cereal::ModelDataV2::Builder &framed, const ModelDataRaw &net_ou
   for (int t_offset=0; t_offset<LEAD_MHP_SELECTION; t_offset++) {
     fill_lead_v2(leads[t_offset], net_outputs.lead, net_outputs.lead_prob, t_offset, t_offsets[t_offset]);
   }
-
-
-
-// atom model pathData
-  // x pos at 10s is a good valid_len
-  float valid_len = 0;
-  for (int i=1; i<TRAJECTORY_SIZE; i++) {
-    if (const float len = best_plan[30*i]; len >= valid_len){
-      valid_len = len;
-    }
-  }
-  // clamp to 10 and MODEL_PATH_DISTANCE
-  valid_len = fmin(MODEL_PATH_DISTANCE, fmax(MIN_VALID_LEN, valid_len));
-  int valid_len_idx = 0;
-  for (int i=1; i<TRAJECTORY_SIZE; i++) {
-    if (valid_len >= X_IDXS[valid_len_idx]){
-      valid_len_idx = i;
-    }
-  }
-
-  fill_path(framed.initPath(), best_plan, 1.0, valid_len, valid_len_idx, 0);
-
-
 }
 
 void model_publish(PubMaster &pm, uint32_t vipc_frame_id, uint32_t frame_id, float frame_drop,

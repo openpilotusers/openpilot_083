@@ -3,12 +3,13 @@ import os
 import sys
 import threading
 import capnp
-from selfdrive.version import version, dirty, origin, branch
+from selfdrive.version import version, dirty
+import traceback
+from datetime import datetime
 
-from selfdrive.hardware import PC
 from selfdrive.swaglog import cloudlog
 
-if os.getenv("NOLOG") or os.getenv("NOCRASH") or PC:
+if os.getenv("NOLOG") or os.getenv("NOCRASH"):
   def capture_exception(*args, **kwargs):
     pass
 
@@ -23,16 +24,30 @@ if os.getenv("NOLOG") or os.getenv("NOCRASH") or PC:
 else:
   from raven import Client
   from raven.transport.http import HTTPTransport
+  from selfdrive.version import origin, branch, get_git_commit
 
-  tags = {
-    'dirty': dirty,
-    'origin': origin,
-    'branch': branch
-  }
-  client = Client('https://1994756b5e6f41cf939a4c65de45f4f2:cefebaf3a8aa40d182609785f7189bd7@app.getsentry.com/77924',
-                  install_sys_hook=False, transport=HTTPTransport, release=version, tags=tags)
+  CRASHES_DIR = '/data/community/crashes'
+  if not os.path.exists(CRASHES_DIR):
+    os.makedirs(CRASHES_DIR)
+
+  error_tags = {'dirty': dirty, 'origin': origin, 'branch': branch, 'commit': get_git_commit()}
+  username = ""
+  if username is None or not isinstance(username, str):
+    username = 'undefined'
+  error_tags['username'] = username
+
+  sentry_uri = 'https://1994756b5e6f41cf939a4c65de45f4f2:cefebaf3a8aa40d182609785f7189bd7@app.getsentry.com/77924'  # stock
+  client = Client(sentry_uri, install_sys_hook=False, transport=HTTPTransport, release=version, tags=error_tags)
+
+
+  def save_exception(exc_text):
+    log_file = '{}/{}'.format(CRASHES_DIR, datetime.now().strftime('%d-%m-%Y--%I:%M.%S-%p.log'))
+    with open(log_file, 'w') as f:
+      f.write(exc_text)
+    print('Logged current crash to {}'.format(log_file))
 
   def capture_exception(*args, **kwargs):
+    save_exception(traceback.format_exc())
     exc_info = sys.exc_info()
     if not exc_info[0] is capnp.lib.capnp.KjException:
       client.captureException(*args, **kwargs)

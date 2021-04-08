@@ -3,6 +3,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QApplication>
+#include <QProcess>
 
 #include "qt_window.hpp"
 #include "selfdrive/hardware/hw.h"
@@ -20,9 +21,11 @@ int main(int argc, char *argv[]) {
 
   QPushButton *btn = new QPushButton();
 #ifdef __aarch64__
-  btn->setText("Reboot");
+  btn->setText("MixPlorer");
   QObject::connect(btn, &QPushButton::released, [=]() {
-    Hardware::reboot();
+    QProcess::execute("/data/openpilot/run_mixplorer.sh");
+    btn->setEnabled(false);
+    //Hardware::reboot();
   });
 #else
   btn->setText("Exit");

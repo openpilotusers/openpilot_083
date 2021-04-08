@@ -86,6 +86,6 @@ class CarInterface(CarInterfaceBase):
 
     return ret.as_reader()
 
-  def apply(self, c, sm, CP):
+  def apply(self, c):
     # in mock no carcontrols
     return []

@@ -9,6 +9,7 @@
 #include "common/visionimg.h"
 #include "ui.hpp"
 #include "paint.hpp"
+#include "dashcam.h"
 
 
 int write_param_float(float param, const char* param_name, bool persistent_param) {
@@ -50,21 +51,37 @@ static void ui_init_vision(UIState *s) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_RED);
   }
   assert(glGetError() == GL_NO_ERROR);
+  s->scene.recording = false;
+  s->scene.touched = false;
+  s->scene.map_on_top = false;
 }
 
 
 void ui_init(UIState *s) {
   s->sm = new SubMaster({
     "modelV2", "controlsState", "liveCalibration", "radarState", "deviceState", "liveLocationKalman",
-    "pandaState", "carParams", "driverState", "driverMonitoringState", "sensorEvents", "carState", "ubloxGnss",
-//#ifdef QCOM2
+    "pandaState", "carParams", "driverState", "driverMonitoringState", "sensorEvents", "carState", "ubloxGnss", "gpsLocationExternal", "liveParameters", "lateralPlan",
+#ifdef QCOM2
     "roadCameraState",
-//#endif
-    "liveParameters","lateralPlan","carControl","gpsLocationExternal",
+#endif
   });
 
   s->scene.started = false;
   s->status = STATUS_OFFROAD;
+  s->setbtn_count = 0;
+  s->homebtn_count = 0;
+
+  s->scene.satelliteCount = -1;
+  read_param(&s->nOpkrAutoScreenDimming, "OpkrAutoScreenDimming");
+  read_param(&s->nOpkrUIBrightness, "OpkrUIBrightness");
+  read_param(&s->nOpkrUIVolumeBoost, "OpkrUIVolumeBoost");
+  read_param(&s->nDebugUi1, "DebugUi1");
+  read_param(&s->nDebugUi2, "DebugUi2");
+  read_param(&s->nOpkrBlindSpotDetect, "OpkrBlindSpotDetect");
+  read_param(&s->lat_control, "LateralControlMethod");
+  read_param(&s->speed_lim_off, "OpkrSpeedLimitOffset");
+  read_param(&s->scene.laneless_mode, "LanelessMode");
+  Params().write_db_value("LimitSetSpeedCamera", "0", 1);
 
   ui_nvg_init(s);
 
@@ -138,7 +155,7 @@ static void update_model(UIState *s, const cereal::ModelDataV2::Reader &model) {
     max_distance = std::clamp((float)(lead_d - fmin(lead_d * 0.35, 10.)), 0.0f, max_distance);
   }
   max_idx = get_path_length_idx(model_position, max_distance);
-  update_line_data(s, model_position, 0.5, 1.22, &scene.track_vertices, max_idx);
+  update_line_data(s, model_position, 0.7, 1.22, &scene.track_vertices, max_idx);
 }
 
 static void update_sockets(UIState *s) {
@@ -148,23 +165,54 @@ static void update_sockets(UIState *s) {
   UIScene &scene = s->scene;
   if (scene.started && sm.updated("controlsState")) {
     scene.controls_state = sm["controlsState"].getControlsState();
+    scene.lateralControlMethod = scene.controls_state.getLateralControlMethod();
+    if (scene.lateralControlMethod == 0) {
+      scene.output_scale = scene.controls_state.getLateralControlState().getPidState().getOutput();
+    } else if (scene.lateralControlMethod == 1) {
+      scene.output_scale = scene.controls_state.getLateralControlState().getIndiState().getOutput();
+    } else if (s->scene.lateralControlMethod == 2) {
+      scene.output_scale = scene.controls_state.getLateralControlState().getLqrState().getOutput();
+    }
+    scene.angleSteersDes = scene.controls_state.getSteeringAngleDesiredDeg();
 
-// debug Message
-    std::string user_text1 = scene.controls_state.getAlertTextMsg1();
-    std::string user_text2 = scene.controls_state.getAlertTextMsg2();
-    const char* va_text1 = user_text1.c_str();
-    const char* va_text2 = user_text2.c_str();    
-    if (va_text1) snprintf(scene.alert.text1, sizeof(scene.alert.text1), "%s", va_text1);
-    else  scene.alert.text1[0] = '\0';
+    scene.alertTextMsg1 = scene.controls_state.getAlertTextMsg1(); //debug1
+    scene.alertTextMsg2 = scene.controls_state.getAlertTextMsg2(); //debug2
 
-    if (va_text2) snprintf(scene.alert.text2, sizeof(scene.alert.text2), "%s", va_text2);
-    else scene.alert.text2[0] = '\0';    
+    scene.limitSpeedCamera = scene.controls_state.getLimitSpeedCamera();
+    scene.limitSpeedCameraDist = scene.controls_state.getLimitSpeedCameraDist();
+    scene.steerRatio = scene.controls_state.getSteerRatio();
   }
   if (sm.updated("carState")) {
     scene.car_state = sm["carState"].getCarState();
+    auto data = sm["carState"].getCarState();
+    if(scene.leftBlinker!=data.getLeftBlinker() || scene.rightBlinker!=data.getRightBlinker()){
+      scene.blinker_blinkingrate = 120;
+    }
+    scene.brakePress = data.getBrakePressed();
+    scene.brakeLights = data.getBrakeLights();
+    scene.getGearShifter = data.getGearShifter();
+    scene.leftBlinker = data.getLeftBlinker();
+    scene.rightBlinker = data.getRightBlinker();
+    scene.leftblindspot = data.getLeftBlindspot();
+    scene.rightblindspot = data.getRightBlindspot();
+    scene.tpmsPressureFl = data.getTpmsPressureFl();
+    scene.tpmsPressureFr = data.getTpmsPressureFr();
+    scene.tpmsPressureRl = data.getTpmsPressureRl();
+    scene.tpmsPressureRr = data.getTpmsPressureRr();
+    scene.radarDistance = data.getRadarDistance();
+    scene.standStill = data.getStandStill();
+    scene.vSetDis = data.getVSetDis();
+    scene.cruiseAccStatus = data.getCruiseAccStatus();
+    scene.angleSteers = data.getSteeringAngleDeg();
+  }
 
-    auto cruiseState = scene.car_state.getCruiseState();
-    scene.scr.awake = cruiseState.getCruiseSwState();
+  if (sm.updated("liveParameters")) {
+    //scene.liveParams = sm["liveParameters"].getLiveParameters();
+    auto data = sm["liveParameters"].getLiveParameters();
+    scene.liveParams.angleOffset = data.getAngleOffsetDeg();
+    scene.liveParams.angleOffsetAverage = data.getAngleOffsetAverageDeg();
+    scene.liveParams.stiffnessFactor = data.getStiffnessFactor();
+    scene.liveParams.steerRatio = data.getSteerRatio();
   }
   if (sm.updated("radarState")) {
     std::optional<cereal::ModelDataV2::XYZTData::Reader> line;
@@ -191,12 +239,15 @@ static void update_sockets(UIState *s) {
     }
   }
   if (sm.updated("modelV2")) {
-    scene.modelDataV2 = sm["modelV2"].getModelV2();
-    update_model(s, scene.modelDataV2);
+    update_model(s, sm["modelV2"].getModelV2());
   }
-
   if (sm.updated("deviceState")) {
     scene.deviceState = sm["deviceState"].getDeviceState();
+    s->scene.cpuPerc = scene.deviceState.getCpuUsagePercent();
+    s->scene.cpuTemp = scene.deviceState.getCpuTempC()[0];
+    s->scene.fanSpeed = scene.deviceState.getFanSpeedPercentDesired();
+    auto data = sm["deviceState"].getDeviceState();
+    snprintf(scene.ipAddr, sizeof(scene.ipAddr), "%s", data.getIpAddr().cStr());
   }
   if (sm.updated("pandaState")) {
     auto pandaState = sm["pandaState"].getPandaState();
@@ -210,9 +261,10 @@ static void update_sockets(UIState *s) {
     if (data.which() == cereal::UbloxGnss::MEASUREMENT_REPORT) {
       scene.satelliteCount = data.getMeasurementReport().getNumMeas();
     }
-
-    scene.gpsLocationExternal = sm["gpsLocationExternal"].getGpsLocationExternal();
-  
+    auto data2 = sm["gpsLocationExternal"].getGpsLocationExternal();
+      scene.gpsAccuracyUblox = data2.getAccuracy();
+      scene.altitudeUblox = data2.getAltitude();
+      scene.bearingUblox = data2.getBearingDeg();
   }
   if (sm.updated("liveLocationKalman")) {
     scene.gpsOK = sm["liveLocationKalman"].getLiveLocationKalman().getGpsOK();
@@ -250,29 +302,27 @@ static void update_sockets(UIState *s) {
       }
     }
   }
-//#ifdef QCOM2
+#ifdef QCOM2
   if (sm.updated("roadCameraState")) {
-    scene.camera_state = sm["roadCameraState"].getRoadCameraState();
-    float gain = scene.camera_state.getGainFrac() * (scene.camera_state.getGlobalGain() > 100 ? 2.5 : 1.0) / 10.0;
-    scene.light_sensor = std::clamp<float>((1023.0 / 1757.0) * (1757.0 - scene.camera_state.getIntegLines()) * (1.0 - gain), 0.0, 1023.0);
+    auto camera_state = sm["roadCameraState"].getRoadCameraState();
+    float gain = camera_state.getGainFrac() * (camera_state.getGlobalGain() > 100 ? 2.5 : 1.0) / 10.0;
+    scene.light_sensor = std::clamp<float>((1023.0 / 1757.0) * (1757.0 - camera_state.getIntegLines()) * (1.0 - gain), 0.0, 1023.0);
   }
-//#endif
+#endif
   scene.started = scene.deviceState.getStarted() || scene.driver_view;
 
+  if (sm.updated("lateralPlan")) {
+    scene.lateral_plan = sm["lateralPlan"].getLateralPlan();
+    auto data = sm["lateralPlan"].getLateralPlan();
 
-   // atom
-   if (sm.updated("liveParameters")) 
-   { 
-    scene.liveParameters = sm["liveParameters"].getLiveParameters();
-   }
-   if (sm.updated("lateralPlan"))
-   {
-    scene.lateralPlan = sm["lateralPlan"].getLateralPlan();
-   } 
-   if (sm.updated("carControl"))
-   {
-    scene.carControl = sm["carControl"].getCarControl();
-   } 
+    scene.lateralPlan.laneWidth = data.getLaneWidth();
+    scene.lateralPlan.dProb = data.getDProb();
+    scene.lateralPlan.lProb = data.getLProb();
+    scene.lateralPlan.rProb = data.getRProb();
+    scene.lateralPlan.steerRateCost = data.getSteerRateCost();
+    scene.lateralPlan.standstillElapsedTime = data.getStandstillElapsedTime();
+    scene.lateralPlan.lanelessModeStatus = data.getLanelessMode();
+  }
 }
 
 static void update_alert(UIState *s) {
@@ -298,9 +348,11 @@ static void update_alert(UIState *s) {
     const uint64_t cs_frame = s->sm->rcv_frame("controlsState");
     if (cs_frame < scene.started_frame) {
       // car is started, but controlsState hasn't been seen at all
-      scene.alert_text1 = "openpilot Unavailable";
-      scene.alert_text2 = "Waiting for controls to start";
-      scene.alert_size = cereal::ControlsState::AlertSize::MID;
+      if( !s->is_OpenpilotViewEnabled ) {
+        scene.alert_text1 = "openpilot Unavailable";
+        scene.alert_text2 = "Waiting for controls to start";
+        scene.alert_size = cereal::ControlsState::AlertSize::MID;
+      }
     } else if ((s->sm->frame - cs_frame) > 5 * UI_FREQ) {
       // car is started, but controls is lagging or died
       if (scene.alert_text2 != "Controls Unresponsive") {
@@ -322,6 +374,11 @@ static void update_params(UIState *s) {
 
   if (frame % (5*UI_FREQ) == 0) {
     read_param(&scene.is_metric, "IsMetric");
+    read_param(&s->is_OpenpilotViewEnabled, "IsOpenpilotViewEnabled");
+    read_param(&s->nOpkrUIBrightness, "OpkrUIBrightness");
+    read_param(&s->nOpkrUIVolumeBoost, "OpkrUIVolumeBoost");
+    read_param(&s->lat_control, "LateralControlMethod");
+    read_param(&s->driving_record, "OpkrDrivingRecord");
     read_param(&scene.end_to_end, "EndToEndToggle");
   } else if (frame % (6*UI_FREQ) == 0) {
     scene.athenaStatus = NET_DISCONNECTED;
@@ -371,7 +428,6 @@ static void update_status(UIState *s) {
       s->scene.started_frame = s->sm->frame;
 
       read_param(&s->scene.is_rhd, "IsRHD");
-      read_param(&s->scene.end_to_end, "EndToEndToggle");
       s->sidebar_collapsed = true;
       s->scene.alert_size = cereal::ControlsState::AlertSize::NONE;
       s->vipc_client = s->scene.driver_view ? s->vipc_client_front : s->vipc_client_rear;
@@ -391,4 +447,5 @@ void ui_update(UIState *s) {
   update_status(s);
   update_alert(s);
   update_vision(s);
+  dashcam(s);
 }
