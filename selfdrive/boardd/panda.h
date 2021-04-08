@@ -33,7 +33,6 @@ struct __attribute__((packed)) health_t {
   uint8_t car_harness_status;
   uint8_t usb_power_mode;
   uint8_t safety_model;
-  int16_t safety_param;
   uint8_t fault_status;
   uint8_t power_save_enabled;
 };
@@ -45,7 +44,7 @@ class Panda {
  private:
   libusb_context *ctx = NULL;
   libusb_device_handle *dev_handle = NULL;
-  std::mutex usb_lock;
+  pthread_mutex_t usb_lock;
   void handle_usb_issue(int err, const char func[]);
   void cleanup();
 
@@ -53,8 +52,9 @@ class Panda {
   Panda();
   ~Panda();
 
-  std::atomic<bool> connected = true;
+  bool connected = true;
   cereal::PandaState::PandaType hw_type = cereal::PandaState::PandaType::UNKNOWN;
+  bool is_pigeon = false;
   bool has_rtc = false;
 
   // HW communication
@@ -66,7 +66,6 @@ class Panda {
   // Panda functionality
   cereal::PandaState::PandaType get_hw_type();
   void set_safety_model(cereal::CarParams::SafetyModel safety_model, int safety_param=0);
-  void set_unsafe_mode(uint16_t unsafe_mode);
   void set_rtc(struct tm sys_time);
   struct tm get_rtc();
   void set_fan_speed(uint16_t fan_speed);
@@ -74,11 +73,11 @@ class Panda {
   void set_ir_pwr(uint16_t ir_pwr);
   health_t get_state();
   void set_loopback(bool loopback);
-  std::optional<std::vector<uint8_t>> get_firmware_version();
-  std::optional<std::string> get_serial();
+  const char* get_firmware_version();
+  const char* get_serial();
   void set_power_saving(bool power_saving);
   void set_usb_power_mode(cereal::PandaState::UsbPowerMode power_mode);
   void send_heartbeat();
   void can_send(capnp::List<cereal::CanData>::Reader can_data_list);
-  int can_receive(kj::Array<capnp::word>& out_buf);
+  int can_receive(cereal::Event::Builder &event);
 };

@@ -22,10 +22,8 @@ void can_list_to_can_capnp_cpp(const std::vector<can_frame> &can_list, std::stri
     c.setDat(kj::arrayPtr((uint8_t*)it->dat.data(), it->dat.size()));
     c.setSrc(it->src);
   }
-  const uint64_t msg_size = capnp::computeSerializedSizeInWords(msg) * sizeof(capnp::word);
-  out.resize(msg_size);
-  kj::ArrayOutputStream output_stream(kj::ArrayPtr<capnp::byte>((unsigned char *)out.data(), msg_size));
-  capnp::writeMessage(output_stream, msg);
+  auto bytes = msg.toBytes();
+  out.append((const char *)bytes.begin(), bytes.size());
 }
 
 }
