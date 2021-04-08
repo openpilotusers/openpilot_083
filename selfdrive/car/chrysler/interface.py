@@ -82,7 +82,7 @@ class CarInterface(CarInterfaceBase):
 
   # pass in a car.CarControl
   # to be called @ 100hz
-  def apply(self, c, sm, CP):
+  def apply(self, c):
 
     if (self.CS.frame == -1):
       return []  # if we haven't seen a frame 220, then do not update.
