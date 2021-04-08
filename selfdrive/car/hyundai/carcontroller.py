@@ -1,4 +1,4 @@
-﻿import os
+import os
 from cereal import car, log
 from common.realtime import DT_CTRL
 from common.numpy_fast import clip
