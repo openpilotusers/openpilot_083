@@ -10,8 +10,6 @@ if [ "$ALIAS_CHECK" == "" ]; then
 fi
 
 if [ ! -f "/data/KRSet" ]; then
-    setprop persist.sys.locale ko-KR
-    setprop persist.sys.local ko-KR
     setprop persist.sys.timezone Asia/Seoul
     /usr/bin/touch /data/KRSet
 fi
