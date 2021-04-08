@@ -8,6 +8,7 @@
 #include <QHBoxLayout>
 #include <QMouseEvent>
 #include <QVBoxLayout>
+#include <QProcess>
 
 #include "common/util.h"
 #include "common/params.h"
@@ -57,9 +58,57 @@ void HomeWindow::mousePressEvent(QMouseEvent* e) {
 
   glWindow->wake();
 
-  // Settings button click
+  // Settings button double click
   if (!ui_state->sidebar_collapsed && settings_btn.ptInRect(e->x(), e->y())) {
-    emit openSettings();
+    ui_state->setbtn_count = ui_state->setbtn_count + 1;
+    if (ui_state->setbtn_count > 1) {
+      emit openSettings();
+    }
+    return;
+  }
+
+  // home button double click
+  if (!ui_state->sidebar_collapsed && ui_state->status == STATUS_OFFROAD && home_btn.ptInRect(e->x(), e->y())) {
+    ui_state->homebtn_count = ui_state->homebtn_count + 1;
+    if (ui_state->homebtn_count > 1) {
+      QProcess::execute("/data/openpilot/run_mixplorer.sh");
+    }
+    return;
+  }
+
+  // OPKR add map
+  if (ui_state->scene.started && map_overlay_btn.ptInRect(e->x(), e->y())) {
+    ui_state->sound->play(AudibleAlert::CHIME_WARNING1);
+    QProcess::execute("am start --activity-task-on-home com.opkr.maphack/com.opkr.maphack.MainActivity");
+    ui_state->scene.map_on_top = false;
+    return;
+  }
+  if (ui_state->scene.started && ui_state->sidebar_collapsed && !ui_state->scene.map_on_top && map_btn.ptInRect(e->x(), e->y())) {
+    ui_state->sound->play(AudibleAlert::CHIME_WARNING1);
+    QProcess::execute("am start --activity-task-on-home com.skt.tmap.ku/com.skt.tmap.activity.TmapNaviActivity");
+    ui_state->scene.map_on_top = true;
+    return;
+  }
+  // OPKR REC
+  if (ui_state->scene.started && ui_state->sidebar_collapsed && !ui_state->scene.map_on_top && rec_btn.ptInRect(e->x(), e->y())) {
+    ui_state->scene.recording = !ui_state->scene.recording;
+    ui_state->scene.touched = true;
+    return;
+  }
+  // Laneless mode
+  if (ui_state->scene.started && ui_state->sidebar_collapsed && !ui_state->scene.map_on_top && ui_state->scene.end_to_end && laneless_btn.ptInRect(e->x(), e->y())) {
+    ui_state->scene.laneless_mode = ui_state->scene.laneless_mode + 1;
+    if (ui_state->scene.laneless_mode > 2) {
+      ui_state->scene.laneless_mode = 0;
+    }
+    if (ui_state->scene.laneless_mode == 0) {
+      Params().write_db_value("LanelessMode", "0", 1);
+    } else if (ui_state->scene.laneless_mode == 1) {
+      Params().write_db_value("LanelessMode", "1", 1);
+    } else if (ui_state->scene.laneless_mode == 2) {
+      Params().write_db_value("LanelessMode", "2", 1);
+    }
+    return;
   }
 
   // Handle sidebar collapsing
@@ -67,12 +116,8 @@ void HomeWindow::mousePressEvent(QMouseEvent* e) {
     ui_state->sidebar_collapsed = !ui_state->sidebar_collapsed;
   }
 
-  
-  // atom  mouse
-  ui_state->scene.mouse.touch_x = e->x();
-  ui_state->scene.mouse.touch_y = e->y();
-  ui_state->scene.mouse.touched = e->button();
-  ui_state->scene.mouse.touch_cnt++;
+  ui_state->setbtn_count = 0;
+  ui_state->homebtn_count = 0;
 }
 
 
@@ -94,9 +139,9 @@ OffroadHome::OffroadHome(QWidget* parent) : QWidget(parent) {
   QObject::connect(alert_notification, SIGNAL(released()), this, SLOT(openAlerts()));
   header_layout->addWidget(alert_notification, 0, Qt::AlignHCenter | Qt::AlignRight);
 
-  std::string brand = Params().read_db_bool("Passive") ? "dashcam" : "openpilot";
+  std::string brand = Params().read_db_bool("Passive") ? "대시캠" : "오픈파일럿";
   QLabel* version = new QLabel(QString::fromStdString(brand + " v" + Params().get("Version")));
-  version->setStyleSheet(R"(font-size: 55px;)");
+  version->setStyleSheet(R"(font-size: 45px;)");
   header_layout->addWidget(version, 0, Qt::AlignHCenter | Qt::AlignRight);
 
   main_layout->addLayout(header_layout);
@@ -155,8 +200,8 @@ void OffroadHome::refresh() {
     return;
   }
 
-  date->setText(QDateTime::currentDateTime().toString("dddd, MMMM d"));
-
+  //QLocale locale(QLocale::Korean);
+  date->setText(QDateTime::currentDateTime().toString("yyyy년 M월 d일"));
   // update alerts
 
   alerts_widget->refresh();
@@ -167,10 +212,10 @@ void OffroadHome::refresh() {
   }
 
   if (alerts_widget->updateAvailable) {
-    alert_notification->setText("UPDATE");
+    alert_notification->setText("업데이트");
   } else {
     int alerts = alerts_widget->alerts.size();
-    alert_notification->setText(QString::number(alerts) + " ALERT" + (alerts == 1 ? "" : "S"));
+    alert_notification->setText(QString::number(alerts) + " 경고" + (alerts == 1 ? "" : "S"));
   }
 
   if (!alert_notification->isVisible() && !first_refresh) {
@@ -206,21 +251,6 @@ static void handle_display_state(UIState* s, bool user_input) {
   static float accel_prev = 0., gyro_prev = 0.;
 
   bool should_wake = s->scene.started || s->scene.ignition || user_input;
-
-  if( s->scene.scr.nTime > 0 )
-  {
-     s->scene.scr.nTime--;
-  }
-
-  if( user_input )
-  {
-     //printf("touched  user_input=%d  %d  %d\n", user_input, s->awake, should_wake);
-     s->scene.scr.nTime = s->scene.scr.autoScreenOff * 60 * 20;
-  }
-  else if( s->scene.scr.autoScreenOff && s->scene.scr.nTime == 0)
-  {
-    should_wake = false;
-  }  
   if (!should_wake) {
     // tap detection while display is off
     bool accel_trigger = abs(s->scene.accel_sensor - accel_prev) > 0.2;
@@ -238,10 +268,8 @@ static void handle_display_state(UIState* s, bool user_input) {
 
   // handle state transition
   if (s->awake != should_wake) {
-    printf("setting  user_input=%d  %d  %d\n", user_input, s->awake, should_wake);
     s->awake = should_wake;
-
-    //Hardware::set_display_power(s->awake);
+    Hardware::set_display_power(s->awake);
     LOGD("setting display power %d", s->awake);
   }
 }
@@ -295,16 +323,25 @@ void GLWindow::backlightUpdate() {
     clipped_brightness = BACKLIGHT_OFFROAD;
   }
 
-  smooth_brightness = clipped_brightness * k + smooth_brightness * (1.0f - k);
+  // set brightness
+  if (ui_state.nOpkrAutoScreenDimming && ui_state.scene.ignition && ui_state.sidebar_collapsed) {
+    if (ui_state.scene.alert_text1 != "" || ui_state.scene.alert_text2 != "" || ui_state.scene.leftBlinker || ui_state.scene.rightBlinker) {
+      smooth_brightness = 80;
+    } else {
+      smooth_brightness = 5;
+    }
+  } else {
+    if (ui_state.nOpkrUIBrightness == 0) {
+      smooth_brightness = clipped_brightness * k + smooth_brightness * (1.0f - k);
+    } else {
+      smooth_brightness = 100 * ui_state.nOpkrUIBrightness * 0.01;
+    }
+  }
 
   int brightness = smooth_brightness;
   if (!ui_state.awake) {
     brightness = 0;
     emit screen_shutoff();
-  }
-  else if( ui_state.scene.scr.brightness )
-  {
-    brightness = 255 * (ui_state.scene.scr.brightness * 0.01);
   }
 
   if (brightness != last_brightness) {
@@ -330,9 +367,16 @@ void GLWindow::timerUpdate() {
 
   handle_display_state(&ui_state, false);
 
-  // scale volume with speed
-  sound.volume = util::map_val(ui_state.scene.car_state.getVEgo(), 0.f, 20.f,
+  // scale volume with speed, max 1.0 min 0.5
+  if (ui_state.nOpkrUIVolumeBoost > 0) {
+    sound.volume = ui_state.nOpkrUIVolumeBoost * 0.01;
+  } else if (ui_state.nOpkrUIVolumeBoost < 0) {
+    sound.volume = util::map_val(ui_state.scene.car_state.getVEgo(), 0.f, 20.f,
+                               Hardware::MUTE, Hardware::MUTE);
+  } else {
+    sound.volume = util::map_val(ui_state.scene.car_state.getVEgo(), 0.f, 20.f,
                                Hardware::MIN_VOLUME, Hardware::MAX_VOLUME);
+  }
 
   ui_update(&ui_state);
   repaint();
@@ -355,35 +399,8 @@ void GLWindow::paintGL() {
     }
     prev_draw_t = cur_draw_t;
   }
-
-   ScreenAwake();
 }
 
 void GLWindow::wake() {
   handle_display_state(&ui_state, true);
-}
-
-
-
-void GLWindow::ScreenAwake() 
-{
-  const bool draw_alerts = ui_state.scene.started;
-  //const bool draw_vision = draw_alerts && ui_state.vipc_client->connected;
-
-  
-  int  cur_key = ui_state.scene.scr.awake;
-
-  if (draw_alerts && ui_state.scene.alert_size != cereal::ControlsState::AlertSize::NONE) 
-  {
-      cur_key += 1;
-  }
-
-
-  static int old_key;
-  if( cur_key != old_key )
-  {
-    old_key = cur_key;
-    if(cur_key)
-        GLWindow::wake();
-  }     
 }

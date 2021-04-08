@@ -1,4 +1,4 @@
-#include <QFile>
+﻿#include <QFile>
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -29,11 +29,11 @@ OffroadAlert::OffroadAlert(QWidget* parent) : QFrame(parent) {
   QHBoxLayout *footer_layout = new QHBoxLayout();
   main_layout->addLayout(footer_layout);
 
-  QPushButton *dismiss_btn = new QPushButton("Dismiss");
+  QPushButton *dismiss_btn = new QPushButton("해제");
   dismiss_btn->setFixedSize(400, 125);
   footer_layout->addWidget(dismiss_btn, 0, Qt::AlignLeft);
 
-  reboot_btn = new QPushButton("Reboot and Update");
+  reboot_btn = new QPushButton("업데이트 및 재시작");
   reboot_btn->setFixedSize(600, 125);
   reboot_btn->setVisible(false);
   footer_layout->addWidget(reboot_btn, 0, Qt::AlignRight);

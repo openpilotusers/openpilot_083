@@ -34,7 +34,7 @@ QWidget* layoutToWidget(QLayout* l, QWidget* parent){
 Networking::Networking(QWidget* parent, bool show_advanced) : QWidget(parent), show_advanced(show_advanced){
   s = new QStackedLayout;
 
-  QLabel* warning = new QLabel("Network manager is inactive!");
+  QLabel* warning = new QLabel("네트워크 관리자 비활성화됨!");
   warning->setAlignment(Qt::AlignCenter);
   warning->setStyleSheet(R"(font-size: 65px;)");
 
@@ -60,7 +60,7 @@ void Networking::attemptInitialization(){
   QVBoxLayout* vlayout = new QVBoxLayout;
 
   if (show_advanced) {
-    QPushButton* advancedSettings = new QPushButton("Advanced");
+    QPushButton* advancedSettings = new QPushButton("추가옵션");
     advancedSettings->setStyleSheet(R"(margin-right: 30px)");
     advancedSettings->setFixedSize(350, 100);
     connect(advancedSettings, &QPushButton::released, [=](){s->setCurrentWidget(an);});
@@ -117,7 +117,7 @@ void Networking::connectToNetwork(Network n) {
   if (n.security_type == SecurityType::OPEN) {
     wifi->connect(n);
   } else if (n.security_type == SecurityType::WPA) {
-    QString pass = InputDialog::getText("Enter password for \"" + n.ssid + "\"", 8);
+    QString pass = InputDialog::getText(n.ssid + "의 패스워드를 입력하세요", 8);
     wifi->connect(n, pass);
   }
 }
@@ -125,7 +125,7 @@ void Networking::connectToNetwork(Network n) {
 void Networking::wrongPassword(QString ssid) {
   for (Network n : wifi->seen_networks) {
     if (n.ssid == ssid) {
-      QString pass = InputDialog::getText("Wrong password for \"" + n.ssid +"\"", 8);
+      QString pass = InputDialog::getText(n.ssid + " 잘못된 패스워드 입니다", 8);
       wifi->connect(n, pass);
       return;
     }
@@ -140,14 +140,14 @@ AdvancedNetworking::AdvancedNetworking(QWidget* parent, WifiManager* wifi): QWid
   vlayout->setMargin(40);
 
   // Back button
-  QPushButton* back = new QPushButton("Back");
+  QPushButton* back = new QPushButton("뒤로가기");
   back->setFixedSize(500, 100);
   connect(back, &QPushButton::released, [=](){emit backPress();});
   vlayout->addWidget(back, 0, Qt::AlignLeft);
 
   // Enable tethering layout
   QHBoxLayout* tetheringToggleLayout = new QHBoxLayout;
-  tetheringToggleLayout->addWidget(new QLabel("Enable tethering"));
+  tetheringToggleLayout->addWidget(new QLabel("테더링 활성화"));
   Toggle* toggle_switch = new Toggle;
   toggle_switch->setFixedSize(150, 100);
   tetheringToggleLayout->addWidget(toggle_switch);
@@ -161,11 +161,11 @@ AdvancedNetworking::AdvancedNetworking(QWidget* parent, WifiManager* wifi): QWid
 
   // Change tethering password
   QHBoxLayout *tetheringPassword = new QHBoxLayout;
-  tetheringPassword->addWidget(new QLabel("Edit tethering password"), 1);
-  editPasswordButton = new QPushButton("EDIT");
+  tetheringPassword->addWidget(new QLabel("테더링 패스워드"), 1);
+  editPasswordButton = new QPushButton("변경");
   editPasswordButton->setFixedWidth(500);
   connect(editPasswordButton, &QPushButton::released, [=](){
-    QString pass = InputDialog::getText("Enter new tethering password", 8);
+    QString pass = InputDialog::getText("새로운 테더링 패스워드를 입력하세요", 8);
     if (pass.size()) {
       wifi->changeTetheringPassword(pass);
     }
@@ -176,7 +176,7 @@ AdvancedNetworking::AdvancedNetworking(QWidget* parent, WifiManager* wifi): QWid
 
   // IP adress
   QHBoxLayout* IPlayout = new QHBoxLayout;
-  IPlayout->addWidget(new QLabel("IP address"), 0);
+  IPlayout->addWidget(new QLabel("IP 주소"), 0);
   ipLabel = new QLabel(wifi->ipv4_address);
   ipLabel->setStyleSheet("color: #aaaaaa");
   IPlayout->addWidget(ipLabel, 0, Qt::AlignRight);
@@ -212,7 +212,7 @@ WifiUI::WifiUI(QWidget *parent, WifiManager* wifi) : QWidget(parent), wifi(wifi)
   vlayout = new QVBoxLayout;
 
   // Scan on startup
-  QLabel *scanning = new QLabel("Scanning for networks");
+  QLabel *scanning = new QLabel("네트워크 검색 중");
   scanning->setStyleSheet(R"(font-size: 65px;)");
   vlayout->addWidget(scanning, 0, Qt::AlignCenter);
   vlayout->setSpacing(25);
@@ -261,7 +261,7 @@ void WifiUI::refresh() {
       hlayout->addWidget(icon, 0, Qt::AlignRight);
 
       // connect button
-      QPushButton* btn = new QPushButton(network.security_type == SecurityType::UNSUPPORTED ? "Unsupported" : (network.connected == ConnectedType::CONNECTED ? "Connected" : (network.connected == ConnectedType::CONNECTING ? "Connecting" : "Connect")));
+      QPushButton* btn = new QPushButton(network.security_type == SecurityType::UNSUPPORTED ? "지원되지 않음" : (network.connected == ConnectedType::CONNECTED ? "연결됨" : (network.connected == ConnectedType::CONNECTING ? "연결중" : "연결")));
       btn->setDisabled(network.connected == ConnectedType::CONNECTED || network.connected == ConnectedType::CONNECTING || network.security_type == SecurityType::UNSUPPORTED);
       btn->setFixedWidth(350);
       hlayout->addWidget(btn, 0, Qt::AlignRight);
@@ -282,12 +282,12 @@ void WifiUI::refresh() {
   // Setup buttons for pagination
   QHBoxLayout *prev_next_buttons = new QHBoxLayout;
 
-  QPushButton* prev = new QPushButton("Previous");
+  QPushButton* prev = new QPushButton("이전");
   prev->setEnabled(page);
   QObject::connect(prev, SIGNAL(released()), this, SLOT(prevPage()));
   prev_next_buttons->addWidget(prev);
 
-  QPushButton* next = new QPushButton("Next");
+  QPushButton* next = new QPushButton("다음");
   next->setEnabled(wifi->seen_networks.size() > (page + 1) * networks_per_page);
   QObject::connect(next, SIGNAL(released()), this, SLOT(nextPage()));
   prev_next_buttons->addWidget(next);
