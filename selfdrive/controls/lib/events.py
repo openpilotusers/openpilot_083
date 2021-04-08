@@ -1,4 +1,4 @@
-from enum import IntEnum
+ï»¿from enum import IntEnum
 from typing import Dict, Union, Callable, Any
 
 from cereal import log, car
@@ -141,21 +141,21 @@ class Alert:
 class NoEntryAlert(Alert):
   def __init__(self, alert_text_2, audible_alert=AudibleAlert.chimeError,
                visual_alert=VisualAlert.none, duration_hud_alert=2.):
-    super().__init__("¿ÀÇÂÆÄÀÏ·µ »ç¿ëºÒ°¡", alert_text_2, AlertStatus.normal,
+    super().__init__("ì˜¤í”ˆíŒŒì¼ëŸ¿ ì‚¬ìš©ë¶ˆê°€", alert_text_2, AlertStatus.normal,
                      AlertSize.mid, Priority.LOW, visual_alert,
                      audible_alert, .4, duration_hud_alert, 3.)
 
 
 class SoftDisableAlert(Alert):
   def __init__(self, alert_text_2):
-    super().__init__("ÇÚµéÀ» Àâ¾ÆÁÖ¼¼¿ä", alert_text_2,
+    super().__init__("í•¸ë“¤ì„ ì¡ì•„ì£¼ì„¸ìš”", alert_text_2,
                      AlertStatus.critical, AlertSize.full,
                      Priority.MID, VisualAlert.steerRequired,
                      AudibleAlert.chimeError, .1, 2., 2.),
 
 
 class ImmediateDisableAlert(Alert):
-  def __init__(self, alert_text_2, alert_text_1="ÇÚµéÀ» Àâ¾ÆÁÖ¼¼¿ä"):
+  def __init__(self, alert_text_2, alert_text_1="í•¸ë“¤ì„ ì¡ì•„ì£¼ì„¸ìš”"):
     super().__init__(alert_text_1, alert_text_2,
                      AlertStatus.critical, AlertSize.full,
                      Priority.HIGHEST, VisualAlert.steerRequired,
@@ -180,8 +180,8 @@ def below_steer_speed_alert(CP: car.CarParams, sm: messaging.SubMaster, metric: 
   speed = int(round(CP.minSteerSpeed * (CV.MS_TO_KPH if metric else CV.MS_TO_MPH)))
   unit = "km/h" if metric else "mph"
   return Alert(
-    "ÇÚµéÀ» Àâ¾ÆÁÖ¼¼¿ä",
-    "%d %s ÀÌÇÏ¿¡¼­´Â Á¶ÇâÁ¦¾î°¡ ºÒ°¡ÇÕ´Ï´Ù" % (speed, unit),
+    "í•¸ë“¤ì„ ì¡ì•„ì£¼ì„¸ìš”",
+    "%d %s ì´í•˜ì—ì„œëŠ” ì¡°í–¥ì œì–´ê°€ ë¶ˆê°€í•©ë‹ˆë‹¤" % (speed, unit),
     AlertStatus.userPrompt, AlertSize.mid,
     Priority.MID, VisualAlert.none, AudibleAlert.none, 0., 0.4, .3)
 
@@ -189,21 +189,21 @@ def calibration_incomplete_alert(CP: car.CarParams, sm: messaging.SubMaster, met
   speed = int(MIN_SPEED_FILTER * (CV.MS_TO_KPH if metric else CV.MS_TO_MPH))
   unit = "km/h" if metric else "mph"
   return Alert(
-    "Ä¶¸®ºê·¹ÀÌ¼Ç ÁøÇàÁß: %d%%" % sm['liveCalibration'].calPerc,
-    "%d %s ÀÌ»óÀÇ ¼Óµµ·Î ÁÖÇàÇÏ¼¼¿ä" % (speed, unit),
+    "ìº˜ë¦¬ë¸Œë ˆì´ì…˜ ì§„í–‰ì¤‘: %d%%" % sm['liveCalibration'].calPerc,
+    "%d %s ì´ìƒì˜ ì†ë„ë¡œ ì£¼í–‰í•˜ì„¸ìš”" % (speed, unit),
     AlertStatus.normal, AlertSize.mid,
     Priority.LOWEST, VisualAlert.none, AudibleAlert.none, 0., 0., .2)
 
 def no_gps_alert(CP: car.CarParams, sm: messaging.SubMaster, metric: bool) -> Alert:
   gps_integrated = sm['pandaState'].pandaType in [log.PandaState.PandaType.uno, log.PandaState.PandaType.dos]
   return Alert(
-    "GPS ½ÅÈ£ ¾àÇÔ",
-    "È¯°æ¿¡ ¹®Á¦°¡ ¾øÀ»°æ¿ì ¼­ºñ½ºÆÀ¿¡ ¿¬¶ôÇÏ¼¼¿ä" if gps_integrated else "GPS¾ÈÅ×³ª À§Ä¡¸¦ Á¡°ËÇÏ¼¼¿ä",
+    "GPS ì‹ í˜¸ ì•½í•¨",
+    "í™˜ê²½ì— ë¬¸ì œê°€ ì—†ì„ê²½ìš° ì„œë¹„ìŠ¤íŒ€ì— ì—°ë½í•˜ì„¸ìš”" if gps_integrated else "GPSì•ˆí…Œë‚˜ ìœ„ì¹˜ë¥¼ ì ê²€í•˜ì„¸ìš”",
     AlertStatus.normal, AlertSize.mid,
     Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2, creation_delay=300.)
 
 def wrong_car_mode_alert(CP: car.CarParams, sm: messaging.SubMaster, metric: bool) -> Alert:
-  text = "Å©·çÁî ¸ğµå ²¨Áü"
+  text = "í¬ë£¨ì¦ˆ ëª¨ë“œ êº¼ì§"
   if CP.carName == "honda":
     text = "Main Switch Off"
   return NoEntryAlert(text, duration_hud_alert=0.)
@@ -215,13 +215,13 @@ def standstill_alert(CP, sm, metric):
 
   if elapsed_time_min == 0:
     return Alert(
-      "Àá½Ã ¸ØÃã (°æ°ú½Ã°£: %02dÃÊ)" % (elapsed_time_sec),
+      "ì ì‹œ ë©ˆì¶¤ (ê²½ê³¼ì‹œê°„: %02dì´ˆ)" % (elapsed_time_sec),
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.5)
   else:
     return Alert(
-      "Àá½Ã ¸ØÃã (°æ°ú½Ã°£: %dºĞ %02dÃÊ)" % (elapsed_time_min, elapsed_time_sec),
+      "ì ì‹œ ë©ˆì¶¤ (ê²½ê³¼ì‹œê°„: %dë¶„ %02dì´ˆ)" % (elapsed_time_min, elapsed_time_sec),
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.5)
@@ -241,39 +241,39 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
 
   EventName.startup: {
     ET.PERMANENT: Alert(
-      "¿ÀÇÂÆÄÀÏ·µ »ç¿ëÁØºñ°¡ µÇ¾ú½À´Ï´Ù",
-      "¾ÈÀü¿îÀüÀ» À§ÇØ Ç×»ó ÇÚµéÀ» Àâ°í µµ·Î±³Åë »óÈ²À» ÁÖ½ÃÇÏ¼¼¿ä",
+      "ì˜¤í”ˆíŒŒì¼ëŸ¿ ì‚¬ìš©ì¤€ë¹„ê°€ ë˜ì—ˆìŠµë‹ˆë‹¤",
+      "ì•ˆì „ìš´ì „ì„ ìœ„í•´ í•­ìƒ í•¸ë“¤ì„ ì¡ê³  ë„ë¡œêµí†µ ìƒí™©ì„ ì£¼ì‹œí•˜ì„¸ìš”",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 5.),
   },
 
   EventName.startupMaster: {
     ET.PERMANENT: Alert(
-      "°æ°í: ÀÌ Branch´Â Å×½ºÆ®µÇÁö ¾Ê¾Ò½À´Ï´Ù",
-      "¾ÈÀü¿îÀüÀ» À§ÇØ Ç×»ó ÇÚµéÀ» Àâ°í µµ·Î±³Åë »óÈ²À» ÁÖ½ÃÇÏ¼¼¿ä",
+      "ê²½ê³ : ì´ BranchëŠ” í…ŒìŠ¤íŠ¸ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤",
+      "ì•ˆì „ìš´ì „ì„ ìœ„í•´ í•­ìƒ í•¸ë“¤ì„ ì¡ê³  ë„ë¡œêµí†µ ìƒí™©ì„ ì£¼ì‹œí•˜ì„¸ìš”",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 5.),
   },
 
   EventName.startupNoControl: {
     ET.PERMANENT: Alert(
-      "´ë½ÃÄ· ¸ğµå",
-      "¾ÈÀü¿îÀüÀ» À§ÇØ Ç×»ó ÇÚµéÀ» Àâ°í µµ·Î±³Åë »óÈ²À» ÁÖ½ÃÇÏ¼¼¿ä",
+      "ëŒ€ì‹œìº  ëª¨ë“œ",
+      "ì•ˆì „ìš´ì „ì„ ìœ„í•´ í•­ìƒ í•¸ë“¤ì„ ì¡ê³  ë„ë¡œêµí†µ ìƒí™©ì„ ì£¼ì‹œí•˜ì„¸ìš”",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 5.),
   },
 
   EventName.startupNoCar: {
     ET.PERMANENT: Alert(
-      "´ë½ÃÄ· ¸ğµå: Áö¿øµÇÁö ¾Ê´Â Â÷·®",
-      "¾ÈÀü¿îÀüÀ» À§ÇØ Ç×»ó ÇÚµéÀ» Àâ°í µµ·Î±³Åë »óÈ²À» ÁÖ½ÃÇÏ¼¼¿ä",
+      "ëŒ€ì‹œìº  ëª¨ë“œ: ì§€ì›ë˜ì§€ ì•ŠëŠ” ì°¨ëŸ‰",
+      "ì•ˆì „ìš´ì „ì„ ìœ„í•´ í•­ìƒ í•¸ë“¤ì„ ì¡ê³  ë„ë¡œêµí†µ ìƒí™©ì„ ì£¼ì‹œí•˜ì„¸ìš”",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 5.),
   },
 
   EventName.dashcamMode: {
     ET.PERMANENT: Alert(
-      "´ë½ÃÄ· ¸ğµå",
+      "ëŒ€ì‹œìº  ëª¨ë“œ",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOWEST, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
@@ -281,8 +281,8 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
 
   EventName.invalidLkasSetting: {
     ET.PERMANENT: Alert(
-      "Â÷·®ÀÇ LKAS ±â´ÉÀÌ ÄÑÁ® ÀÖ½À´Ï´Ù",
-      "¿ÀÇÂÆÄÀÏ·µ »ç¿ëÀ» À§ÇØ LKAS¸¦ ²ô¼¼¿ä",
+      "ì°¨ëŸ‰ì˜ LKAS ê¸°ëŠ¥ì´ ì¼œì ¸ ìˆìŠµë‹ˆë‹¤",
+      "ì˜¤í”ˆíŒŒì¼ëŸ¿ ì‚¬ìš©ì„ ìœ„í•´ LKASë¥¼ ë„ì„¸ìš”",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
   },
@@ -290,48 +290,48 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   EventName.communityFeatureDisallowed: {
     # LOW priority to overcome Cruise Error
     ET.PERMANENT: Alert(
-      "Ä¿¹Â´ÏÆ¼ ±â´É °¨ÁöµÊ",
-      "°³¹ßÀÚ ¼³Á¤¿¡¼­ Ä¿¹Â´ÏÆ¼ ±â´ÉÀ» È°¼ºÈ­ÇÏ¼¼¿ä",
+      "ì»¤ë®¤ë‹ˆí‹° ê¸°ëŠ¥ ê°ì§€ë¨",
+      "ê°œë°œì ì„¤ì •ì—ì„œ ì»¤ë®¤ë‹ˆí‹° ê¸°ëŠ¥ì„ í™œì„±í™”í•˜ì„¸ìš”",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
   },
 
   EventName.carUnrecognized: {
     ET.PERMANENT: Alert(
-      "´ë½ÃÄ· ¸ğµå",
-      "¹ÌÀÎ½Ä Â÷·®",
+      "ëŒ€ì‹œìº  ëª¨ë“œ",
+      "ë¯¸ì¸ì‹ ì°¨ëŸ‰",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWEST, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
   },
 
   EventName.stockAeb: {
     ET.PERMANENT: Alert(
-      "ºê·¹ÀÌÅ©!",
-      "¼øÁ¤ AEB: Ãæµ¹ À§Çè",
+      "ë¸Œë ˆì´í¬!",
+      "ìˆœì • AEB: ì¶©ëŒ ìœ„í—˜",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGHEST, VisualAlert.fcw, AudibleAlert.none, 1., 2., 2.),
   },
 
   EventName.stockFcw: {
     ET.PERMANENT: Alert(
-      "ºê·¹ÀÌÅ©!",
-      "¼øÁ¤ FCW: Ãæµ¹ À§Çè",
+      "ë¸Œë ˆì´í¬!",
+      "ìˆœì • FCW: ì¶©ëŒ ìœ„í—˜",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGHEST, VisualAlert.fcw, AudibleAlert.none, 1., 2., 2.),
   },
 
   EventName.fcw: {
     ET.PERMANENT: Alert(
-      "ºê·¹ÀÌÅ©!",
-      "Ãæµ¹ À§Çè",
+      "ë¸Œë ˆì´í¬!",
+      "ì¶©ëŒ ìœ„í—˜",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGHEST, VisualAlert.fcw, AudibleAlert.chimeWarningRepeat, 1., 2., 2.),
   },
 
   EventName.ldw: {
     ET.PERMANENT: Alert(
-      "ÇÚµéÀ» Àâ¾ÆÁÖ¼¼¿ä",
-      "Â÷¼±ÀÌÅ»ÀÌ °¨ÁöµÇ¾ú½À´Ï´Ù",
+      "í•¸ë“¤ì„ ì¡ì•„ì£¼ì„¸ìš”",
+      "ì°¨ì„ ì´íƒˆì´ ê°ì§€ë˜ì—ˆìŠµë‹ˆë‹¤",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimePrompt, 1., 2., 3.),
   },
@@ -340,16 +340,16 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
 
   EventName.gasPressed: {
     ET.PRE_ENABLE: Alert(
-      "°¡¼ÓÁß¿¡´Â ¿ÀÇÂÆÄÀÏ·µ ºê·¹ÀÌÅ© ÀÛµ¿ºÒ°¡",
+      "ê°€ì†ì¤‘ì—ëŠ” ì˜¤í”ˆíŒŒì¼ëŸ¿ ë¸Œë ˆì´í¬ ì‘ë™ë¶ˆê°€",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOWEST, VisualAlert.none, AudibleAlert.none, .0, .0, .1, creation_delay=1.),
   },
 
   EventName.vehicleModelInvalid: {
-    ET.NO_ENTRY: NoEntryAlert("Â÷·® ¸Å°³ º¯¼ö ½Äº° ½ÇÆĞ"),
+    ET.NO_ENTRY: NoEntryAlert("ì°¨ëŸ‰ ë§¤ê°œ ë³€ìˆ˜ ì‹ë³„ ì‹¤íŒ¨"),
     ET.WARNING: Alert(
-      "Â÷·® ¸Å°³ º¯¼ö ½Äº° ½ÇÆĞ",
+      "ì°¨ëŸ‰ ë§¤ê°œ ë³€ìˆ˜ ì‹ë³„ ì‹¤íŒ¨",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOWEST, VisualAlert.none, AudibleAlert.none, .0, .0, .1),
@@ -357,15 +357,15 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
 
   EventName.steerTempUnavailableMute: {
     ET.WARNING: Alert(
-      "ÇÚµéÀ» Àâ¾ÆÁÖ¼¼¿ä",
-      "Á¶ÇâÁ¦¾î°¡ ÀÏ½ÃÀûÀ¸·Î ºñÈ°¼ºÈ­ µÇ¾ú½À´Ï´Ù",
+      "í•¸ë“¤ì„ ì¡ì•„ì£¼ì„¸ìš”",
+      "ì¡°í–¥ì œì–´ê°€ ì¼ì‹œì ìœ¼ë¡œ ë¹„í™œì„±í™” ë˜ì—ˆìŠµë‹ˆë‹¤",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .2, .2, .2),
   },
 
   EventName.preDriverDistracted: {
     ET.WARNING: Alert(
-      "µµ·Î»óÈ²¿¡ ÁÖÀÇ¸¦ ±â¿ïÀÌ¼¼¿ä",
+      "ë„ë¡œìƒí™©ì— ì£¼ì˜ë¥¼ ê¸°ìš¸ì´ì„¸ìš”",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.75),
@@ -373,23 +373,23 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
 
   EventName.promptDriverDistracted: {
     ET.WARNING: Alert(
-      "µµ·Î»óÈ²¿¡ ÁÖÀÇÇÏ¼¼¿ä",
-      "Àü¹æÁÖ½Ã ÇÊ¿ä",
+      "ë„ë¡œìƒí™©ì— ì£¼ì˜í•˜ì„¸ìš”",
+      "ì „ë°©ì£¼ì‹œ í•„ìš”",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarning2Repeat, .1, .1, .1),
   },
 
   EventName.driverDistracted: {
     ET.WARNING: Alert(
-      "°æ°í: Á¶ÇâÁ¦¾î°¡ Áï½Ã ÇØÁ¦µË´Ï´Ù",
-      "¿îÀüÀÚ Àü¹æÁÖ½Ã ºÒ¾È",
+      "ê²½ê³ : ì¡°í–¥ì œì–´ê°€ ì¦‰ì‹œ í•´ì œë©ë‹ˆë‹¤",
+      "ìš´ì „ì ì „ë°©ì£¼ì‹œ ë¶ˆì•ˆ",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGH, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, .1, .1, .1),
   },
 
   EventName.preDriverUnresponsive: {
     ET.WARNING: Alert(
-      "ÇÚµéÀ» ÅÍÄ¡ÇÏ¼¼¿ä: ¸ğ´ÏÅÍ¸µ ¾øÀ½",
+      "í•¸ë“¤ì„ í„°ì¹˜í•˜ì„¸ìš”: ëª¨ë‹ˆí„°ë§ ì—†ìŒ",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.75),
@@ -397,40 +397,40 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
 
   EventName.promptDriverUnresponsive: {
     ET.WARNING: Alert(
-      "ÇÚµéÀ» ÅÍÄ¡ÇÏ¼¼¿ä",
-      "¿îÀüÀÚ ¸ğ´ÏÅÍ¸µ ¾øÀ½",
+      "í•¸ë“¤ì„ í„°ì¹˜í•˜ì„¸ìš”",
+      "ìš´ì „ì ëª¨ë‹ˆí„°ë§ ì—†ìŒ",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.MID, VisualAlert.none, AudibleAlert.none, .1, .1, .1),
   },
 
   EventName.driverUnresponsive: {
     ET.WARNING: Alert(
-      "°æ°í: Á¶ÇâÁ¦¾î°¡ Áï½Ã ÇØÁ¦µË´Ï´Ù",
-      "¿îÀüÀÚ ¸ğ´ÏÅÍ¸µ ¾øÀ½",
+      "ê²½ê³ : ì¡°í–¥ì œì–´ê°€ ì¦‰ì‹œ í•´ì œë©ë‹ˆë‹¤",
+      "ìš´ì „ì ëª¨ë‹ˆí„°ë§ ì—†ìŒ",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGH, VisualAlert.none, AudibleAlert.none, .1, .1, .1),
   },
 
   EventName.driverMonitorLowAcc: {
     ET.WARNING: Alert(
-      "¿îÀüÀÚ ¾ó±¼ È®ÀÎ Áß",
-      "¿îÀüÀÚ ¾ó±¼ ÀÎ½ÄÀÌ ¿øÇÒÇÏÁö ¾Ê½À´Ï´Ù",
+      "ìš´ì „ì ì–¼êµ´ í™•ì¸ ì¤‘",
+      "ìš´ì „ì ì–¼êµ´ ì¸ì‹ì´ ì›í• í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .4, 0., 1.5),
   },
 
   EventName.manualRestart: {
     ET.WARNING: Alert(
-      "ÇÚµéÀ» Àâ¾ÆÁÖ¼¼¿ä",
-      "¼öµ¿À¸·Î ÀçÃâ¹ß ÇÏ¼¼¿ä",
+      "í•¸ë“¤ì„ ì¡ì•„ì£¼ì„¸ìš”",
+      "ìˆ˜ë™ìœ¼ë¡œ ì¬ì¶œë°œ í•˜ì„¸ìš”",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
   },
 
   EventName.resumeRequired: {
     ET.WARNING: Alert(
-      "Àá½Ã¸ØÃã",
-      "ÀçÃâ¹ßÀ» À§ÇØ RES¹öÆ°À» ´©¸£¼¼¿ä",
+      "ì ì‹œë©ˆì¶¤",
+      "ì¬ì¶œë°œì„ ìœ„í•´ RESë²„íŠ¼ì„ ëˆ„ë¥´ì„¸ìš”",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
   },
@@ -441,47 +441,47 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
 
   EventName.preLaneChangeLeft: {
     ET.WARNING: Alert(
-      "Â÷¼± º¯°æÀ» À§ÇØ ÇÚµéÀ» ÁÂÃøÀ¸·Î »ìÂ¦ µ¹¸®¼¼¿ä",
-      "´Ù¸¥ Â÷·®¿¡ ÁÖÀÇÇÏ¼¼¿ä",
+      "ì°¨ì„  ë³€ê²½ì„ ìœ„í•´ í•¸ë“¤ì„ ì¢Œì¸¡ìœ¼ë¡œ ì‚´ì§ ëŒë¦¬ì„¸ìš”",
+      "ë‹¤ë¥¸ ì°¨ëŸ‰ì— ì£¼ì˜í•˜ì„¸ìš”",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.75),
   },
 
   EventName.preLaneChangeRight: {
     ET.WARNING: Alert(
-      "Â÷¼± º¯°æÀ» À§ÇØ ÇÚµéÀ» ¿ìÃøÀ¸·Î »ìÂ¦ µ¹¸®¼¼¿ä",
-      "´Ù¸¥ Â÷·®¿¡ ÁÖÀÇÇÏ¼¼¿ä",
+      "ì°¨ì„  ë³€ê²½ì„ ìœ„í•´ í•¸ë“¤ì„ ìš°ì¸¡ìœ¼ë¡œ ì‚´ì§ ëŒë¦¬ì„¸ìš”",
+      "ë‹¤ë¥¸ ì°¨ëŸ‰ì— ì£¼ì˜í•˜ì„¸ìš”",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.75),
   },
 
   EventName.laneChangeBlocked: {
     ET.WARNING: Alert(
-      "Ãø¸é Â÷·® Á¢±Ù Áß",
-      "´Ù¸¥ Â÷·®¿¡ ÁÖÀÇÇÏ¼¼¿ä",
+      "ì¸¡ë©´ ì°¨ëŸ‰ ì ‘ê·¼ ì¤‘",
+      "ë‹¤ë¥¸ ì°¨ëŸ‰ì— ì£¼ì˜í•˜ì„¸ìš”",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.none, .0, .1, .1),
   },
 
   EventName.laneChange: {
     ET.WARNING: Alert(
-      "Â÷¼± º¯°æ Áß",
-      "´Ù¸¥ Â÷·®¿¡ ÁÖÀÇÇÏ¼¼¿ä",
+      "ì°¨ì„  ë³€ê²½ ì¤‘",
+      "ë‹¤ë¥¸ ì°¨ëŸ‰ì— ì£¼ì˜í•˜ì„¸ìš”",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1),
   },
   
   EventName.laneChangeManual: {
     ET.WARNING: Alert(
-      "Àú¼Ó ¹æÇâÁö½Ãµî ÀÛµ¿ Áß",
-      "ÀÚµ¿Á¶ÇâÀÌ ÀÏ½Ã ºñÈ°¼ºÈ­ µË´Ï´Ù Á÷Á¢ Á¶ÇâÇÏ¼¼¿ä",
+      "ì €ì† ë°©í–¥ì§€ì‹œë“± ì‘ë™ ì¤‘",
+      "ìë™ì¡°í–¥ì´ ì¼ì‹œ ë¹„í™œì„±í™” ë©ë‹ˆë‹¤ ì§ì ‘ ì¡°í–¥í•˜ì„¸ìš”",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.75),
   },
 
   EventName.emgButtonManual: {
     ET.WARNING: Alert(
-      "ºñ»óµî Á¡¸ê Áß",
+      "ë¹„ìƒë“± ì ë©¸ ì¤‘",
       "",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.75),
@@ -489,35 +489,35 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
 
   EventName.driverSteering: {
     ET.WARNING: Alert(
-      "¿îÀüÀÚ Á÷Á¢ Á¶ÇâÁß",
-      "ÀÚµ¿Á¶ÇâÀÌ ÀÏ½ÃÀûÀ¸·Î ÀúÇÏµË´Ï´Ù",
+      "ìš´ì „ì ì§ì ‘ ì¡°í–¥ì¤‘",
+      "ìë™ì¡°í–¥ì´ ì¼ì‹œì ìœ¼ë¡œ ì €í•˜ë©ë‹ˆë‹¤",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1),
   },
 
   EventName.steerSaturated: {
     ET.WARNING: Alert(
-      "ÇÚµéÀ» Àâ¾ÆÁÖ¼¼¿ä",
-      "Â÷·ÎÀ¯Áö ¹üÀ§¸¦ ÀÌÅ»ÇÏ°í ÀÖ½À´Ï´Ù",
+      "í•¸ë“¤ì„ ì¡ì•„ì£¼ì„¸ìš”",
+      "ì°¨ë¡œìœ ì§€ ë²”ìœ„ë¥¼ ì´íƒˆí•˜ê³  ìˆìŠµë‹ˆë‹¤",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .1, .1, .1),
   },
 
   EventName.fanMalfunction: {
-    ET.PERMANENT: NormalPermanentAlert("ÆÒ ¿ÀÀÛµ¿", "¼­ºñ½ºÆÀ¿¡ ¹®ÀÇÇÏ¼¼¿ä"),
+    ET.PERMANENT: NormalPermanentAlert("íŒ¬ ì˜¤ì‘ë™", "ì„œë¹„ìŠ¤íŒ€ì— ë¬¸ì˜í•˜ì„¸ìš”"),
   },
 
   EventName.cameraMalfunction: {
-    ET.PERMANENT: NormalPermanentAlert("Ä«¸Ş¶ó ¿ÀÀÛµ¿", "¼­ºñ½ºÆÀ¿¡ ¹®ÀÇÇÏ¼¼¿ä"),
+    ET.PERMANENT: NormalPermanentAlert("ì¹´ë©”ë¼ ì˜¤ì‘ë™", "ì„œë¹„ìŠ¤íŒ€ì— ë¬¸ì˜í•˜ì„¸ìš”"),
   },
 
   EventName.gpsMalfunction: {
-    ET.PERMANENT: NormalPermanentAlert("GPS ¿ÀÀÛµ¿", "¼­ºñ½ºÆÀ¿¡ ¹®ÀÇÇÏ¼¼¿ä"),
+    ET.PERMANENT: NormalPermanentAlert("GPS ì˜¤ì‘ë™", "ì„œë¹„ìŠ¤íŒ€ì— ë¬¸ì˜í•˜ì„¸ìš”"),
   },
 
   EventName.modeChangeOpenpilot: {
     ET.WARNING: Alert(
-      "¿ÀÇÂÆÄÀÏ·µ ¸ğµå",
+      "ì˜¤í”ˆíŒŒì¼ëŸ¿ ëª¨ë“œ",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeModeOpenpilot, 1., 0, 1.),
@@ -525,29 +525,29 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   
   EventName.modeChangeDistcurv: {
     ET.WARNING: Alert(
-      "Â÷°£+Ä¿ºê Á¦¾î ¸ğµå",
+      "ì°¨ê°„+ì»¤ë¸Œ ì œì–´ ëª¨ë“œ",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeModeDistcurv, 1., 0, 1.),
   },
   EventName.modeChangeDistance: {
     ET.WARNING: Alert(
-      "Â÷°£ONLY Á¦¾î ¸ğµå",
+      "ì°¨ê°„ONLY ì œì–´ ëª¨ë“œ",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeModeDistance, 1., 0, 1.),
   },
   EventName.modeChangeOneway: {
     ET.WARNING: Alert(
-      "Æíµµ1Â÷¼± ¸ğµå",
+      "í¸ë„1ì°¨ì„  ëª¨ë“œ",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeModeOneway, 1., 0, 1.),
   },
   EventName.needBrake: {
     ET.WARNING: Alert(
-      "ºê·¹ÀÌÅ©!",
-      "Ãßµ¹À§Çè",
+      "ë¸Œë ˆì´í¬!",
+      "ì¶”ëŒìœ„í—˜",
       AlertStatus.normal, AlertSize.full,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning2Repeat, .1, .1, .1),
   },
@@ -575,17 +575,17 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
 
   EventName.brakeHold: {
     ET.USER_DISABLE: EngagementAlert(AudibleAlert.none),
-    ET.NO_ENTRY: NoEntryAlert("ºê·¹ÀÌÅ© È¦µå Áß"),
+    ET.NO_ENTRY: NoEntryAlert("ë¸Œë ˆì´í¬ í™€ë“œ ì¤‘"),
   },
 
   EventName.parkBrake: {
     ET.USER_DISABLE: EngagementAlert(AudibleAlert.none),
-    ET.NO_ENTRY: NoEntryAlert("ÆÄÅ·ºê·¹ÀÌÅ© Ã¼°á µÊ"),
+    ET.NO_ENTRY: NoEntryAlert("íŒŒí‚¹ë¸Œë ˆì´í¬ ì²´ê²° ë¨"),
   },
 
   EventName.pedalPressed: {
     ET.USER_DISABLE: EngagementAlert(AudibleAlert.none),
-    ET.NO_ENTRY: NoEntryAlert("½ÃÀÛ Áß Æä´Ş ¹âÀ½",
+    ET.NO_ENTRY: NoEntryAlert("ì‹œì‘ ì¤‘ í˜ë‹¬ ë°ŸìŒ",
                               visual_alert=VisualAlert.brakePressed),
   },
 
@@ -596,22 +596,22 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
 
   EventName.wrongCruiseMode: {
     ET.USER_DISABLE: EngagementAlert(AudibleAlert.none),
-    ET.NO_ENTRY: NoEntryAlert("¾î´ğÆ¼ºê Å©·çÁî¸¦ È°¼ºÈ­ÇÏ¼¼¿ä"),
+    ET.NO_ENTRY: NoEntryAlert("ì–´ëŒ‘í‹°ë¸Œ í¬ë£¨ì¦ˆë¥¼ í™œì„±í™”í•˜ì„¸ìš”"),
   },
 
   EventName.steerTempUnavailable: {
     ET.WARNING: Alert(
-      "ÇÚµéÀ» Àâ¾ÆÁÖ¼¼¿ä",
-      "Á¶ÇâÁ¦¾î°¡ ÀÏ½ÃÀûÀ¸·Î ºñÈ°¼ºÈ­ µÇ¾ú½À´Ï´Ù",
+      "í•¸ë“¤ì„ ì¡ì•„ì£¼ì„¸ìš”",
+      "ì¡°í–¥ì œì–´ê°€ ì¼ì‹œì ìœ¼ë¡œ ë¹„í™œì„±í™” ë˜ì—ˆìŠµë‹ˆë‹¤",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimeWarning1, .4, 2., 3.),
-    ET.NO_ENTRY: NoEntryAlert("Á¶ÇâÁ¦¾î°¡ ÀÏ½ÃÀûÀ¸·Î ºñÈ°¼ºÈ­ µÇ¾ú½À´Ï´Ù",
+    ET.NO_ENTRY: NoEntryAlert("ì¡°í–¥ì œì–´ê°€ ì¼ì‹œì ìœ¼ë¡œ ë¹„í™œì„±í™” ë˜ì—ˆìŠµë‹ˆë‹¤",
                               duration_hud_alert=0.),
   },
 
   EventName.outOfSpace: {
     ET.PERMANENT: Alert(
-      "ÀúÀå°ø°£ ºÎÁ·",
+      "ì €ì¥ê³µê°„ ë¶€ì¡±",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
@@ -620,16 +620,16 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   },
 
   EventName.belowEngageSpeed: {
-    ET.NO_ENTRY: NoEntryAlert("Â÷·®ÀÇ ¼Óµµ ³·À½"),
+    ET.NO_ENTRY: NoEntryAlert("ì°¨ëŸ‰ì˜ ì†ë„ ë‚®ìŒ"),
   },
 
   EventName.sensorDataInvalid: {
     ET.PERMANENT: Alert(
-      "EON¼¾¼­·ÎºÎÅÍ µ¥ÀÌÅÍ¸¦ ¹ŞÁö ¸øÇß½À´Ï´Ù",
-      "ÀåÄ¡¸¦ Àç½ÃÀÛ ÇÏ¼¼¿ä",
+      "EONì„¼ì„œë¡œë¶€í„° ë°ì´í„°ë¥¼ ë°›ì§€ ëª»í–ˆìŠµë‹ˆë‹¤",
+      "ì¥ì¹˜ë¥¼ ì¬ì‹œì‘ í•˜ì„¸ìš”",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2, creation_delay=1.),
-    ET.NO_ENTRY: NoEntryAlert("EON¼¾¼­·ÎºÎÅÍ µ¥ÀÌÅÍ¸¦ ¹ŞÁö ¸øÇß½À´Ï´Ù"),
+    ET.NO_ENTRY: NoEntryAlert("EONì„¼ì„œë¡œë¶€í„° ë°ì´í„°ë¥¼ ë°›ì§€ ëª»í–ˆìŠµë‹ˆë‹¤"),
   },
 
   EventName.noGps: {
@@ -637,102 +637,102 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   },
 
   EventName.soundsUnavailable: {
-    ET.PERMANENT: NormalPermanentAlert("½ºÇÇÄ¿¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù", "ÀåÄ¡¸¦ Àç½ÃÀÛÇÏ¼¼¿ä"),
-    ET.NO_ENTRY: NoEntryAlert("½ºÇÇÄ¿¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù"),
+    ET.PERMANENT: NormalPermanentAlert("ìŠ¤í”¼ì»¤ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤", "ì¥ì¹˜ë¥¼ ì¬ì‹œì‘í•˜ì„¸ìš”"),
+    ET.NO_ENTRY: NoEntryAlert("ìŠ¤í”¼ì»¤ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤"),
   },
 
   EventName.tooDistracted: {
-    ET.NO_ENTRY: NoEntryAlert("¿îÀüÀÚ Àü¹æÁÖ½Ã ¸Å¿ì ºÒ¾È"),
+    ET.NO_ENTRY: NoEntryAlert("ìš´ì „ì ì „ë°©ì£¼ì‹œ ë§¤ìš° ë¶ˆì•ˆ"),
   },
 
   EventName.overheat: {
     ET.PERMANENT: Alert(
-      "½Ã½ºÅÛÀÌ °ú¿­µÇ¾ú½À´Ï´Ù",
+      "ì‹œìŠ¤í…œì´ ê³¼ì—´ë˜ì—ˆìŠµë‹ˆë‹¤",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
-    ET.SOFT_DISABLE: SoftDisableAlert("½Ã½ºÅÛÀÌ °ú¿­µÇ¾ú½À´Ï´Ù"),
-    ET.NO_ENTRY: NoEntryAlert("½Ã½ºÅÛÀÌ °ú¿­µÇ¾ú½À´Ï´Ù"),
+    ET.SOFT_DISABLE: SoftDisableAlert("ì‹œìŠ¤í…œì´ ê³¼ì—´ë˜ì—ˆìŠµë‹ˆë‹¤"),
+    ET.NO_ENTRY: NoEntryAlert("ì‹œìŠ¤í…œì´ ê³¼ì—´ë˜ì—ˆìŠµë‹ˆë‹¤"),
   },
 
   EventName.wrongGear: {
     ET.USER_DISABLE: EngagementAlert(AudibleAlert.chimeDisengage),
-    ET.NO_ENTRY: NoEntryAlert("±â¾î°¡ µå¶óÀÌºê¸ğµå°¡ ¾Æ´Õ´Ï´Ù"),
+    ET.NO_ENTRY: NoEntryAlert("ê¸°ì–´ê°€ ë“œë¼ì´ë¸Œëª¨ë“œê°€ ì•„ë‹™ë‹ˆë‹¤"),
   },
 
   EventName.calibrationInvalid: {
-    ET.PERMANENT: NormalPermanentAlert("Ä¶¸®ºê·¹ÀÌ¼Ç À¯È¿ÇÏÁö ¾ÊÀ½", "ÀåÄ¡ À§Ä¡ Á¶Á¤ ¹× Àç Ä¶¸®ºê·¹ÀÌ¼Ç"),
-    ET.SOFT_DISABLE: SoftDisableAlert("Ä¶¸®ºê·¹ÀÌ¼Ç À¯È¿ÇÏÁö ¾ÊÀ½: ÀåÄ¡ À§Ä¡ Á¶Á¤ ¹× Àç Ä¶¸®ºê·¹ÀÌ¼Ç"),
-    ET.NO_ENTRY: NoEntryAlert("Ä¶¸®ºê·¹ÀÌ¼Ç À¯È¿ÇÏÁö ¾ÊÀ½: ÀåÄ¡ À§Ä¡ Á¶Á¤ ¹× Àç Ä¶¸®ºê·¹ÀÌ¼Ç"),
+    ET.PERMANENT: NormalPermanentAlert("ìº˜ë¦¬ë¸Œë ˆì´ì…˜ ìœ íš¨í•˜ì§€ ì•ŠìŒ", "ì¥ì¹˜ ìœ„ì¹˜ ì¡°ì • ë° ì¬ ìº˜ë¦¬ë¸Œë ˆì´ì…˜"),
+    ET.SOFT_DISABLE: SoftDisableAlert("ìº˜ë¦¬ë¸Œë ˆì´ì…˜ ìœ íš¨í•˜ì§€ ì•ŠìŒ: ì¥ì¹˜ ìœ„ì¹˜ ì¡°ì • ë° ì¬ ìº˜ë¦¬ë¸Œë ˆì´ì…˜"),
+    ET.NO_ENTRY: NoEntryAlert("ìº˜ë¦¬ë¸Œë ˆì´ì…˜ ìœ íš¨í•˜ì§€ ì•ŠìŒ: ì¥ì¹˜ ìœ„ì¹˜ ì¡°ì • ë° ì¬ ìº˜ë¦¬ë¸Œë ˆì´ì…˜"),
   },
 
   EventName.calibrationIncomplete: {
     ET.PERMANENT: calibration_incomplete_alert,
-    ET.SOFT_DISABLE: SoftDisableAlert("Ä¶¸®ºê·¹ÀÌ¼Ç ÁøÇà Áß"),
-    ET.NO_ENTRY: NoEntryAlert("Ä¶¸®ºê·¹ÀÌ¼Ç ÁøÇà Áß"),
+    ET.SOFT_DISABLE: SoftDisableAlert("ìº˜ë¦¬ë¸Œë ˆì´ì…˜ ì§„í–‰ ì¤‘"),
+    ET.NO_ENTRY: NoEntryAlert("ìº˜ë¦¬ë¸Œë ˆì´ì…˜ ì§„í–‰ ì¤‘"),
   },
 
   EventName.doorOpen: {
-    ET.SOFT_DISABLE: SoftDisableAlert("µµ¾î°¡ ¿­·ÁÀÖ½À´Ï´Ù"),
-    ET.NO_ENTRY: NoEntryAlert("µµ¾î°¡ ¿­·ÁÀÖ½À´Ï´Ù"),
+    ET.SOFT_DISABLE: SoftDisableAlert("ë„ì–´ê°€ ì—´ë ¤ìˆìŠµë‹ˆë‹¤"),
+    ET.NO_ENTRY: NoEntryAlert("ë„ì–´ê°€ ì—´ë ¤ìˆìŠµë‹ˆë‹¤"),
   },
 
   EventName.seatbeltNotLatched: {
-    ET.SOFT_DISABLE: SoftDisableAlert("¾ÈÀüº§Æ®¸¦ Ã¼°áÇÏ¼¼¿ä"),
-    ET.NO_ENTRY: NoEntryAlert("¾ÈÀüº§Æ®¸¦ Ã¼°áÇÏ¼¼¿ä"),
+    ET.SOFT_DISABLE: SoftDisableAlert("ì•ˆì „ë²¨íŠ¸ë¥¼ ì²´ê²°í•˜ì„¸ìš”"),
+    ET.NO_ENTRY: NoEntryAlert("ì•ˆì „ë²¨íŠ¸ë¥¼ ì²´ê²°í•˜ì„¸ìš”"),
   },
 
   EventName.espDisabled: {
-    ET.SOFT_DISABLE: SoftDisableAlert("ESP ²¨Áü"),
-    ET.NO_ENTRY: NoEntryAlert("ESP ²¨Áü"),
+    ET.SOFT_DISABLE: SoftDisableAlert("ESP êº¼ì§"),
+    ET.NO_ENTRY: NoEntryAlert("ESP êº¼ì§"),
   },
 
   EventName.lowBattery: {
-    ET.SOFT_DISABLE: SoftDisableAlert("¹èÅÍ¸® ºÎÁ·"),
-    ET.NO_ENTRY: NoEntryAlert("¹èÅÍ¸® ºÎÁ·"),
+    ET.SOFT_DISABLE: SoftDisableAlert("ë°°í„°ë¦¬ ë¶€ì¡±"),
+    ET.NO_ENTRY: NoEntryAlert("ë°°í„°ë¦¬ ë¶€ì¡±"),
   },
 
   EventName.commIssue: {
-    ET.SOFT_DISABLE: SoftDisableAlert("ÇÁ·Î¼¼½º °£ Åë½Å ¿À·ù°¡ ÀÖ½À´Ï´Ù"),
-    ET.NO_ENTRY: NoEntryAlert("ÇÁ·Î¼¼½º °£ Åë½Å ¿À·ù°¡ ÀÖ½À´Ï´Ù",
+    ET.SOFT_DISABLE: SoftDisableAlert("í”„ë¡œì„¸ìŠ¤ ê°„ í†µì‹  ì˜¤ë¥˜ê°€ ìˆìŠµë‹ˆë‹¤"),
+    ET.NO_ENTRY: NoEntryAlert("í”„ë¡œì„¸ìŠ¤ ê°„ í†µì‹  ì˜¤ë¥˜ê°€ ìˆìŠµë‹ˆë‹¤",
                               audible_alert=AudibleAlert.none),
   },
 
   EventName.processNotRunning: {
-    ET.NO_ENTRY: NoEntryAlert("½Ã½ºÅÛ ¿ÀÀÛµ¿: ÀåÄ¡¸¦ Àç½ÃÀÛÇÏ¼¼¿ä",
+    ET.NO_ENTRY: NoEntryAlert("ì‹œìŠ¤í…œ ì˜¤ì‘ë™: ì¥ì¹˜ë¥¼ ì¬ì‹œì‘í•˜ì„¸ìš”",
                               audible_alert=AudibleAlert.none),
   },
 
   EventName.radarFault: {
-    ET.SOFT_DISABLE: SoftDisableAlert("·¹ÀÌ´õ ¿À·ù: Â÷·®À» Àç½ÃÀÛÇÏ¼¼¿ä"),
-    ET.NO_ENTRY : NoEntryAlert("·¹ÀÌ´õ ¿À·ù: Â÷·®À» Àç½ÃÀÛÇÏ¼¼¿ä"),
+    ET.SOFT_DISABLE: SoftDisableAlert("ë ˆì´ë” ì˜¤ë¥˜: ì°¨ëŸ‰ì„ ì¬ì‹œì‘í•˜ì„¸ìš”"),
+    ET.NO_ENTRY : NoEntryAlert("ë ˆì´ë” ì˜¤ë¥˜: ì°¨ëŸ‰ì„ ì¬ì‹œì‘í•˜ì„¸ìš”"),
   },
 
   EventName.modeldLagging: {
-    ET.SOFT_DISABLE: SoftDisableAlert("ÁÖÇà ¸ğµ¨ Áö¿¬"),
-    ET.NO_ENTRY : NoEntryAlert("ÁÖÇà ¸ğµ¨ Áö¿¬"),
+    ET.SOFT_DISABLE: SoftDisableAlert("ì£¼í–‰ ëª¨ë¸ ì§€ì—°"),
+    ET.NO_ENTRY : NoEntryAlert("ì£¼í–‰ ëª¨ë¸ ì§€ì—°"),
   },
 
   EventName.posenetInvalid: {
-    ET.SOFT_DISABLE: SoftDisableAlert("Àü¹æ ¿µ»óÀÎ½ÄÀÌ ¿øÇÒÇÏÁö ¾Ê½À´Ï´Ù"),
-    ET.NO_ENTRY: NoEntryAlert("Àü¹æ ¿µ»óÀÎ½ÄÀÌ ¿øÇÒÇÏÁö ¾Ê½À´Ï´Ù"),
+    ET.SOFT_DISABLE: SoftDisableAlert("ì „ë°© ì˜ìƒì¸ì‹ì´ ì›í• í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤"),
+    ET.NO_ENTRY: NoEntryAlert("ì „ë°© ì˜ìƒì¸ì‹ì´ ì›í• í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤"),
   },
 
   EventName.deviceFalling: {
-    ET.SOFT_DISABLE: SoftDisableAlert("ÀåÄ¡ÀÇ ¸¶¿îÆ® ¿¬°áÀÌ ºÒ¾ÈÇÕ´Ï´Ù"),
-    ET.NO_ENTRY: NoEntryAlert("ÀåÄ¡ÀÇ ¸¶¿îÆ® ¿¬°áÀÌ ºÒ¾ÈÇÕ´Ï´Ù"),
+    ET.SOFT_DISABLE: SoftDisableAlert("ì¥ì¹˜ì˜ ë§ˆìš´íŠ¸ ì—°ê²°ì´ ë¶ˆì•ˆí•©ë‹ˆë‹¤"),
+    ET.NO_ENTRY: NoEntryAlert("ì¥ì¹˜ì˜ ë§ˆìš´íŠ¸ ì—°ê²°ì´ ë¶ˆì•ˆí•©ë‹ˆë‹¤"),
   },
 
   EventName.lowMemory: {
-    ET.SOFT_DISABLE: SoftDisableAlert("¸Ş¸ğ¸® ºÎÁ·: ÀåÄ¡¸¦ Àç½ÃÀÛÇÏ¼¼¿ä"),
-    ET.PERMANENT: NormalPermanentAlert("¸Ş¸ğ¸® ºÎÁ·", "ÀåÄ¡¸¦ Àç½ÃÀÛÇÏ¼¼¿ä"),
-    ET.NO_ENTRY : NoEntryAlert("¸Ş¸ğ¸® ºÎÁ·: ÀåÄ¡¸¦ Àç½ÃÀÛÇÏ¼¼¿ä",
+    ET.SOFT_DISABLE: SoftDisableAlert("ë©”ëª¨ë¦¬ ë¶€ì¡±: ì¥ì¹˜ë¥¼ ì¬ì‹œì‘í•˜ì„¸ìš”"),
+    ET.PERMANENT: NormalPermanentAlert("ë©”ëª¨ë¦¬ ë¶€ì¡±", "ì¥ì¹˜ë¥¼ ì¬ì‹œì‘í•˜ì„¸ìš”"),
+    ET.NO_ENTRY : NoEntryAlert("ë©”ëª¨ë¦¬ ë¶€ì¡±: ì¥ì¹˜ë¥¼ ì¬ì‹œì‘í•˜ì„¸ìš”",
                                audible_alert=AudibleAlert.chimeDisengage),
   },
 
   EventName.controlsFailed: {
-    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("Â÷·®Á¦¾î ºÒ°¡"),
-    ET.NO_ENTRY: NoEntryAlert("Â÷·®Á¦¾î ºÒ°¡"),
+    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("ì°¨ëŸ‰ì œì–´ ë¶ˆê°€"),
+    ET.NO_ENTRY: NoEntryAlert("ì°¨ëŸ‰ì œì–´ ë¶ˆê°€"),
   },
 
   EventName.controlsMismatch: {
@@ -740,47 +740,47 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   },
 
   EventName.canError: {
-    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("CAN ¿À·ù: CAN ½ÅÈ£¸¦ È®ÀÎÇÏ¼¼¿ä"),
+    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("CAN ì˜¤ë¥˜: CAN ì‹ í˜¸ë¥¼ í™•ì¸í•˜ì„¸ìš”"),
     ET.PERMANENT: Alert(
-      "CAN ¿À·ù: CAN ½ÅÈ£¸¦ È®ÀÎÇÏ¼¼¿ä",
+      "CAN ì˜¤ë¥˜: CAN ì‹ í˜¸ë¥¼ í™•ì¸í•˜ì„¸ìš”",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, 0., 0., .2, creation_delay=1.),
-    ET.NO_ENTRY: NoEntryAlert("CAN ¿À·ù: CAN ½ÅÈ£¸¦ È®ÀÎÇÏ¼¼¿ä"),
+    ET.NO_ENTRY: NoEntryAlert("CAN ì˜¤ë¥˜: CAN ì‹ í˜¸ë¥¼ í™•ì¸í•˜ì„¸ìš”"),
   },
 
   EventName.steerUnavailable: {
-    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("LKAS ¿À·ù: Â÷·®À» Àç½ÃÀÛÇÏ¼¼¿ä"),
+    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("LKAS ì˜¤ë¥˜: ì°¨ëŸ‰ì„ ì¬ì‹œì‘í•˜ì„¸ìš”"),
     ET.PERMANENT: Alert(
-      "LKAS ¿À·ù: ½ÃÀÛÀ» À§ÇØ Â÷·®À» Àç½ÃÀÛÇÏ¼¼¿ä",
+      "LKAS ì˜¤ë¥˜: ì‹œì‘ì„ ìœ„í•´ ì°¨ëŸ‰ì„ ì¬ì‹œì‘í•˜ì„¸ìš”",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
-    ET.NO_ENTRY: NoEntryAlert("LKAS ¿À·ù: Â÷·®À» Àç½ÃÀÛÇÏ¼¼¿ä"),
+    ET.NO_ENTRY: NoEntryAlert("LKAS ì˜¤ë¥˜: ì°¨ëŸ‰ì„ ì¬ì‹œì‘í•˜ì„¸ìš”"),
   },
 
   EventName.brakeUnavailable: {
-    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("Å©·çÁî ¿À·ù: Â÷·®À» Àç½ÃÀÛÇÏ¼¼¿ä"),
+    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("í¬ë£¨ì¦ˆ ì˜¤ë¥˜: ì°¨ëŸ‰ì„ ì¬ì‹œì‘í•˜ì„¸ìš”"),
     ET.PERMANENT: Alert(
-      "Å©·çÁî ¿À·ù: ½ÃÀÛÀ» À§ÇØ Â÷·®À» Àç½ÃÀÛÇÏ¼¼¿ä",
+      "í¬ë£¨ì¦ˆ ì˜¤ë¥˜: ì‹œì‘ì„ ìœ„í•´ ì°¨ëŸ‰ì„ ì¬ì‹œì‘í•˜ì„¸ìš”",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
-    ET.NO_ENTRY: NoEntryAlert("Å©·çÁî ¿À·ù: Â÷·®À» Àç½ÃÀÛÇÏ¼¼¿ä"),
+    ET.NO_ENTRY: NoEntryAlert("í¬ë£¨ì¦ˆ ì˜¤ë¥˜: ì°¨ëŸ‰ì„ ì¬ì‹œì‘í•˜ì„¸ìš”"),
   },
 
   EventName.reverseGear: {
     ET.PERMANENT: Alert(
-      "ÈÄÁø ±â¾î",
+      "í›„ì§„ ê¸°ì–´",
       "",
       AlertStatus.normal, AlertSize.full,
       Priority.LOWEST, VisualAlert.none, AudibleAlert.none, 0., 0., .2, creation_delay=0.5),
-    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("ÈÄÁø ±â¾î"),
-    ET.NO_ENTRY: NoEntryAlert("ÈÄÁø ±â¾î"),
+    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("í›„ì§„ ê¸°ì–´"),
+    ET.NO_ENTRY: NoEntryAlert("í›„ì§„ ê¸°ì–´"),
   },
 
   EventName.cruiseDisabled: {
-    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("Å©·çÁî ²¨Áü"),
+    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("í¬ë£¨ì¦ˆ êº¼ì§"),
   },
 
   EventName.plannerError: {
@@ -789,48 +789,48 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   },
 
   EventName.relayMalfunction: {
-    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("ÇÏ³×½º ¿ÀÀÛµ¿"),
-    ET.PERMANENT: NormalPermanentAlert("ÇÏ³×½º ¿ÀÀÛµ¿", "ÀåÄ¡¸¦ Á¡°ËÇÏ¼¼¿ä"),
-    ET.NO_ENTRY: NoEntryAlert("ÇÏ³×½º ¿ÀÀÛµ¿"),
+    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("í•˜ë„¤ìŠ¤ ì˜¤ì‘ë™"),
+    ET.PERMANENT: NormalPermanentAlert("í•˜ë„¤ìŠ¤ ì˜¤ì‘ë™", "ì¥ì¹˜ë¥¼ ì ê²€í•˜ì„¸ìš”"),
+    ET.NO_ENTRY: NoEntryAlert("í•˜ë„¤ìŠ¤ ì˜¤ì‘ë™"),
   },
 
   EventName.noTarget: {
     ET.IMMEDIATE_DISABLE: Alert(
-      "¿ÀÇÂÆÄÀÏ·µ ½ÃÀÛºÒ°¡",
-      "¼±ÇàÂ÷·®ÀÌ ¾ø½À´Ï´Ù",
+      "ì˜¤í”ˆíŒŒì¼ëŸ¿ ì‹œì‘ë¶ˆê°€",
+      "ì„ í–‰ì°¨ëŸ‰ì´ ì—†ìŠµë‹ˆë‹¤",
       AlertStatus.normal, AlertSize.mid,
       Priority.HIGH, VisualAlert.none, AudibleAlert.none, .4, 2., 3.),
-    ET.NO_ENTRY : NoEntryAlert("¼±ÇàÂ÷·®ÀÌ ¾ø½À´Ï´Ù"),
+    ET.NO_ENTRY : NoEntryAlert("ì„ í–‰ì°¨ëŸ‰ì´ ì—†ìŠµë‹ˆë‹¤"),
   },
 
   EventName.speedTooLow: {
     ET.IMMEDIATE_DISABLE: Alert(
-      "¿ÀÇÂÆÄÀÏ·µ ½ÃÀÛºÒ°¡",
-      "Â÷·®ÀÇ ¼Óµµ°¡ ³·½À´Ï´Ù",
+      "ì˜¤í”ˆíŒŒì¼ëŸ¿ ì‹œì‘ë¶ˆê°€",
+      "ì°¨ëŸ‰ì˜ ì†ë„ê°€ ë‚®ìŠµë‹ˆë‹¤",
       AlertStatus.normal, AlertSize.mid,
       Priority.HIGH, VisualAlert.none, AudibleAlert.none, .4, 2., 3.),
   },
 
   EventName.speedTooHigh: {
     ET.WARNING: Alert(
-      "¼Óµµ°¡ ³Ê¹« ³ô½À´Ï´Ù",
-      "Àç ÀÛµ¿À» À§ÇØ Â÷·®ÀÇ ¼Óµµ¸¦ ³·Ãß¼¼¿ä",
+      "ì†ë„ê°€ ë„ˆë¬´ ë†’ìŠµë‹ˆë‹¤",
+      "ì¬ ì‘ë™ì„ ìœ„í•´ ì°¨ëŸ‰ì˜ ì†ë„ë¥¼ ë‚®ì¶”ì„¸ìš”",
       AlertStatus.normal, AlertSize.mid,
       Priority.HIGH, VisualAlert.none, AudibleAlert.chimeWarning2Repeat, 2.2, 3., 4.),
     ET.NO_ENTRY: Alert(
-      "¼Óµµ°¡ ³Ê¹« ³ô½À´Ï´Ù",
-      "½ÃÀÛÀ» À§ÇØ Â÷·®ÀÇ ¼Óµµ¸¦ ³·Ãß¼¼¿ä",
+      "ì†ë„ê°€ ë„ˆë¬´ ë†’ìŠµë‹ˆë‹¤",
+      "ì‹œì‘ì„ ìœ„í•´ ì°¨ëŸ‰ì˜ ì†ë„ë¥¼ ë‚®ì¶”ì„¸ìš”",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
   },
 
   EventName.lowSpeedLockout: {
     ET.PERMANENT: Alert(
-      "Å©·çÁî ¿À·ù: ½ÃÀÛÀ» À§ÇØ Â÷·®À» Àç½ÃÀÛÇÏ¼¼¿ä",
+      "í¬ë£¨ì¦ˆ ì˜¤ë¥˜: ì‹œì‘ì„ ìœ„í•´ ì°¨ëŸ‰ì„ ì¬ì‹œì‘í•˜ì„¸ìš”",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
-    ET.NO_ENTRY: NoEntryAlert("Å©·çÁî ¿À·ù: Â÷·®À» Àç½ÃÀÛÇÏ¼¼¿ä"),
+    ET.NO_ENTRY: NoEntryAlert("í¬ë£¨ì¦ˆ ì˜¤ë¥˜: ì°¨ëŸ‰ì„ ì¬ì‹œì‘í•˜ì„¸ìš”"),
   },
 
 }
