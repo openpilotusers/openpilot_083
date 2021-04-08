@@ -52,7 +52,7 @@ static void draw_battery_text(UIState *s) {
   char battery_str[7];
   snprintf(battery_str, sizeof(battery_str), "%d%%%s", s->scene.deviceState.getBatteryPercent(), s->scene.deviceState.getBatteryStatus() == "Charging" ? "+" : "-");  
   nvgFillColor(s->vg, COLOR_WHITE);
-  nvgFontSize(s->vg, 44*0.9);
+  nvgFontSize(s->vg, 44*0.85);
   nvgFontFace(s->vg, "sans-regular");
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
   nvgTextBox(s->vg, battery_img_x, battery_img_y, battery_img_w, battery_str, NULL);

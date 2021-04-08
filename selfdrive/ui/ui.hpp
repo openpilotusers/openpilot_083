@@ -33,10 +33,19 @@
 #define COLOR_BLACK_ALPHA(x) nvgRGBA(0, 0, 0, x)
 #define COLOR_WHITE nvgRGBA(255, 255, 255, 255)
 #define COLOR_WHITE_ALPHA(x) nvgRGBA(255, 255, 255, x)
-#define COLOR_RED_ALPHA(x) nvgRGBA(201, 34, 49, x)
 #define COLOR_YELLOW nvgRGBA(218, 202, 37, 255)
 #define COLOR_RED nvgRGBA(201, 34, 49, 255)
-
+#define COLOR_OCHRE nvgRGBA(218, 111, 37, 255)
+#define COLOR_OCHRE_ALPHA(x) nvgRGBA(218, 111, 37, x)
+#define COLOR_GREEN nvgRGBA(0, 255, 0, 255)
+#define COLOR_GREEN_ALPHA(x) nvgRGBA(0, 255, 0, x)
+#define COLOR_BLUE nvgRGBA(0, 0, 255, 255)
+#define COLOR_BLUE_ALPHA(x) nvgRGBA(0, 0, 255, x)
+#define COLOR_ORANGE nvgRGBA(255, 175, 3, 255)
+#define COLOR_ORANGE_ALPHA(x) nvgRGBA(255, 175, 3, x)
+#define COLOR_RED_ALPHA(x) nvgRGBA(201, 34, 49, x)
+#define COLOR_YELLOW_ALPHA(x) nvgRGBA(218, 202, 37, x)
+#define COLOR_GREY nvgRGBA(191, 191, 191, 1)
 #define UI_BUF_COUNT 4
 
 typedef struct Rect {
@@ -51,11 +60,15 @@ typedef struct Rect {
 } Rect;
 
 const int sbr_w = 300;
-const int bdr_s = 30;
+const int bdr_s = 15;
 const int header_h = 420;
 const int footer_h = 280;
 const Rect settings_btn = {50, 35, 200, 117};
 const Rect home_btn = {60, 1080 - 180 - 40, 180, 180};
+const Rect map_overlay_btn = {0, 465, 150, 150};
+const Rect map_btn = {1585, 905, 140, 140};
+const Rect rec_btn = {1745, 905, 140, 140};
+const Rect laneless_btn = {1425, 905, 140, 140};
 
 const int UI_FREQ = 20;   // Hz
 
@@ -74,11 +87,11 @@ typedef enum UIStatus {
 } UIStatus;
 
 static std::map<UIStatus, NVGcolor> bg_colors = {
-  {STATUS_OFFROAD, nvgRGBA(0x0, 0x0, 0x0, 0xef)},
+  {STATUS_OFFROAD, nvgRGBA(0x0, 0x0, 0x0, 0xff)},
   {STATUS_DISENGAGED, nvgRGBA(0x17, 0x33, 0x49, 0xc8)},
-  {STATUS_ENGAGED, nvgRGBA(0x17, 0x86, 0x44, 0x51)},
-  {STATUS_WARNING, nvgRGBA(0xDA, 0x6F, 0x25, 0x51)},
-  {STATUS_ALERT, nvgRGBA(0xC9, 0x22, 0x31, 0x31)},
+  {STATUS_ENGAGED, nvgRGBA(0x17, 0x86, 0x44, 0xf1)},
+  {STATUS_WARNING, nvgRGBA(0xDA, 0x6F, 0x25, 0xf1)},
+  {STATUS_ALERT, nvgRGBA(0xC9, 0x22, 0x31, 0xf1)},
 };
 
 typedef struct {
@@ -98,15 +111,61 @@ typedef struct UIScene {
   bool is_rhd;
   bool driver_view;
 
+  int lead_status;
+  float lead_d_rel, lead_v_rel;
   std::string alert_text1;
   std::string alert_text2;
+  std::string alertTextMsg1;
+  std::string alertTextMsg2;
   std::string alert_type;
   float alert_blinking_rate;
   cereal::ControlsState::AlertSize alert_size;
 
   cereal::PandaState::PandaType pandaType;
 
+  bool brakePress;
+  bool recording;
+  bool touched;
+  bool map_on_top;
+
+  float gpsAccuracyUblox;
+  float altitudeUblox;
+  float bearingUblox;
+
+  int cpuPerc;
+  float cpuTemp;
+  bool rightblindspot;
+  bool leftblindspot;
+  bool leftBlinker;
+  bool rightBlinker;
+  int blinker_blinkingrate;
+  int blindspot_blinkingrate = 120;
+  int car_valid_status_changed = 0;
+  float angleSteers;
+  float steerRatio;
+  bool brakeLights;
+  float angleSteersDes;
+  float curvature;
+  bool steerOverride;
+  float output_scale; 
+  int batteryPercent;
+  bool batteryCharging;
+  char batteryStatus[64];
   char ipAddr[20];
+  int fanSpeed;
+  float tpmsPressureFl;
+  float tpmsPressureFr;
+  float tpmsPressureRl;
+  float tpmsPressureRr;
+  int lateralControlMethod;
+  float radarDistance;
+  bool standStill;
+  float limitSpeedCamera;
+  float limitSpeedCameraDist;
+  float vSetDis;
+  bool cruiseAccStatus;
+  int laneless_mode;
+
   NetStatus athenaStatus;
 
   cereal::DeviceState::Reader deviceState;
@@ -115,6 +174,9 @@ typedef struct UIScene {
   cereal::ControlsState::Reader controls_state;
   cereal::DriverState::Reader driver_state;
   cereal::DriverMonitoringState::Reader dmonitoring_state;
+
+  cereal::CarState::GearShifter getGearShifter;
+  cereal::LateralPlan::Reader lateral_plan;
 
   // gps
   int satelliteCount;
@@ -134,38 +196,27 @@ typedef struct UIScene {
   bool started, ignition, is_metric, longitudinal_control, end_to_end;
   uint64_t started_frame;
 
-
-  // atom
-  struct _screen
+  struct _LiveParams
   {
-     int  nTime;
-     int  autoScreenOff;
-     int  brightness;
-     int  awake;
-  } scr;
+    float angleOffset;
+    float angleOffsetAverage;
+    float stiffnessFactor;
+    float steerRatio;
+  } liveParams;
 
-  
-  int  dash_menu_no;
-  struct _mouse
+  struct _LateralPlan
   {
-    int touch_x;
-    int touch_y;
-    int touched;
-    int touch_cnt;
-  } mouse;
+    float laneWidth;
+    float steerRateCost;
+    int standstillElapsedTime = 0;
 
-  cereal::ModelDataV2::Reader modelDataV2;
-  cereal::FrameData::Reader   camera_state;
-  cereal::CarControl::Reader carControl;
-  cereal::LateralPlan::Reader lateralPlan;
-  cereal::LiveParametersData::Reader   liveParameters;
-  cereal::GpsLocationData::Reader   gpsLocationExternal;
+    float dProb;
+    float lProb;
+    float rProb;
 
-  struct _STATUS_
-  {
-      char text1[512];
-      char text2[512];
-  } alert;
+    float angleOffset;
+    bool lanelessModeStatus;
+  } lateralPlan;
 } UIScene;
 
 typedef struct UIState {
@@ -198,6 +249,22 @@ typedef struct UIState {
 
   // device state
   bool awake;
+  int awake_timeout;
+  float light_sensor, accel_sensor, gyro_sensor;
+
+  bool is_speed_over_limit;
+  float speed_lim_off;
+  int is_OpenpilotViewEnabled;
+  bool nOpkrAutoScreenDimming;
+  int nOpkrUIBrightness;
+  int nOpkrUIVolumeBoost;
+  int nDebugUi1;
+  int nDebugUi2;
+  int nOpkrBlindSpotDetect;
+  int lat_control;
+  int driving_record;
+  int setbtn_count;
+  int homebtn_count;
 
   bool sidebar_collapsed;
   Rect video_rect, viz_rect;
