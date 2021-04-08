@@ -1,4 +1,4 @@
-﻿import os
+import os
 import math
 import numpy as np
 from common.params import Params
