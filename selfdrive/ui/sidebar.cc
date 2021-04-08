@@ -1,4 +1,4 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include <map>
@@ -123,25 +123,25 @@ static void draw_temp_metric(UIState *s) {
       {cereal::DeviceState::ThermalStatus::YELLOW, 1},
       {cereal::DeviceState::ThermalStatus::RED, 2},
       {cereal::DeviceState::ThermalStatus::DANGER, 3}};
-  std::string temp_val = std::to_string((int)s->scene.deviceState.getAmbientTempC()) + "¡ÆC";
-  draw_metric(s, "½Ã½ºÅÛ¿Âµµ", temp_val.c_str(), temp_severity_map[s->scene.deviceState.getThermalStatus()], 0, NULL);
+  std::string temp_val = std::to_string((int)s->scene.deviceState.getAmbientTempC()) + "Â°C";
+  draw_metric(s, "ì‹œìŠ¤í…œì˜¨ë„", temp_val.c_str(), temp_severity_map[s->scene.deviceState.getThermalStatus()], 0, NULL);
 }
 
 static void draw_panda_metric(UIState *s) {
   const int panda_y_offset = 32 + 148;
 
   int panda_severity = 0;
-  std::string panda_message = "Â÷·®\n¿¬°áµÊ";
+  std::string panda_message = "ì°¨ëŸ‰\nì—°ê²°ë¨";
   if (s->scene.pandaType == cereal::PandaState::PandaType::UNKNOWN) {
     panda_severity = 2;
-    panda_message = "Â÷·®\n¿¬°á¾ÈµÊ";
+    panda_message = "ì°¨ëŸ‰\nì—°ê²°ì•ˆë¨";
   } else if (s->scene.started) {
   	if (s->scene.satelliteCount <= 0) {
   	  panda_severity = 0;
-  	  panda_message = "Â÷·®\n¿¬°áµÊ";
+  	  panda_message = "ì°¨ëŸ‰\nì—°ê²°ë¨";
   	} else {
       panda_severity = 0;
-      panda_message = "Â÷·®¿¬°áµÊ\nGPS : " + std::to_string((int)s->scene.satelliteCount);
+      panda_message = "ì°¨ëŸ‰ì—°ê²°ë¨\nGPS : " + std::to_string((int)s->scene.satelliteCount);
     }
   }
   draw_metric(s, NULL, NULL, panda_severity, panda_y_offset, panda_message.c_str());
@@ -149,9 +149,9 @@ static void draw_panda_metric(UIState *s) {
 
 static void draw_connectivity(UIState *s) {
   static std::map<NetStatus, std::pair<const char *, int>> connectivity_map = {
-    {NET_ERROR, {"ÀÎÅÍ³Ý\nÁ¢¼Ó¿À·ù", 2}},
-    {NET_CONNECTED, {"ÀÎÅÍ³Ý\n¿Â¶óÀÎ", 0}},
-    {NET_DISCONNECTED, {"ÀÎÅÍ³Ý\n¿ÀÇÁ¶óÀÎ", 1}},
+    {NET_ERROR, {"ì¸í„°ë„·\nì ‘ì†ì˜¤ë¥˜", 2}},
+    {NET_CONNECTED, {"ì¸í„°ë„·\nì˜¨ë¼ì¸", 0}},
+    {NET_DISCONNECTED, {"ì¸í„°ë„·\nì˜¤í”„ë¼ì¸", 1}},
   };
   auto net_params = connectivity_map[s->scene.athenaStatus];
   draw_metric(s, NULL, NULL, net_params.second, 180 + 158, net_params.first);
