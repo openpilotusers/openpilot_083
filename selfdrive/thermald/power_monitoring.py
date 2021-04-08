@@ -1,4 +1,4 @@
-﻿import random
+import random
 import threading
 import time
 from statistics import mean
