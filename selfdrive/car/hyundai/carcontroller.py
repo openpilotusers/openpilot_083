@@ -258,6 +258,20 @@ class CarController():
     can_sends.append( create_lkas11(self.packer, self.lkas11_cnt, self.car_fingerprint, apply_steer, steer_req,
                                    CS.lkas11, sys_warning, self.hud_sys_state, c ) )
 
+    if CS.mdps_bus or CS.scc_bus == 1: # send lkas11 bus 1 if mdps is on bus 1
+      can_sends.append( create_lkas11(self.packer, self.lkas11_cnt, self.car_fingerprint, apply_steer, steer_req,
+                                      CS.lkas11, sys_warning, self.hud_sys_state, c, 1 ) )
+
+    if CS.mdps_bus: # send clu11 to mdps if it is not on bus 0
+      clu11_speed = CS.clu_Vanz
+      enabled_speed = 60
+      if clu11_speed > enabled_speed or not lkas_active:
+        enabled_speed = clu11_speed
+      can_sends.append( create_clu11(self.packer, frame, CS.clu11, Buttons.NONE, enabled_speed, CS.mdps_bus) )
+
+    # send mdps12 to LKAS to prevent LKAS error if no cancel cmd
+    can_sends.append( create_mdps12(self.packer, frame, CS.mdps12) )
+
     if steer_req:
       can_sends.append( create_mdps12(self.packer, frame, CS.mdps12) )
 

@@ -5,7 +5,7 @@ hyundai_checksum = crcmod.mkCrcFun(0x11D, initCrc=0xFD, rev=False, xorOut=0xdf)
 
 
 def create_lkas11(packer, frame, car_fingerprint, apply_steer, steer_req,
-                  lkas11, sys_warning, sys_state, CC ):
+                  lkas11, sys_warning, sys_state, CC, bus = 0):
 
   values = lkas11
   values["CF_Lkas_LdwsSysState"] = sys_state
@@ -60,10 +60,10 @@ def create_lkas11(packer, frame, car_fingerprint, apply_steer, steer_req,
 
   values["CF_Lkas_Chksum"] = checksum
 
-  return packer.make_can_msg("LKAS11", 0, values)
+  return packer.make_can_msg("LKAS11", bus, values)
 
 
-def create_clu11(packer, frame, clu11, button, speed = None):
+def create_clu11(packer, frame, clu11, button, speed = None, bus = 0):
   values = clu11
 
   if speed != None:
@@ -71,7 +71,7 @@ def create_clu11(packer, frame, clu11, button, speed = None):
 
   values["CF_Clu_CruiseSwState"] = button
   values["CF_Clu_AliveCnt1"] = frame % 0x10
-  return packer.make_can_msg("CLU11", 0, values)
+  return packer.make_can_msg("CLU11", bus, values)
 
 
 #def create_lfahda_mfc(packer, enabled, hda_set_speed=0):
