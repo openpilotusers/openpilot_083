@@ -1,4 +1,4 @@
-#include <cmath>
+ï»¿#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <thread>
@@ -139,7 +139,7 @@ OffroadHome::OffroadHome(QWidget* parent) : QWidget(parent) {
   QObject::connect(alert_notification, SIGNAL(released()), this, SLOT(openAlerts()));
   header_layout->addWidget(alert_notification, 0, Qt::AlignHCenter | Qt::AlignRight);
 
-  std::string brand = Params().read_db_bool("Passive") ? "´ë½ÃÄ·" : "¿ÀÇÂÆÄÀÏ·µ";
+  std::string brand = Params().read_db_bool("Passive") ? "ëŒ€ì‹œìº " : "ì˜¤í”ˆíŒŒì¼ëŸ¿";
   QLabel* version = new QLabel(QString::fromStdString(brand + " v" + Params().get("Version")));
   version->setStyleSheet(R"(font-size: 45px;)");
   header_layout->addWidget(version, 0, Qt::AlignHCenter | Qt::AlignRight);
@@ -201,7 +201,7 @@ void OffroadHome::refresh() {
   }
 
   //QLocale locale(QLocale::Korean);
-  date->setText(QDateTime::currentDateTime().toString("yyyy³â M¿ù dÀÏ"));
+  date->setText(QDateTime::currentDateTime().toString("yyyyë…„ Mì›” dì¼"));
   // update alerts
 
   alerts_widget->refresh();
@@ -212,10 +212,10 @@ void OffroadHome::refresh() {
   }
 
   if (alerts_widget->updateAvailable) {
-    alert_notification->setText("¾÷µ¥ÀÌÆ®");
+    alert_notification->setText("ì—…ë°ì´íŠ¸");
   } else {
     int alerts = alerts_widget->alerts.size();
-    alert_notification->setText(QString::number(alerts) + " °æ°í" + (alerts == 1 ? "" : "S"));
+    alert_notification->setText(QString::number(alerts) + " ê²½ê³ " + (alerts == 1 ? "" : "S"));
   }
 
   if (!alert_notification->isVisible() && !first_refresh) {
