@@ -1,4 +1,4 @@
-﻿import os
+import os
 from common.params import Params
 from common.basedir import BASEDIR
 from selfdrive.version import comma_remote, tested_branch
