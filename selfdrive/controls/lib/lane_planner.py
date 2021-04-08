@@ -1,13 +1,14 @@
 from common.numpy_fast import interp
 import numpy as np
 from selfdrive.hardware import EON, TICI
-from cereal import log
-
+from cereal import car, log
+from common.params import Params
 
 TRAJECTORY_SIZE = 33
 # camera offset is meters from center car to camera
 if EON:
-  CAMERA_OFFSET = 0.06
+  CAMERA_OFFSET = float(int(Params().get("CameraOffsetAdj", encoding='utf8')) * 0.001)  # m from center car to camera
+  CAMERA_OFFSET_A = float((int(Params().get("CameraOffsetAdj", encoding='utf8')) * 0.001) - 0.1)
   PATH_OFFSET = 0.0
 elif TICI:
   CAMERA_OFFSET = -0.04
@@ -39,14 +40,48 @@ class LanePlanner:
     self.r_lane_change_prob = 0.
 
 
-  def parse_model(self, md):
+  def parse_model(self, md, sm, v_ego):
+    curvature = sm['controlsState'].curvature
+    mode_select = sm['carState'].cruiseState.modeSel
+    Curv = round(curvature, 4)
+    # right lane is minus
+    lane_differ = round(abs(self.lll_y[0] + self.rll_y[0]), 2)
+    lean_offset = 0
+
+    if mode_select == 3:
+      lean_offset = -0.1
+    else:
+      lean_offset = 0
+
+    if (int(Params().get("LeftCurvOffsetAdj", encoding='utf8')) != 0 or int(Params().get("RightCurvOffsetAdj", encoding='utf8')) != 0) and v_ego > 8:
+      leftCurvOffsetAdj = int(Params().get("LeftCurvOffsetAdj", encoding='utf8'))
+      rightCurvOffsetAdj = int(Params().get("RightCurvOffsetAdj", encoding='utf8'))
+      if curvature > 0.0008 and leftCurvOffsetAdj < 0 and lane_differ >= 0: # left curve
+        if lane_differ > 0.6:
+          lane_differ = 0.6          
+        lean_offset = +(abs(leftCurvOffsetAdj) * lane_differ * 0.05) # move to left
+      elif curvature > 0.0008 and leftCurvOffsetAdj > 0 and lane_differ <= 0:
+        if lane_differ > 0.6:
+          lane_differ = 0.6
+        lean_offset = -(abs(leftCurvOffsetAdj) * lane_differ * 0.05) # move to right
+      elif curvature < -0.0008 and rightCurvOffsetAdj < 0 and lane_differ >= 0: # right curve
+        if lane_differ > 0.6:
+          lane_differ = 0.6    
+        lean_offset = +(abs(rightCurvOffsetAdj) * lane_differ * 0.05) # move to left
+      elif curvature < -0.0008 and rightCurvOffsetAdj > 0 and lane_differ <= 0:
+        if lane_differ > 0.6:
+          lane_differ = 0.6    
+        lean_offset = -(abs(rightCurvOffsetAdj) * lane_differ * 0.05) # move to right
+      else:
+        lean_offset = 0
+
     if len(md.laneLines) == 4 and len(md.laneLines[0].t) == TRAJECTORY_SIZE:
       self.ll_t = (np.array(md.laneLines[1].t) + np.array(md.laneLines[2].t))/2
       # left and right ll x is the same
       self.ll_x = md.laneLines[1].x
       # only offset left and right lane lines; offsetting path does not make sense
-      self.lll_y = np.array(md.laneLines[1].y) - CAMERA_OFFSET
-      self.rll_y = np.array(md.laneLines[2].y) - CAMERA_OFFSET
+      self.lll_y = np.array(md.laneLines[1].y) - CAMERA_OFFSET + lean_offset
+      self.rll_y = np.array(md.laneLines[2].y) - CAMERA_OFFSET + lean_offset
       self.lll_prob = md.laneLineProbs[1]
       self.rll_prob = md.laneLineProbs[2]
       self.lll_std = md.laneLineStds[1]
@@ -80,7 +115,7 @@ class LanePlanner:
     self.lane_width_certainty += 0.05 * (l_prob * r_prob - self.lane_width_certainty)
     current_lane_width = abs(self.rll_y[0] - self.lll_y[0])
     self.lane_width_estimate += 0.005 * (current_lane_width - self.lane_width_estimate)
-    speed_lane_width = interp(v_ego, [0., 31.], [2.0, 3.5])
+    speed_lane_width = interp(v_ego, [0., 31.], [2.8, 3.5])
     self.lane_width = self.lane_width_certainty * self.lane_width_estimate + \
                       (1 - self.lane_width_certainty) * speed_lane_width
 
