@@ -9,7 +9,7 @@ global_alertTextMsg2 = ''
 
 
 
-def printf( txt ):
+def printf1( txt ):
     global global_alertTextMsg1
     global_alertTextMsg1 = txt
 

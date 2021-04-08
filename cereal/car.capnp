@@ -103,8 +103,8 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     dashcamMode @96;
 
     # atom
-    steerTorqueOver @97;
-    steerTorqueLow @98;
+    steerTorqueOver @106;
+    steerTorqueLow @107;
 
 
     radarCanErrorDEPRECATED @15;
@@ -126,6 +126,15 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     neosUpdateRequiredDEPRECATED @88;
     modelLagWarningDEPRECATED @93;
     startupOneplusDEPRECATED @82;
+    laneChangeManual @97;
+    emgButtonManual @98;
+    driverSteering @99;
+    modeChangeOpenpilot @100;
+    modeChangeDistcurv @101;
+    modeChangeDistance @102;
+    modeChangeOneway @103;
+    needBrake @104;
+    standStill @105;
   }
 }
 
@@ -192,8 +201,21 @@ struct CarState {
   leftBlindspot @33 :Bool; # Is there something blocking the left lane change
   rightBlindspot @34 :Bool; # Is there something blocking the right lane change
 
+  # tpms 
+  tpmsPressureFl @37 :Float32;
+  tpmsPressureFr @38 :Float32;
+  tpmsPressureRl @39 :Float32;
+  tpmsPressureRr @40 :Float32;
+
+  radarDistance @41 :Float32;
+  standStill @42 :Bool;
+  vSetDis @43 :Float32;
+  cruiseButtons @44 :Float32;
+  cruiseAccStatus @45 :Bool;
+  driverAcc @46 :Bool;
+
   # atom
-  tpms @37 :WheelSpeeds;
+  tpms @47 :WheelSpeeds;
 
 
   struct WheelSpeeds {
@@ -350,6 +372,18 @@ struct CarControl {
       chimeWarningRepeat @6;
       chimePrompt @7;
       chimeWarning2Repeat @8;
+      chimeReady @9;
+      chimeDoorOpen @10;
+      chimeGearDrive @11;
+      chimeLaneChange @12;
+      chimeLaneDeparture @13;
+      chimeRoadWarning @14;
+      chimeSeatBelt @15;
+      chimeViewUncertain @16;
+      chimeModeOpenpilot @17;
+      chimeModeDistcurv @18;
+      chimeModeDistance @19;
+      chimeModeOneway @20;
     }
   }
 
@@ -429,12 +463,14 @@ struct CarParams {
   fingerprintSource @49: FingerprintSource;
   networkLocation @50 :NetworkLocation;  # Where Panda/C2 is integrated into the car's CAN network
 
-  mdpsBus @56: Int8;
-  sasBus @57: Int8;
-  sccBus @58: Int8;
+  mdpsBus @55: Int8;
+  sasBus @56: Int8;
+  sccBus @57: Int8;
+  spasEnabled @58: Bool;
+  standStill @59: Bool;
 
   # atom
-  atomTuning @55 :AtomTuning;
+  atomTuning @60 :AtomTuning;
 
   struct AtomTuning {
     cvKPH @0 :List(Float32);
@@ -456,7 +492,10 @@ struct CarParams {
     kpV @1 :List(Float32);
     kiBP @2 :List(Float32);
     kiV @3 :List(Float32);
-    kf @4 :Float32;
+    kdBP @4 :List(Float32) = [0.];
+    kdV @5 :List(Float32) = [0.];
+    kf @6 :Float32;
+    newKfTuned @7 :Bool;
   }
 
   struct LongitudinalPIDTuning {
