@@ -43,4 +43,21 @@ public:
   bool read_db_bool(const char* param_name);
 
   std::string get(std::string key, bool block=false);
+
+  int ui_get_params(const char* param_name, int *pValue = NULL);  
+
+  inline bool getBool(const char *key) {
+    return get(key) == "1";
+  }
+
+  // write a value
+  int put(const char* key, const char* val, size_t value_size);
+
+  inline int put(const std::string &key, const std::string &val) {
+    return put(key.c_str(), val.data(), val.size());
+  }
+
+  inline int putBool(const char *key, bool val) {
+    return put(key, val ? "1" : "0", 1);
+  }
 };

@@ -8,21 +8,17 @@ from selfdrive.car.fw_versions import get_fw_versions, match_fw_to_car
 from selfdrive.swaglog import cloudlog
 import cereal.messaging as messaging
 from selfdrive.car import gen_empty_fingerprint
+from selfdrive.car.hyundai.values import CAR
 
 from cereal import car
 EventName = car.CarEvent.EventName
 
 
 def get_startup_event(car_recognized, controller_available):
-  event = EventName.startup
-  if Params().get("GitRemote", encoding="utf8") in ['git@github.com:commaai/openpilot.git', 'https://github.com/commaai/openpilot.git']:
-    if Params().get("GitBranch", encoding="utf8") not in ['devel', 'release2-staging', 'dashcam-staging', 'release2', 'dashcam']:
-      event = EventName.startupMaster
-
-  #if comma_remote and tested_branch:
-  #  event = EventName.startup
-  #else:
-  #  event = EventName.startupMaster
+  if comma_remote and tested_branch:
+    event = EventName.startup
+  else:
+    event = EventName.startupMaster
 
   if not car_recognized:
     event = EventName.startupNoCar
@@ -177,12 +173,8 @@ def get_car(logcan, sendcan):
 
   if candidate is None:
     cloudlog.warning("car doesn't match any fingerprints: %r", fingerprints)
-    candidate = "mock"
-  
-  if Params().get("CarModel", encoding="utf8") is not None:
-    car_name = Params().get("CarModel", encoding="utf8")
-    car_name = car_name.rstrip('\n')
-    candidate = car_name
+    #candidate = "mock"
+    candidate = "KIA OPTIMA HYBRID 2017 & SPORTS 2019"
 
   CarInterface, CarController, CarState = interfaces[candidate]
   car_params = CarInterface.get_params(candidate, fingerprints, car_fw)

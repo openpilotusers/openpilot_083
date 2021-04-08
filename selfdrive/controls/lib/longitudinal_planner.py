@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
-import os
 import math
-from datetime import datetime
-import time
 import numpy as np
 from common.params import Params
 from common.numpy_fast import interp
 
 import cereal.messaging as messaging
-from cereal import car
 from common.realtime import sec_since_boot
 from selfdrive.swaglog import cloudlog
 from selfdrive.config import Conversions as CV
@@ -87,18 +83,6 @@ class Planner():
     self.params = Params()
     self.first_loop = True
 
-    self.target_speed_map = 0.0
-    self.target_speed_map_counter = 0
-    self.target_speed_map_counter_check = False
-    self.target_speed_map_counter1 = 0
-    self.target_speed_map_counter2 = 0
-    self.target_speed_map_counter3 = 0
-    self.target_speed_map_dist = 0
-    self.target_speed_map_block = False
-    self.target_speed_map_sign = False
-    self.tartget_speed_offset = int(self.params.get("OpkrSpeedLimitOffset", encoding="utf8"))
-    self.vego = 0
-
   def choose_solution(self, v_cruise_setpoint, enabled):
     if enabled:
       solutions = {'cruise': self.v_cruise}
@@ -127,7 +111,6 @@ class Planner():
     """Gets called when new radarState is available"""
     cur_time = sec_since_boot()
     v_ego = sm['carState'].vEgo
-    self.vego = v_ego
 
     long_control_state = sm['controlsState'].longControlState
     v_cruise_kph = sm['controlsState'].vCruise
@@ -145,54 +128,8 @@ class Planner():
     self.v_acc_start = self.v_acc_next
     self.a_acc_start = self.a_acc_next
 
-    self.target_speed_map_counter += 1
-    if self.target_speed_map_counter >= (50+self.target_speed_map_counter1) and self.target_speed_map_counter_check == False:
-      self.target_speed_map_counter_check = True
-      os.system("logcat -d -s opkrspdlimit,opkrspd2limit | grep opkrspd | tail -n 1 | awk \'{print $7}\' > /data/params/d/LimitSetSpeedCamera &")
-      os.system("logcat -d -s opkrspddist | grep opkrspd | tail -n 1 | awk \'{print $7}\' > /data/params/d/LimitSetSpeedCameraDist &")
-      self.target_speed_map_counter3 += 1
-      if self.target_speed_map_counter3 > 2:
-        self.target_speed_map_counter3 = 0
-        os.system("logcat -c &")
-    elif self.target_speed_map_counter >= (75+self.target_speed_map_counter1):
-      self.target_speed_map_counter1 = 0
-      self.target_speed_map_counter = 0
-      self.target_speed_map_counter_check = False
-      mapspeed = self.params.get("LimitSetSpeedCamera", encoding="utf8")
-      mapspeeddist = self.params.get("LimitSetSpeedCameraDist", encoding="utf8")
-      if mapspeed is not None and mapspeeddist is not None:
-        mapspeed = int(float(mapspeed.rstrip('\n')))
-        mapspeeddist = int(float(mapspeeddist.rstrip('\n')))
-        if mapspeed > 29:
-          self.target_speed_map = mapspeed
-          self.target_speed_map_dist = mapspeeddist
-          if self.target_speed_map_dist > 1001:
-            self.target_speed_map_block = True
-          self.target_speed_map_counter1 = 80
-          os.system("logcat -c &")
-        else:
-          self.target_speed_map = 0
-          self.target_speed_map_dist = 0
-          self.target_speed_map_block = False
-      elif mapspeed is None and mapspeeddist is None and self.target_speed_map_counter2 < 2:
-        self.target_speed_map_counter2 += 1
-        self.target_speed_map_counter = 51
-        self.target_speed_map = 0
-        self.target_speed_map_dist = 0
-        self.target_speed_map_counter_check = True
-        self.target_speed_map_block = False
-        self.target_speed_map_sign = False
-      else:
-        self.target_speed_map_counter = 49
-        self.target_speed_map_counter2 = 0
-        self.target_speed_map = 0
-        self.target_speed_map_dist = 0
-        self.target_speed_map_counter_check = False
-        self.target_speed_map_block = False
-        self.target_speed_map_sign = False
-
     # Calculate speed for normal cruise control
-    if enabled and not self.first_loop and not sm['carState'].brakePressed and not sm['carState'].gasPressed:
+    if enabled and not self.first_loop and not sm['carState'].gasPressed:
       accel_limits = [float(x) for x in calc_cruise_accel_limits(v_ego, following)]
       jerk_limits = [min(-0.1, accel_limits[0]), max(0.1, accel_limits[1])]  # TODO: make a separate lookup for jerk tuning
       accel_limits_turns = limit_accel_in_turns(v_ego, sm['carState'].steeringAngleDeg, accel_limits, self.CP)
@@ -276,33 +213,5 @@ class Planner():
     longitudinalPlan.fcw = self.fcw
 
     longitudinalPlan.processingDelay = (plan_send.logMonoTime / 1e9) - sm.rcv_time['radarState']
-
-    # Send radarstate(dRel, vRel, yRel)
-    lead_1 = sm['radarState'].leadOne
-    lead_2 = sm['radarState'].leadTwo
-    longitudinalPlan.dRel1 = float(lead_1.dRel)
-    longitudinalPlan.yRel1 = float(lead_1.yRel)
-    longitudinalPlan.vRel1 = float(lead_1.vRel)
-    longitudinalPlan.dRel2 = float(lead_2.dRel)
-    longitudinalPlan.yRel2 = float(lead_2.yRel)
-    longitudinalPlan.vRel2 = float(lead_2.vRel)
-    longitudinalPlan.status2 = bool(lead_2.status)
-    cam_distance_calc = 0
-    cam_distance_calc = interp(self.vego*CV.MS_TO_KPH, [30,60,100,160], [3.75,5.5,6,7])
-    consider_speed = interp((self.vego*CV.MS_TO_KPH - self.target_speed_map), [10, 30], [1, 1.3])
-    if self.target_speed_map > 29 and self.target_speed_map_dist < cam_distance_calc*consider_speed*self.vego*CV.MS_TO_KPH:
-      longitudinalPlan.targetSpeedCamera = float(self.target_speed_map)
-      longitudinalPlan.targetSpeedCameraDist = float(self.target_speed_map_dist)
-      self.target_speed_map_sign = True
-    elif self.target_speed_map > 29 and self.target_speed_map_dist >= cam_distance_calc*consider_speed*self.vego*CV.MS_TO_KPH and self.target_speed_map_block:
-      longitudinalPlan.targetSpeedCamera = float(self.target_speed_map)
-      longitudinalPlan.targetSpeedCameraDist = float(self.target_speed_map_dist)
-      self.target_speed_map_sign = True
-    elif self.target_speed_map > 29 and self.target_speed_map_sign:
-      longitudinalPlan.targetSpeedCamera = float(self.target_speed_map)
-      longitudinalPlan.targetSpeedCameraDist = float(self.target_speed_map_dist)
-    else:
-      longitudinalPlan.targetSpeedCamera = 0
-      longitudinalPlan.targetSpeedCameraDist = 0
 
     pm.send('longitudinalPlan', plan_send)

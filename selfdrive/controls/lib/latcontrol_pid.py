@@ -1,43 +1,21 @@
 import math
 
-from selfdrive.controls.lib.pid import LatPIDController
+from selfdrive.controls.lib.pid import PIController
 from selfdrive.controls.lib.drive_helpers import get_steer_max
-from cereal import car, log
-from common.params import Params
+from cereal import log
 
 
 class LatControlPID():
   def __init__(self, CP):
-    self.pid = LatPIDController((CP.lateralTuning.pid.kpBP, CP.lateralTuning.pid.kpV),
-                                (CP.lateralTuning.pid.kiBP, CP.lateralTuning.pid.kiV),
-                                (CP.lateralTuning.pid.kdBP, CP.lateralTuning.pid.kdV),
-                                k_f=CP.lateralTuning.pid.kf, pos_limit=1.0, neg_limit=-1.0,
-                                sat_limit=CP.steerLimitTimer)
-    self.new_kf_tuned = CP.lateralTuning.pid.newKfTuned
-    self.mpc_frame = 0
-    self.params = Params()
+    self.pid = PIController((CP.lateralTuning.pid.kpBP, CP.lateralTuning.pid.kpV),
+                            (CP.lateralTuning.pid.kiBP, CP.lateralTuning.pid.kiV),
+                            k_f=CP.lateralTuning.pid.kf, pos_limit=1.0, neg_limit=-1.0,
+                            sat_limit=CP.steerLimitTimer)
 
   def reset(self):
     self.pid.reset()
 
-  # live tune referred to kegman's 
-  def live_tune(self, CP):
-    self.mpc_frame += 1
-    if self.mpc_frame % 300 == 0:
-      self.steerKpV = float(int(self.params.get("PidKp", encoding='utf8')) * 0.01)
-      self.steerKiV = float(int(self.params.get("PidKi", encoding='utf8')) * 0.001)
-      self.steerKdV = float(int(self.params.get("PidKd", encoding='utf8')) * 0.01)
-      self.steerKf = float(int(self.params.get("PidKf", encoding='utf8')) * 0.00001)
-      self.pid = LatPIDController((CP.lateralTuning.pid.kpBP, [0.1, self.steerKpV]),
-                          (CP.lateralTuning.pid.kiBP, [0.01, self.steerKiV]),
-                          (CP.lateralTuning.pid.kdBP, [self.steerKdV]),
-                          k_f=self.steerKf, pos_limit=1.0)
-      self.mpc_frame = 0
-
   def update(self, active, CS, CP, VM, params, lat_plan):
-    if self.params.get('OpkrLiveTune') == b'1':
-      self.live_tune(CP)
-
     pid_log = log.ControlsState.LateralPIDState.new_message()
     pid_log.steeringAngleDeg = float(CS.steeringAngleDeg)
     pid_log.steeringRateDeg = float(CS.steeringRateDeg)
@@ -56,12 +34,9 @@ class LatControlPID():
 
       # TODO: feedforward something based on lat_plan.rateSteers
       steer_feedforward = angle_steers_des_no_offset  # offset does not contribute to resistive torque
-      if self.new_kf_tuned:
-        _c1, _c2, _c3 = 0.35189607550172824, 7.506201251644202, 69.226826411091
-        steer_feedforward *= _c1 * CS.vEgo ** 2 + _c2 * CS.vEgo + _c3
-      else:
-        steer_feedforward *= CS.vEgo**2  # proportional to realigning tire momentum (~ lateral accel)
-      deadzone = float(int(self.params.get("IgnoreZone", encoding='utf8')) * 0.1)
+      steer_feedforward *= CS.vEgo**2  # proportional to realigning tire momentum (~ lateral accel)
+
+      deadzone = 0.0
 
       check_saturation = (CS.vEgo > 10) and not CS.steeringRateLimited and not CS.steeringPressed
       output_steer = self.pid.update(angle_steers_des, CS.steeringAngleDeg, check_saturation=check_saturation, override=CS.steeringPressed,

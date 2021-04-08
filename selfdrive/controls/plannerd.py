@@ -20,7 +20,7 @@ def plannerd_thread(sm=None, pm=None):
   lateral_planner = LateralPlanner(CP)
 
   if sm is None:
-    sm = messaging.SubMaster(['carState', 'controlsState', 'radarState', 'modelV2'],
+    sm = messaging.SubMaster(['carState', 'controlsState', 'radarState', 'modelV2', 'liveParameters'],
                              poll=['radarState', 'modelV2'])
 
   if pm is None:

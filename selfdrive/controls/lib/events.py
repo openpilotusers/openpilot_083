@@ -453,6 +453,23 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.none, .0, .1, .1),
   },
 
+
+    EventName.steerTorqueOver: {
+    ET.WARNING: Alert(
+      "TAKE CONTROL",
+      "Auto-Steering Pauses",
+      AlertStatus.userPrompt, AlertSize.mid,
+      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimePrompt, 0, 0, .3),
+  },
+  
+  EventName.steerTorqueLow: {
+    ET.WARNING: Alert(
+      "TAKE CONTROL",
+      "Temporarily Degraded Auto-Steering",
+      AlertStatus.userPrompt, AlertSize.mid,
+      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimePrompt, 0., 0., .1),
+  },
+
   EventName.steerSaturated: {
     ET.WARNING: Alert(
       "TAKE CONTROL",
