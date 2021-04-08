@@ -11,7 +11,8 @@ import selfdrive.crash as crash
 from common.basedir import BASEDIR
 from common.params import Params
 from common.text_window import TextWindow
-from selfdrive.hardware import HARDWARE
+from selfdrive.hardware import EON, HARDWARE
+from selfdrive.hardware.eon.apk import (pm_apply_packages, update_apks)
 from selfdrive.manager.helpers import unblock_stdout
 from selfdrive.manager.process import ensure_running
 from selfdrive.manager.process_config import managed_processes
@@ -29,7 +30,7 @@ def manager_init():
     ("EndToEndToggle", "0"),
     ("CompletedTrainingVersion", "0"),
     ("IsRHD", "0"),
-    ("IsMetric", "0"),
+    ("IsMetric", "1"),
     ("RecordFront", "0"),
     ("HasAcceptedTerms", "0"),
     ("HasCompletedSetup", "0"),
@@ -39,14 +40,85 @@ def manager_init():
     ("OpenpilotEnabledToggle", "1"),
     ("VisionRadarToggle", "0"),
     ("IsDriverViewEnabled", "0"),
-
     ("IsOpenpilotViewEnabled", "0"),
-    ("OpkrAutoResume", "0"),
-    ("OpkrLiveSteerRatio", "0"),
+    ("OpkrAutoShutdown", "2"),
+    ("OpkrAutoScreenDimming", "0"),
+    ("OpkrUIBrightness", "0"),
+    ("OpkrUIBrightness", "0"),
+    ("OpkrUIVolumeBoost", "0"),
+    ("OpkrEnableDriverMonitoring", "1"),
+    ("OpkrEnableLogger", "0"),
+    ("OpkrEnableGetoffAlert", "1"),
+    ("OpkrAutoResume", "1"),
+    ("OpkrVariableCruise", "1"),
+    ("OpkrLaneChangeSpeed", "45"),
+    ("OpkrAutoLaneChangeDelay", "0"),
+    ("OpkrSteerAngleCorrection", "0"),
+    ("PutPrebuiltOn", "0"),
+    ("FingerprintIssuedFix", "0"),
+    ("LdwsCarFix", "0"),
+    ("LateralControlMethod", "0"),
+    ("CruiseStatemodeSelInit", "1"),
+    ("InnerLoopGain", "35"),
+    ("OuterLoopGain", "20"),
+    ("TimeConstant", "14"),
+    ("ActuatorEffectiveness", "20"),
+    ("Scale", "1750"),
+    ("LqrKi", "10"),
+    ("DcGain", "30"),
+    ("IgnoreZone", "1"),
+    ("PidKp", "20"),
+    ("PidKi", "40"),
+    ("PidKd", "150"),
+    ("PidKf", "5"),
+    ("CameraOffsetAdj", "60"),
+    ("SteerRatioAdj", "150"),
+    ("SteerRatioMaxAdj", "180"),
+    ("SteerActuatorDelayAdj", "0"),
+    ("SteerRateCostAdj", "45"),
+    ("SteerLimitTimerAdj", "40"),
+    ("TireStiffnessFactorAdj", "85"),
+    ("SteerMaxBaseAdj", "300"),
+    ("SteerMaxAdj", "384"),
+    ("SteerDeltaUpBaseAdj", "3"),
+    ("SteerDeltaUpAdj", "3"),
+    ("SteerDeltaDownBaseAdj", "7"),
+    ("SteerDeltaDownAdj", "7"),
+    ("SteerMaxvAdj", "10"),
+    ("OpkrBatteryChargingControl", "1"),
+    ("OpkrBatteryChargingMin", "70"),
+    ("OpkrBatteryChargingMax", "80"),
+    ("LeftCurvOffsetAdj", "0"),
+    ("RightCurvOffsetAdj", "0"),
+    ("DebugUi1", "0"),
+    ("DebugUi2", "0"),
+    ("OpkrBlindSpotDetect", "1"),
+    ("OpkrMaxAngleLimit", "90"),
+    ("OpkrSpeedLimitOffset", "0"),
+    ("LimitSetSpeedCamera", "0"),
+    ("LimitSetSpeedCameraDist", "0"),
+    ("OpkrLiveSteerRatio", "1"),
+    ("OpkrVariableSteerMax", "1"),
+    ("OpkrVariableSteerDelta", "0"),
+    ("FingerprintTwoSet", "1"),
+    ("OpkrVariableCruiseProfile", "0"),
+    ("OpkrLiveTune", "0"),
+    ("OpkrDrivingRecord", "0"),
     ("OpkrTurnSteeringDisable", "0"),
-    ("OpkrPrebuilt", "0"),
-    ("OpkrAutoScreenOff", "0"),
-    ("OpkrUIBrightness", "0"),    
+    ("CarModel", ""),
+    ("OpkrHotspotOnBoot", "0"),
+    ("OpkrSSHLegacy", "1"),
+    ("ShaneFeedForward", "0"),
+    ("CruiseOverMaxSpeed", "0"),
+    ("OpkrMapDecelOnly", "0"),
+    ("JustDoGearD", "0"),
+    ("LanelessMode", "0"),
+    ("ComIssueGone", "0"),
+    ("MaxSteer", "384"),
+    ("MaxRTDelta", "112"),
+    ("MaxRateUp", "3"),
+    ("MaxRateDown", "7"),
+    ("SteerThreshold", "150"),
   ]
 
   if params.get("RecordFrontLock", encoding='utf-8') == "1":
@@ -63,6 +135,9 @@ def manager_init():
 
   if params.get("Passive") is None:
     raise Exception("Passive must be set to continue")
+
+  if EON:
+    update_apks()
 
   os.umask(0)  # Make sure we can create files with 777 permissions
 
@@ -90,6 +165,13 @@ def manager_init():
   crash.bind_user(id=dongle_id)
   crash.bind_extra(version=version, dirty=dirty, device=HARDWARE.get_device_type())
 
+  # ensure shared libraries are readable by apks
+  if EON:
+    os.chmod(BASEDIR, 0o755)
+    os.chmod("/dev/shm", 0o777)
+    os.chmod(os.path.join(BASEDIR, "cereal"), 0o755)
+    os.chmod(os.path.join(BASEDIR, "cereal", "libmessaging_shared.so"), 0o755)
+
 
 def manager_prepare():
   for p in managed_processes.values():
@@ -97,6 +179,9 @@ def manager_prepare():
 
 
 def manager_cleanup():
+  if EON:
+    pm_apply_packages('disable')
+
   for p in managed_processes.values():
     p.stop()
 
@@ -116,30 +201,13 @@ def manager_thread():
   if os.getenv("BLOCK") is not None:
     ignore += os.getenv("BLOCK").split(",")
 
+  if EON:
+    pm_apply_packages('enable')
+
   ensure_running(managed_processes.values(), started=False, not_run=ignore)
 
   started_prev = False
   params = Params()
-
-
-#params = Params()
-  EnableLogger = int(params.get("RecordFront"))
-  
-  if not EnableLogger:
-    ignore.append("loggerd")
-    ignore.append("logcatd")
-    ignore.append("logmessaged")
-    ignore.append("uploader")
-    ignore.append("updated")
-    ignore.append("deleter")
-    ignore.append("tombstoned")
-  else:
-    # save boot log
-    subprocess.call("./bootlog", cwd=os.path.join(BASEDIR, "selfdrive/loggerd"))
-
-
-
-
   sm = messaging.SubMaster(['deviceState'])
   pm = messaging.PubMaster(['managerState'])
 

@@ -79,6 +79,3 @@ class Pc(HardwareBase):
 
   def set_screen_brightness(self, percentage):
     pass
-
-  def get_ip_address(self):
-    pass

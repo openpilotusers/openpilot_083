@@ -23,6 +23,9 @@ from selfdrive.swaglog import cloudlog
 from selfdrive.thermald.power_monitoring import PowerMonitoring
 from selfdrive.version import get_git_branch, terms_version, training_version
 
+import re
+import subprocess
+
 FW_SIGNATURE = get_expected_signature()
 
 DISABLE_LTE_ONROAD = os.path.exists("/persist/disable_lte_onroad") or TICI
@@ -40,6 +43,10 @@ prev_offroad_states: Dict[str, Tuple[bool, Optional[str]]] = {}
 
 last_eon_fan_val = None
 
+mediaplayer = '/data/openpilot/selfdrive/assets/addon/mediaplayer/'
+prebuiltfile = '/data/openpilot/prebuilt'
+sshkeyfile = '/data/public_key'
+pandaflash_ongoing = '/data/openpilot/pandaflash_ongoing'
 
 def read_tz(x):
   if x is None:
@@ -123,6 +130,31 @@ def handle_fan_uno(max_cpu_temp, bat_temp, fan_speed, ignition):
 
   return new_speed
 
+def check_car_battery_voltage(should_start, pandaState, charging_disabled, msg):
+  battery_charging_control = Params().get('OpkrBatteryChargingControl') == b'1'
+  battery_charging_min = int(Params().get('OpkrBatteryChargingMin'))
+  battery_charging_max = int(Params().get('OpkrBatteryChargingMax'))
+
+  # charging disallowed if:
+  #   - there are pandaState packets from panda, and;
+  #   - 12V battery voltage is too low, and;
+  #   - onroad isn't started
+  print(pandaState)
+  
+  if charging_disabled and msg.deviceState.batteryPercent < battery_charging_min:
+    charging_disabled = False
+    os.system('echo "1" > /sys/class/power_supply/battery/charging_enabled')
+  elif not charging_disabled and msg.deviceState.batteryPercent > battery_charging_max:
+    charging_disabled = True
+    os.system('echo "0" > /sys/class/power_supply/battery/charging_enabled')
+  elif msg.deviceState.batteryCurrent < 0 and msg.deviceState.batteryPercent > battery_charging_max:
+    charging_disabled = True
+    os.system('echo "0" > /sys/class/power_supply/battery/charging_enabled')
+
+  if not battery_charging_control:
+    charging_disabled = False
+
+  return charging_disabled
 
 def set_offroad_alert_if_changed(offroad_alert: str, show_alert: bool, extra_text: Optional[str]=None):
   if prev_offroad_states.get(offroad_alert, None) == (show_alert, extra_text):
@@ -157,11 +189,11 @@ def thermald_thread():
 
   network_type = NetworkType.none
   network_strength = NetworkStrength.unknown
-  wifiIpAddress = 'N/A'
 
   current_filter = FirstOrderFilter(0., CURRENT_TAU, DT_TRML)
   cpu_temp_filter = FirstOrderFilter(0., CPU_TEMP_TAU, DT_TRML)
   pandaState_prev = None
+  charging_disabled = False
   should_start_prev = False
   handle_fan = None
   is_uno = False
@@ -184,7 +216,47 @@ def thermald_thread():
           cpr_data[str(cf)] = f.read().strip()
         except Exception:
           pass
-    cloudlog.event("CPR", data=cpr_data)
+
+  ts_last_ip = 0
+  ip_addr = '255.255.255.255'
+
+  # sound trigger
+  sound_trigger = 1
+  opkrAutoShutdown = 0
+
+  shutdown_trigger = 1
+  is_openpilot_view_enabled = 0
+
+  env = dict(os.environ)
+  env['LD_LIBRARY_PATH'] = mediaplayer
+
+  getoff_alert = params.get('OpkrEnableGetoffAlert') == b'1'
+
+  hotspot_on_boot = params.get('OpkrHotspotOnBoot') == b'1'
+  hotspot_run = False
+
+  if int(params.get('OpkrAutoShutdown')) == 0:
+    opkrAutoShutdown = 0
+  elif int(params.get('OpkrAutoShutdown')) == 1:
+    opkrAutoShutdown = 5
+  elif int(params.get('OpkrAutoShutdown')) == 2:
+    opkrAutoShutdown = 30
+  elif int(params.get('OpkrAutoShutdown')) == 3:
+    opkrAutoShutdown = 60
+  elif int(params.get('OpkrAutoShutdown')) == 4:
+    opkrAutoShutdown = 180
+  elif int(params.get('OpkrAutoShutdown')) == 5:
+    opkrAutoShutdown = 300
+  elif int(params.get('OpkrAutoShutdown')) == 6:
+    opkrAutoShutdown = 600
+  elif int(params.get('OpkrAutoShutdown')) == 7:
+    opkrAutoShutdown = 1800
+  elif int(params.get('OpkrAutoShutdown')) == 8:
+    opkrAutoShutdown = 3600
+  elif int(params.get('OpkrAutoShutdown')) == 9:
+    opkrAutoShutdown = 10800
+  else:
+    opkrAutoShutdown = 18000
 
   while 1:
     ts = sec_since_boot()
@@ -201,10 +273,11 @@ def thermald_thread():
           if startup_conditions["ignition"]:
             cloudlog.error("Lost panda connection while onroad")
           startup_conditions["ignition"] = False
+          shutdown_trigger = 1
       else:
         no_panda_cnt = 0
         startup_conditions["ignition"] = pandaState.pandaState.ignitionLine or pandaState.pandaState.ignitionCan
-
+        sound_trigger == 1
       #startup_conditions["hardware_supported"] = pandaState.pandaState.pandaType not in [log.PandaState.PandaType.whitePanda,
       #                                                                                   log.PandaState.PandaType.greyPanda]
       #set_offroad_alert_if_changed("Offroad_HardwareUnsupported", not startup_conditions["hardware_supported"])
@@ -227,13 +300,20 @@ def thermald_thread():
           pandaState_prev.pandaState.pandaType != log.PandaState.PandaType.unknown:
           params.panda_disconnect()
       pandaState_prev = pandaState
+    elif int(params.get("IsOpenpilotViewEnabled")) == 1 and int(params.get("IsDriverViewEnabled")) == 0 and is_openpilot_view_enabled == 0:
+      is_openpilot_view_enabled = 1
+      startup_conditions["ignition"] = True
+    elif int(params.get("IsOpenpilotViewEnabled")) == 0 and int(params.get("IsDriverViewEnabled")) == 0 and is_openpilot_view_enabled == 1:
+      shutdown_trigger = 0
+      sound_trigger == 0
+      is_openpilot_view_enabled = 0
+      startup_conditions["ignition"] = False
 
     # get_network_type is an expensive call. update every 10s
     if (count % int(10. / DT_TRML)) == 0:
       try:
         network_type = HARDWARE.get_network_type()
         network_strength = HARDWARE.get_network_strength(network_type)
-        wifiIpAddress = HARDWARE.get_ip_address()
       except Exception:
         cloudlog.exception("Error getting network status")
 
@@ -242,7 +322,6 @@ def thermald_thread():
     msg.deviceState.cpuUsagePercent = int(round(psutil.cpu_percent()))
     msg.deviceState.networkType = network_type
     msg.deviceState.networkStrength = network_strength
-    msg.deviceState.wifiIpAddress = wifiIpAddress
     msg.deviceState.batteryPercent = HARDWARE.get_battery_capacity()
     msg.deviceState.batteryStatus = HARDWARE.get_battery_status()
     msg.deviceState.batteryCurrent = HARDWARE.get_battery_current()
@@ -254,6 +333,17 @@ def thermald_thread():
       msg.deviceState.batteryPercent = 100
       msg.deviceState.batteryStatus = "Charging"
       msg.deviceState.batteryTempC = 0
+
+    # update ip every 10 seconds
+    ts = sec_since_boot()
+    if ts - ts_last_ip >= 10.:
+      try:
+        result = subprocess.check_output(["ifconfig", "wlan0"], encoding='utf8')  # pylint: disable=unexpected-keyword-arg
+        ip_addr = re.findall(r"inet addr:((\d+\.){3}\d+)", result)[0][0]
+      except:
+        ip_addr = 'N/A'
+      ts_last_ip = ts
+    msg.deviceState.ipAddr = ip_addr
 
     current_filter.update(msg.deviceState.batteryCurrent / 1e6)
 
@@ -351,12 +441,7 @@ def thermald_thread():
     set_offroad_alert_if_changed("Offroad_TemperatureTooHigh", (not startup_conditions["device_temp_good"]))
 
     # Handle offroad/onroad transition
-    is_rhd_region = int(Params().get("IsOpenpilotViewEnabled"))  # IsRHD
-    if is_rhd_region:
-      should_start = True   # user video
-    else:
-      should_start = all(startup_conditions.values())    
-    #should_start = all(startup_conditions.values())
+    should_start = all(startup_conditions.values())
     if should_start:
       if not should_start_prev:
         params.delete("IsOffroad")
@@ -380,27 +465,63 @@ def thermald_thread():
       if off_ts is None:
         off_ts = sec_since_boot()
 
+      if shutdown_trigger == 1 and sound_trigger == 1 and msg.deviceState.batteryStatus == "Discharging" and started_seen and (sec_since_boot() - off_ts) > 1 and getoff_alert:
+        subprocess.Popen([mediaplayer + 'mediaplayer', '/data/openpilot/selfdrive/assets/sounds/eondetach.wav'], shell = False, stdin=None, stdout=None, stderr=None, env = env, close_fds=True)
+        sound_trigger = 0
+      # shutdown if the battery gets lower than 3%, it's discharging, we aren't running for
+      # more than a minute but we were running
+      if shutdown_trigger == 1 and msg.deviceState.batteryStatus == "Discharging" and \
+         started_seen and opkrAutoShutdown and (sec_since_boot() - off_ts) > opkrAutoShutdown and not os.path.isfile(pandaflash_ongoing):
+        os.system('LD_LIBRARY_PATH="" svc power shutdown')
+
+    charging_disabled = check_car_battery_voltage(should_start, pandaState, charging_disabled, msg)
+
+    if msg.deviceState.batteryCurrent > 0:
+      msg.deviceState.batteryStatus = "Discharging"
+    else:
+      msg.deviceState.batteryStatus = "Charging"
+
+    
+    msg.deviceState.chargingDisabled = charging_disabled
+
+    prebuiltlet = Params().get('PutPrebuiltOn') == b'1'
+    if not os.path.isfile(prebuiltfile) and prebuiltlet:
+      os.system("cd /data/openpilot; touch prebuilt")
+    elif os.path.isfile(prebuiltfile) and not prebuiltlet:
+      os.system("cd /data/openpilot; rm -f prebuilt")
+
+    sshkeylet = Params().get('OpkrSSHLegacy') == b'1'
+    if not os.path.isfile(sshkeyfile) and sshkeylet:
+      os.system("cp -f /data/openpilot/selfdrive/assets/addon/key/GithubSshKeys_legacy /data/params/d/GithubSshKeys; chmod 600 /data/params/d/GithubSshKeys; touch /data/public_key")
+    elif os.path.isfile(sshkeyfile) and not sshkeylet:
+      os.system("cp -f /data/openpilot/selfdrive/assets/addon/key/GithubSshKeys_new /data/params/d/GithubSshKeys; chmod 600 /data/params/d/GithubSshKeys; rm -f /data/public_key")
+
+    # opkr hotspot
+    if hotspot_on_boot and not hotspot_run and sec_since_boot() > 60:
+      os.system("service call wifi 37 i32 0 i32 1 &")
+      hotspot_run = True
+
     # Offroad power monitoring
     power_monitor.calculate(pandaState)
     msg.deviceState.offroadPowerUsageUwh = power_monitor.get_power_used()
     msg.deviceState.carBatteryCapacityUwh = max(0, power_monitor.get_car_battery_capacity())
 
-    # Check if we need to disable charging (handled by boardd)
-    msg.deviceState.chargingDisabled = power_monitor.should_disable_charging(pandaState, off_ts)
-
-    # Check if we need to shut down
-    if power_monitor.should_shutdown(pandaState, off_ts, started_seen):
-      cloudlog.info(f"shutting device down, offroad since {off_ts}")
-      # TODO: add function for blocking cloudlog instead of sleep
-      time.sleep(10)
-      HARDWARE.shutdown()
+#    # Check if we need to disable charging (handled by boardd)
+#    msg.deviceState.chargingDisabled = power_monitor.should_disable_charging(pandaState, off_ts)
+#
+#    # Check if we need to shut down
+#    if power_monitor.should_shutdown(pandaState, off_ts, started_seen):
+#      cloudlog.info(f"shutting device down, offroad since {off_ts}")
+#      # TODO: add function for blocking cloudlog instead of sleep
+#      time.sleep(10)
+#      HARDWARE.shutdown()
 
     # If UI has crashed, set the brightness to reasonable non-zero value
     manager_state = messaging.recv_one_or_none(managerState_sock)
     if manager_state is not None:
       ui_running = "ui" in (p.name for p in manager_state.managerState.processes if p.running)
-      if ui_running_prev and not ui_running:
-        HARDWARE.set_screen_brightness(20)
+      #if ui_running_prev and not ui_running:
+        #HARDWARE.set_screen_brightness(20)
       ui_running_prev = ui_running
 
     msg.deviceState.chargingError = current_filter.x > 0. and msg.deviceState.batteryPercent < 90  # if current is positive, then battery is being discharged
@@ -415,10 +536,6 @@ def thermald_thread():
 
     should_start_prev = should_start
     startup_conditions_prev = startup_conditions.copy()
-
-
-    if usb_power:
-      power_monitor.charging_ctrl( msg, ts, 60, 40 )    
 
     # report to server once per minute
     if (count % int(60. / DT_TRML)) == 0:

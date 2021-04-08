@@ -197,6 +197,9 @@ static void update_sockets(UIState *s) {
 
   if (sm.updated("deviceState")) {
     scene.deviceState = sm["deviceState"].getDeviceState();
+
+    auto data = sm["deviceState"].getDeviceState();
+    snprintf(scene.ipAddr, sizeof(scene.ipAddr), "%s", data.getIpAddr().cStr());
   }
   if (sm.updated("pandaState")) {
     auto pandaState = sm["pandaState"].getPandaState();

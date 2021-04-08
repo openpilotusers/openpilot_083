@@ -105,6 +105,8 @@ typedef struct UIScene {
   cereal::ControlsState::AlertSize alert_size;
 
   cereal::PandaState::PandaType pandaType;
+
+  char ipAddr[20];
   NetStatus athenaStatus;
 
   cereal::DeviceState::Reader deviceState;
