@@ -14,11 +14,6 @@ class CarInterface(CarInterfaceBase):
   def __init__(self, CP, CarController, CarState):
     super().__init__(CP, CarController, CarState)
     self.cp2 = self.CS.get_can2_parser(CP)
-    self.mad_mode_enabled = True
-    self.lkas_button_alert = False
-
-    self.blinker_status = 0
-    self.blinker_timer = 0
 
   @staticmethod
   def compute_gb(accel, speed):
@@ -29,8 +24,25 @@ class CarInterface(CarInterfaceBase):
     ret = CarInterfaceBase.get_std_params(candidate, fingerprint)
 
     ret.carName = "hyundai"
-    ret.safetyModel = car.CarParams.SafetyModel.hyundai
-    #ret.safetyModel = car.CarParams.SafetyModel.hyundaiLegacy
+    
+    ret.enableCamera = True
+    ret.stoppingControl = True
+    ret.standStill = False
+
+    # ignore CAN2 address if L-CAN on the same BUS
+    ret.mdpsBus = 1 if 593 in fingerprint[1] and 1296 not in fingerprint[1] else 0
+    ret.sasBus = 1 if 688 in fingerprint[1] and 1296 not in fingerprint[1] else 0
+    ret.sccBus = 0 if 1056 in fingerprint[0] else 1 if 1056 in fingerprint[1] and 1296 not in fingerprint[1] \
+                                                                     else 2 if 1056 in fingerprint[2] else -1
+    ret.radarOffCan = False
+    ret.openpilotLongitudinalControl = False
+    ret.enableCruise = not ret.radarOffCan
+    
+    # set safety_hyundai_community only for non-SCC, MDPS harrness or SCC harrness cars or cars that have unknown issue
+    if ret.mdpsBus == 1:
+      ret.safetyModel = car.CarParams.SafetyModel.hyundaiCommunity
+    else:
+      ret.safetyModel = car.CarParams.SafetyModel.hyundaiLegacy
 
     params = Params()
     PidKp = float(int(params.get("PidKp", encoding='utf8')) * 0.01)
@@ -213,26 +225,7 @@ class CarInterface(CarInterfaceBase):
     ret.gasMaxV = [0.5, 0.5, 0.5]
     ret.brakeMaxBP = [0., 20.]
     ret.brakeMaxV = [1., 0.8]
-
-    ret.enableCamera = True
-
-    ret.stoppingControl = True
-    ret.startAccel = 0.0
-
-    ret.standStill = False
-
-    # ignore CAN2 address if L-CAN on the same BUS
-    ret.mdpsBus = 1 if 593 in fingerprint[1] and 1296 not in fingerprint[1] else 0
-    ret.sasBus = 1 if 688 in fingerprint[1] and 1296 not in fingerprint[1] else 0
-    ret.sccBus = 0 if 1056 in fingerprint[0] else 1 if 1056 in fingerprint[1] and 1296 not in fingerprint[1] \
-                                                                     else 2 if 1056 in fingerprint[2] else -1
-    ret.radarOffCan = False
-    ret.openpilotLongitudinalControl = False
-    ret.enableCruise = not ret.radarOffCan
     
-    # set safety_hyundai_community only for non-SCC, MDPS harrness or SCC harrness cars or cars that have unknown issue
-    if ret.radarOffCan or ret.mdpsBus == 1 or ret.openpilotLongitudinalControl or ret.sccBus == 1 or True:
-      ret.safetyModel = car.CarParams.SafetyModel.hyundaiCommunity
     return ret
 
   def update(self, c, can_strings):
@@ -244,21 +237,9 @@ class CarInterface(CarInterfaceBase):
     ret.canValid = self.cp.can_valid and self.cp2.can_valid and self.cp_cam.can_valid
     ret.steeringRateLimited = self.CC.steer_rate_limited if self.CC is not None else False
 
-    if self.CP.enableCruise and not self.CC.scc_live:
-      self.CP.enableCruise = False
-    elif self.CC.scc_live and not self.CP.enableCruise:
-      self.CP.enableCruise = True
-
     # most HKG cars has no long control, it is safer and easier to engage by main on
-    if self.mad_mode_enabled and not self.CC.longcontrol:
-      ret.cruiseState.enabled = ret.cruiseState.available
+    ret.cruiseState.enabled = ret.cruiseState.available
 
-
-    # low speed steer alert hysteresis logic (only for cars with steer cut off above 10 m/s)
-    if ret.vEgo < (self.CP.minSteerSpeed + 0.2) and self.CP.minSteerSpeed > 10.:
-      self.low_speed_alert = True
-    if ret.vEgo > (self.CP.minSteerSpeed + 0.7):
-      self.low_speed_alert = False
 
     buttonEvents = []
     if self.CS.cruise_buttons != self.CS.prev_cruise_buttons:
@@ -284,15 +265,6 @@ class CarInterface(CarInterfaceBase):
     ret.buttonEvents = buttonEvents
 
     events = self.create_common_events(ret)
-
-    if self.CC.longcontrol and self.CS.cruise_unavail:
-      events.add(EventName.brakeUnavailable)
-    #if abs(ret.steeringAngle) > 90. and EventName.steerTempUnavailable not in events.events:
-    #  events.add(EventName.steerTempUnavailable)
-    if self.low_speed_alert and not self.CS.mdps_bus:
-      events.add(EventName.belowSteerSpeed)
-    if self.mad_mode_enabled and not self.CC.longcontrol and EventName.pedalPressed in events.events:
-      events.events.remove(EventName.pedalPressed)
     if self.CC.lanechange_manual_timer and ret.vEgo > 0.3:
       events.add(EventName.laneChangeManual)
     if self.CC.emergency_manual_timer:

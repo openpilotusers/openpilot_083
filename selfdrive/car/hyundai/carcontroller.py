@@ -18,19 +18,23 @@ import common.log as trace1
 import common.CTime1000 as tm
 from random import randint
 import common.MoveAvg as moveavg1
-import copy
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
 
 def process_hud_alert(enabled, fingerprint, visual_alert, left_lane,
-                      right_lane, left_lane_depart, right_lane_depart):
+                      right_lane, left_lane_depart, right_lane_depart, button_on):
   sys_warning = (visual_alert == VisualAlert.steerRequired)
 
   # initialize to no line visible
   sys_state = 1
-  if left_lane and right_lane or sys_warning:  # HUD alert only display when LKAS status is active
-    sys_state = 3 if enabled or sys_warning else 4
+  if not button_on:
+    lane_visible = 0
+  if left_lane and right_lane or sys_warning:  #HUD alert only display when LKAS status is active
+    if enabled or sys_warning:
+      sys_state = 3
+    else:
+      sys_state = 4
   elif left_lane:
     sys_state = 5
   elif right_lane:
@@ -40,17 +44,17 @@ def process_hud_alert(enabled, fingerprint, visual_alert, left_lane,
   left_lane_warning = 0
   right_lane_warning = 0
   #if left_lane_depart:
-  #  left_lane_warning = 1 if fingerprint in [CAR.GENESIS_G90, CAR.GENESIS_G80] else 2
+  #  left_lane_warning = 1 if fingerprint in [CAR.GENESIS, CAR.GENESIS_G70, CAR.GENESIS_G80,
+  #                                           CAR.GENESIS_G90, CAR.GENESIS_G90_L] else 2
   #if right_lane_depart:
-  #  right_lane_warning = 1 if fingerprint in [CAR.GENESIS_G90, CAR.GENESIS_G80] else 2
+  #  right_lane_warning = 1 if fingerprint in [CAR.GENESIS, CAR.GENESIS_G70, CAR.GENESIS_G80,
+  #                                            CAR.GENESIS_G90, CAR.GENESIS_G90_L] else 2
 
   return sys_warning, sys_state, left_lane_warning, right_lane_warning
 
 
 class CarController():
   def __init__(self, dbc_name, CP, VM):
-    #self.p = CarControllerParams(CP)
-    self.p = CarControllerParams
     self.packer = CANPacker(dbc_name)
 
     self.apply_steer_last = 0
@@ -78,9 +82,9 @@ class CarController():
 
     self.dRel = 0
     self.vRel = 0
-    
+
     self.params = Params()
-    
+
     self.mode_change_switch = int(self.params.get("CruiseStatemodeSelInit", encoding='utf8'))
     self.opkr_variablecruise = self.params.get("OpkrVariableCruise", encoding='utf8') == "1"
     self.opkr_autoresume = self.params.get("OpkrAutoResume", encoding='utf8') == "1"
@@ -138,6 +142,8 @@ class CarController():
     elif CP.lateralTuning.which() == 'lqr':
       self.str_log2 = 'T={:04.0f}/{:05.3f}/{:06.4f}'.format(CP.lateralTuning.lqr.scale, CP.lateralTuning.lqr.ki, CP.lateralTuning.lqr.dcGain)
 
+
+    self.p = CarControllerParams
   def update(self, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert,
              left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, sm):
 
@@ -261,19 +267,20 @@ class CarController():
     self.lkas11_cnt %= 0x10
 
     can_sends = []
-    can_sends.append( create_lkas11(self.packer, self.lkas11_cnt, self.car_fingerprint, apply_steer, steer_req,
-                                   CS.lkas11, sys_warning, self.hud_sys_state, c ) )
+    can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active,
+                                   CS.lkas11, sys_warning, sys_state, enabled, left_lane, right_lane,
+                                   left_lane_warning, right_lane_warning, 0))
 
     if CS.mdps_bus or CS.scc_bus == 1: # send lkas11 bus 1 if mdps is on bus 1
-      can_sends.append( create_lkas11(self.packer, self.lkas11_cnt, self.car_fingerprint, apply_steer, steer_req,
-                                      CS.lkas11, sys_warning, self.hud_sys_state, c, 1 ) )
+      can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active,
+                                   CS.lkas11, sys_warning, sys_state, enabled, left_lane, right_lane,
+                                   left_lane_warning, right_lane_warning, 1))
 
-
-    # send mdps12 to LKAS to prevent LKAS error if no cancel cmd
-    can_sends.append( create_mdps12(self.packer, frame, CS.mdps12) )
+    if CS.mdps_bus: # send mdps12 to LKAS to prevent LKAS error
+      can_sends.append(create_mdps12(self.packer, frame, CS.mdps12))
 
     if steer_req:
-      can_sends.append( create_mdps12(self.packer, frame, CS.mdps12) )
+      can_sends.append(create_mdps12(self.packer, frame, CS.mdps12))
 
     str_log1 = 'CV={:03.0f}  TQ={:03.0f}  R={:03.0f}  ST={:03.0f}/{:01.0f}/{:01.0f}'.format(abs(self.model_speed), abs(new_steer), self.timer1.sampleTime(), self.steerMax, self.steerDeltaUp, self.steerDeltaDown)
 
@@ -350,7 +357,7 @@ class CarController():
     elif run_speed_ctrl:
       is_sc_run = self.SC.update(CS, sm, self)
       if is_sc_run:
-        can_sends.append(create_clu11(self.packer, self.resume_cnt, CS.clu11, self.SC.btn_type, self.SC.sc_clu_speed ))
+        can_sends.append(create_clu11(self.packer, self.resume_cnt, CS.clu11, self.SC.btn_type, self.SC.sc_clu_speed))
         self.resume_cnt += 1
       else:
         self.resume_cnt = 0

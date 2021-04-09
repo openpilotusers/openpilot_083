@@ -1,25 +1,25 @@
 import crcmod
+from common.params import Params
 from selfdrive.car.hyundai.values import CAR, CHECKSUM
 
 hyundai_checksum = crcmod.mkCrcFun(0x11D, initCrc=0xFD, rev=False, xorOut=0xdf)
 
 
 def create_lkas11(packer, frame, car_fingerprint, apply_steer, steer_req,
-                  lkas11, sys_warning, sys_state, CC, bus = 0):
+                  lkas11, sys_warning, sys_state, enabled,
+                  left_lane, right_lane,
+                  left_lane_depart, right_lane_depart, bus = 0):
 
   values = lkas11
   values["CF_Lkas_LdwsSysState"] = sys_state
   values["CF_Lkas_SysWarning"] = 3 if sys_warning else 0
-  #values["CF_Lkas_LdwsLHWarning"] = left_lane_depart
-  #values["CF_Lkas_LdwsRHWarning"] = right_lane_depart
+  values["CF_Lkas_LdwsLHWarning"] = left_lane_depart
+  values["CF_Lkas_LdwsRHWarning"] = right_lane_depart
   values["CR_Lkas_StrToqReq"] = apply_steer
   values["CF_Lkas_ActToi"] = steer_req
   values["CF_Lkas_MsgCount"] = frame % 0x10
 
-  left_lane = CC.hudControl.leftLaneVisible
-  right_lane = CC.hudControl.rightLaneVisible
-  enabled = CC.enabled
-
+  #put your car if lka icon error on cluster
   if car_fingerprint in [CAR.SONATA, CAR.PALISADE, CAR.SONATA_HEV, CAR.SANTA_FE, CAR.KONA_EV, CAR.NIRO_EV, CAR.KONA_HEV, CAR.SELTOS]:
     values["CF_Lkas_LdwsActivemode"] = int(left_lane) + (int(right_lane) << 1)
     values["CF_Lkas_LdwsOpt_USM"] = 2
@@ -163,7 +163,6 @@ def create_frt_radar_opt(packer):
 
 
 def create_mdps12(packer, frame, mdps12):
-  #values = copy.deepcopy( mdps12 )
   values = mdps12
   values["CF_Mdps_ToiActive"] = 0
   values["CF_Mdps_ToiUnavail"] = 1
