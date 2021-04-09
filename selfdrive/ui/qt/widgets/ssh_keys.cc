@@ -146,7 +146,7 @@ void OpenpilotView::refresh() {
   }
 }
 
-CarForceSet::CarForceSet() : AbstractControl("차량강제인식", "핑거프린트 문제로 차량인식이 안될경우 차량명을 입력하시면 강제 인식 합니다. 입력예시 GENESIS, SELTOS, KONA 등 차량명만 입력하면 됩니다. 대문자로 스펠링을 정확히 입력하시기 바랍니다.(자세한 차량명은 values.py 파일내에서 확인가능합니다.)", "../assets/offroad/icon_shell.png") {
+CarForceSet::CarForceSet() : AbstractControl("차량강제인식", "핑거프린트 문제로 차량인식이 안될경우 차량명을 입력하시면 강제 인식 합니다.\n\n입력예시) GENESIS, SELTOS, KONA 등 대문자로 차량명만 입력\nGENESIS, GENESIS_G70, GENESIS_G80, GENESIS_G90, AVANTE, I30, SONATA, SONATA_HEV, SONATA19, SONATA19_HEV, KONA, KONA_EV, KONA_HEV, IONIQ_EV, IONIQ_HEV, SANTA_FE, PALISADE, VELOSTER, GRANDEUR, GRANDEUR_HEV, NEXO, K3, K5, K5_HEV, SPORTAGE, SORENTO, STINGER, NIRO_EV, NIRO_HEV, CEED, K7, K7_HEV, SELTOS", "../assets/offroad/icon_shell.png") {
 
   // setup widget
   //hlayout->addStretch(1);
@@ -168,7 +168,7 @@ CarForceSet::CarForceSet() : AbstractControl("차량강제인식", "핑거프린
 
   QObject::connect(&btnc, &QPushButton::released, [=]() {
     if (btnc.text() == "설정") {
-      carname = InputDialog::getText("차량명을 입력하세요. 예) GENESIS, KONA 등)");
+      carname = InputDialog::getText("차량명은 이전메뉴 차량강제인식을 클릭하여 학인");
       if (carname.length() > 0) {
         btnc.setText("완료");
         btnc.setEnabled(false);
@@ -1215,7 +1215,7 @@ MaxRTDelta::MaxRTDelta() : AbstractControl("RT_DELTA", "판다 RT_DELTA 값을 �
   QObject::connect(&btnminus, &QPushButton::released, [=]() {
     auto str = QString::fromStdString(Params().get("MaxRTDelta"));
     int value = str.toInt();
-    value = value - 1;
+    value = value - 2;
     if (value <= 50 ) {
       value = 50;
     } else {
@@ -1228,7 +1228,7 @@ MaxRTDelta::MaxRTDelta() : AbstractControl("RT_DELTA", "판다 RT_DELTA 값을 �
   QObject::connect(&btnplus, &QPushButton::released, [=]() {
     auto str = QString::fromStdString(Params().get("MaxRTDelta"));
     int value = str.toInt();
-    value = value + 1;
+    value = value + 2;
     if (value >= 500 ) {
       value = 500;
     } else {
