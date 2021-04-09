@@ -347,6 +347,18 @@ private slots:
   void parseResponse();
 };
 
+// 오픈파일러 미리보기
+class OpenpilotView : public AbstractControl {
+  Q_OBJECT
+
+public:
+  OpenpilotView();
+
+private:
+  QPushButton btn;
+
+  void refreshc();
+};
 
 // 차량 강제등록
 class CarForceSet : public AbstractControl {

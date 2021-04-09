@@ -109,6 +109,41 @@ void SshControl::parseResponse(){
   reply = nullptr;
 }
 
+OpenpilotView::OpenpilotView() : AbstractControl("오픈파일럿 주행화면 미리보기", "오픈파일럿 주행화면을 미리보기 합니다.", "") {
+
+  // setup widget
+  hlayout->addStretch(1);
+
+  btn.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btn.setFixedSize(250, 100);
+  hlayout->addWidget(&btn);
+
+  QObject::connect(&btn, &QPushButton::released, [=]() {
+    if (ui_state->scene.started) {
+      Params().write_db_value("IsDriverViewEnabled", "0", 1);
+    } else {
+      Params().write_db_value("IsDriverViewEnabled", "1", 1);
+    }
+    refresh();
+  });
+  refresh();
+}
+
+void OpenpilotView::refresh() {
+  QString param = QString::fromStdString(Params().get("IsOpenpilotViewEnabled"));
+  if (param == "1") {
+    btn.setText("미리보기해제");
+  } else {
+    btn.setText("미리보기");
+  }
+}
 
 CarForceSet::CarForceSet() : AbstractControl("차량강제인식", "핑거프린트 문제로 차량인식이 안될경우 차량명을 입력하시면 강제 인식 합니다. 입력예시 GENESIS, SELTOS, KONA 등 차량명만 입력하면 됩니다. 대문자로 스펠링을 정확히 입력하시기 바랍니다.(자세한 차량명은 values.py 파일내에서 확인가능합니다.)", "../assets/offroad/icon_shell.png") {
 
