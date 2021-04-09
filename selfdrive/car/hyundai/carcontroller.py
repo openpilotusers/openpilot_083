@@ -250,7 +250,6 @@ class CarController():
       enabled_speed = 55
       if clu11_speed > enabled_speed or not lkas_active:
         enabled_speed = clu11_speed
-      can_sends.append( create_clu11(self.packer, frame, CS.clu11, Buttons.NONE, enabled_speed, CS.mdps_bus) )
 
     if frame == 0: # initialize counts from last received count signals
       self.lkas11_cnt = CS.lkas11["CF_Lkas_MsgCount"] + 1
@@ -262,6 +261,7 @@ class CarController():
                                    left_lane_warning, right_lane_warning, 0))
 
     if CS.mdps_bus: # send lkas11 bus 1 if mdps is on bus 1
+      can_sends.append( create_clu11(self.packer, frame, CS.clu11, Buttons.NONE, enabled_speed, CS.mdps_bus) )
       can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active,
                                    CS.lkas11, sys_warning, sys_state, enabled, left_lane, right_lane,
                                    left_lane_warning, right_lane_warning, 1))
