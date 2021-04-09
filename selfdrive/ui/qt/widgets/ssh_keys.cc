@@ -126,7 +126,8 @@ OpenpilotView::OpenpilotView() : AbstractControl("오픈파일럿 주행화면 �
   hlayout->addWidget(&btn);
 
   QObject::connect(&btn, &QPushButton::released, [=]() {
-    if (ui_state->scene.started) {
+    QString stat = QString::fromStdString(Params().get("IsOpenpilotViewEnabled"));
+    if (stat == "1") {
       Params().write_db_value("IsDriverViewEnabled", "0", 1);
     } else {
       Params().write_db_value("IsDriverViewEnabled", "1", 1);

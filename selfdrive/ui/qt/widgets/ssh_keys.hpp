@@ -347,7 +347,7 @@ private slots:
   void parseResponse();
 };
 
-// 오픈파일러 미리보기
+// 오픈파일럿 미리보기
 class OpenpilotView : public AbstractControl {
   Q_OBJECT
 
@@ -357,7 +357,7 @@ public:
 private:
   QPushButton btn;
 
-  void refreshc();
+  void refresh();
 };
 
 // 차량 강제등록
