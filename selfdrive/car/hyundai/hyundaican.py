@@ -20,7 +20,7 @@ def create_lkas11(packer, frame, car_fingerprint, apply_steer, steer_req,
   right_lane = CC.hudControl.rightLaneVisible
   enabled = CC.enabled
 
-  if car_fingerprint in [CAR.SONATA, CAR.PALISADE, CAR.KIA_NIRO_EV, CAR.SANTA_FE, CAR.IONIQ_EV_2020]:
+  if car_fingerprint in [CAR.SONATA, CAR.PALISADE, CAR.SONATA_HEV, CAR.SANTA_FE, CAR.KONA_EV, CAR.NIRO_EV, CAR.KONA_HEV, CAR.SELTOS]:
     values["CF_Lkas_LdwsActivemode"] = int(left_lane) + (int(right_lane) << 1)
     values["CF_Lkas_LdwsOpt_USM"] = 2
 
@@ -38,12 +38,16 @@ def create_lkas11(packer, frame, car_fingerprint, apply_steer, steer_req,
     # Note: the warning is hidden while the blinkers are on
     values["CF_Lkas_SysWarning"] = 4 if sys_warning else 0
 
-  elif car_fingerprint == CAR.HYUNDAI_GENESIS:
+  elif car_fingerprint == CAR.GENESIS:
     # This field is actually LdwsActivemode
     # Genesis and Optima fault when forwarding while engaged
     values["CF_Lkas_LdwsActivemode"] = 2
-  elif car_fingerprint == CAR.KIA_OPTIMA:
+  elif car_fingerprint in [CAR.K5, CAR.K5_HEV, CAR.K7, CAR.K7_HEV]:
     values["CF_Lkas_LdwsActivemode"] = 0
+
+  ldws_car_fix = Params().get("LdwsCarFix", encoding='utf8') == "1"
+  if ldws_car_fix:
+  	values["CF_Lkas_LdwsOpt_USM"] = 3
 
   dat = packer.make_can_msg("LKAS11", 0, values)[2]
 
@@ -68,22 +72,21 @@ def create_clu11(packer, frame, clu11, button, speed = None, bus = 0):
 
   if speed != None:
     values["CF_Clu_Vanz"] = speed
-
   values["CF_Clu_CruiseSwState"] = button
   values["CF_Clu_AliveCnt1"] = frame % 0x10
   return packer.make_can_msg("CLU11", bus, values)
 
 
-#def create_lfahda_mfc(packer, enabled, hda_set_speed=0):
-def create_lfahda_mfc( packer, enabled, CS ):
-  values = CS.lfahda_mfc
-  #values = {
-  #  "LFA_Icon_State": 2 if enabled else 0,
-  #  "HDA_Active": 1 if hda_set_speed else 0,
-  #  "HDA_Icon_State": 2 if hda_set_speed else 0,
-  #  "HDA_VSetReq": hda_set_speed,
-  #}
+def create_lfahda_mfc(packer, enabled, hda_set_speed=0):
+  values = {
+    "LFA_Icon_State": 2 if enabled else 0,
+    "HDA_Active": 1 if hda_set_speed else 0,
+    #"HDA_Icon_State": 2 if hda_set_speed else 0,
+    "HDA_Icon_State": 2 if enabled else 0,
+    "HDA_VSetReq": hda_set_speed,
+  }
   return packer.make_can_msg("LFAHDA_MFC", 0, values)
+
 
 def create_acc_commands(packer, enabled, accel, idx, lead_visible, set_speed, stopping):
   commands = []
