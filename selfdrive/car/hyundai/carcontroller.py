@@ -17,7 +17,6 @@ from common.params import Params
 import common.log as trace1
 import common.CTime1000 as tm
 from random import randint
-import common.MoveAvg as moveavg1
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
@@ -91,7 +90,6 @@ class CarController():
     self.opkr_turnsteeringdisable = self.params.get("OpkrTurnSteeringDisable", encoding='utf8') == "1"
     self.opkr_maxanglelimit = float(int(self.params.get("OpkrMaxAngleLimit", encoding='utf8')))
 
-    self.movAvg = moveavg1.MoveAvg()
     self.timer1 = tm.CTime1000("time")
 
     if self.params.get("OpkrVariableCruiseProfile", encoding='utf8') == "0":
@@ -240,7 +238,6 @@ class CarController():
     if not lkas_active:
       apply_steer = 0
 
-    steer_req = 1 if apply_steer else 0
     self.apply_steer_last = apply_steer
     if CS.acc_active and CS.lead_distance > 149 and self.dRel < ((CS.out.vEgo * CV.MS_TO_KPH)+5) < 100 and self.vRel < -5 and CS.out.vEgo > 7 and abs(lateral_plan.steerAngleDesireDeg) < 15:
       self.need_brake_timer += 1
@@ -271,15 +268,12 @@ class CarController():
                                    CS.lkas11, sys_warning, sys_state, enabled, left_lane, right_lane,
                                    left_lane_warning, right_lane_warning, 0))
 
-    if CS.mdps_bus or CS.scc_bus == 1: # send lkas11 bus 1 if mdps is on bus 1
+    if CS.mdps_bus: # send lkas11 bus 1 if mdps is on bus 1
       can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active,
                                    CS.lkas11, sys_warning, sys_state, enabled, left_lane, right_lane,
                                    left_lane_warning, right_lane_warning, 1))
 
     if CS.mdps_bus: # send mdps12 to LKAS to prevent LKAS error
-      can_sends.append(create_mdps12(self.packer, frame, CS.mdps12))
-
-    if steer_req:
       can_sends.append(create_mdps12(self.packer, frame, CS.mdps12))
 
     str_log1 = 'CV={:03.0f}  TQ={:03.0f}  R={:03.0f}  ST={:03.0f}/{:01.0f}/{:01.0f}'.format(abs(self.model_speed), abs(new_steer), self.timer1.sampleTime(), self.steerMax, self.steerDeltaUp, self.steerDeltaDown)

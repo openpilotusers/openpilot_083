@@ -4,7 +4,6 @@ import os
 import math
 import numpy as np
 from cereal import car, log
-from common.numpy_fast import interp
 from common.params import Params
 
 from selfdrive.car.hyundai.spdcontroller  import SpdController
@@ -21,8 +20,6 @@ class Spdctrl(SpdController):
         super().__init__( CP )
         self.cv_Raio = 0.4
         self.cv_Dist = -5
-        self.steer_mode = 0
-        self.cruise_gap = 0.0
         self.cut_in = False
         self.map_enable = False
         self.map_spdlimit_offset = 0
@@ -264,20 +261,9 @@ class Spdctrl(SpdController):
 
 
     def update_log(self, CS, set_speed, target_set_speed, long_wait_cmd ):
-        if CS.out.cruiseState.modeSel == 0:
-            self.steer_mode = 0
-        elif CS.out.cruiseState.modeSel == 1:
-            self.steer_mode = 1
-        elif CS.out.cruiseState.modeSel == 2:
-            self.steer_mode = 2
-        elif CS.out.cruiseState.modeSel == 3:
-            self.steer_mode = 3
 
-        if self.cruise_gap != CS.cruiseGapSet:
-            self.cruise_gap = CS.cruiseGapSet
-
-        str3 = 'MODE={}  VL={:03.0f}/{:03.0f}  TM={:03.0f}/{:03.0f}  TS={:03.0f}'.format( self.steer_mode, set_speed, CS.VSetDis, long_wait_cmd, self.long_curv_timer, int(round(self.target_speed)) )
-        str4 = '  RD=D:{:03.0f}/V:{:03.0f}  CG={:1.0f}  DG={}'.format(  CS.lead_distance, CS.lead_objspd, self.cruise_gap, self.seq_step_debug )
+        str3 = 'MODE={}  VL={:03.0f}/{:03.0f}  TM={:03.0f}/{:03.0f}  TS={:03.0f}'.format( CS.out.cruiseState.modeSel, set_speed, CS.VSetDis, long_wait_cmd, self.long_curv_timer, int(round(self.target_speed)) )
+        str4 = '  RD=D:{:03.0f}/V:{:03.0f}  CG={:1.0f}  DG={}'.format(  CS.lead_distance, CS.lead_objspd, CS.cruiseGapSet, self.seq_step_debug )
 
         str5 = str3 + str4
         trace1.printf2( str5 )
