@@ -20,6 +20,7 @@ class SpdctrlRelaxed(SpdController):
         super().__init__( CP )
         self.cv_Raio = 0.5
         self.cv_Dist = -5
+        self.seq_step_debug = 0
         self.cut_in = False
         self.map_enable = False
         self.map_spdlimit_offset = 0
