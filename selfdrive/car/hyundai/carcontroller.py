@@ -9,8 +9,8 @@ from common.numpy_fast import interp
 
 # speed controller
 from selfdrive.car.hyundai.spdcontroller  import SpdController
-from selfdrive.car.hyundai.spdctrlSlow  import SpdctrlSlow
-from selfdrive.car.hyundai.spdctrlNormal  import SpdctrlNormal
+from selfdrive.car.hyundai.spdctrl  import Spdctrl
+from selfdrive.car.hyundai.spdctrlRelaxed  import SpdctrlRelaxed
 
 from common.params import Params
 import common.log as trace1
