@@ -146,9 +146,12 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.PALISADE:
       ret.mass = 1999. + STD_CARGO_KG
       ret.wheelbase = 2.90
-    elif candidate in [CAR.AVANTE, CAR.I30]:
-      ret.mass = 1275. + STD_CARGO_KG
-      ret.wheelbase = 2.7
+    elif candidate == CAR.AVANTE:
+      ret.mass = 1245. + STD_CARGO_KG
+      ret.wheelbase = 2.72
+    elif candidate == CAR.I30:
+      ret.mass = 1380. + STD_CARGO_KG
+      ret.wheelbase = 2.65
     elif candidate == CAR.KONA:
       ret.mass = 1275. + STD_CARGO_KG
       ret.wheelbase = 2.7
@@ -177,7 +180,7 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.STINGER:
       ret.mass = 1825.0 + STD_CARGO_KG
       ret.wheelbase = 2.906 # https://www.kia.com/us/en/stinger/specs
-    elif candidate == CAR.FORTE:
+    elif candidate == CAR.K3:
       ret.mass = 3558. * CV.LB_TO_KG
       ret.wheelbase = 2.80
     elif candidate == CAR.CEED:
@@ -290,18 +293,7 @@ class CarInterface(CarInterfaceBase):
 
   # handle button presses
     for b in ret.buttonEvents:
-      # do disable on button down
-      #if b.type == ButtonType.cancel and b.pressed:
-      #  events.add(EventName.buttonCancel)
-      if self.CC.longcontrol and not self.CC.scc_live:
-        # do enable on both accel and decel buttons
-        if b.type in [ButtonType.accelCruise, ButtonType.decelCruise] and not b.pressed:
-          events.add(EventName.buttonEnable)
-        if EventName.wrongCarMode in events.events:
-          events.events.remove(EventName.wrongCarMode)
-        if EventName.pcmDisable in events.events:
-          events.events.remove(EventName.pcmDisable)
-      elif not self.CC.longcontrol and ret.cruiseState.enabled:
+      if ret.cruiseState.enabled:
         # do enable on decel button only
         if b.type == ButtonType.decelCruise and not b.pressed:
           events.add(EventName.buttonEnable)
