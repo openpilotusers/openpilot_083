@@ -3,7 +3,7 @@
 import os
 import math
 import numpy as np
-from cereal import log
+from cereal import car, log
 from common.numpy_fast import interp
 from common.params import Params
 
