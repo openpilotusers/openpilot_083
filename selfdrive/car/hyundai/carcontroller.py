@@ -146,13 +146,6 @@ class CarController():
              left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, sm):
 
     # *** compute control surfaces ***
-
-    # gas and brake
-    apply_accel = actuators.gas - actuators.brake
-
-    apply_accel, self.accel_steady = accel_hysteresis(apply_accel, self.accel_steady)
-    apply_accel = clip(apply_accel * ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX)
-
     param = self.p
 
     #self.model_speed = 255 - self.SC.calc_va(sm, CS.out.vEgo)
