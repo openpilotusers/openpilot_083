@@ -63,7 +63,7 @@ class CarController():
     self.command_load = 0
     self.params = Params()
 
-    self.SC = SpdctrlSlow()
+    self.SC = Spdctrl()
     self.traceCC = trace1.Loger("CarController")
 
 
