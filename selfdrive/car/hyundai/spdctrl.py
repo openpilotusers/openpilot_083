@@ -36,15 +36,13 @@ class Spdctrl(SpdController):
         self.hesitant_timer = 0
         self.map_decel_only = Params().get("OpkrMapDecelOnly", encoding='utf8') == "1"
 
-    def update_lead(self, sm, CS, dRel, yRel, vRel):
+    def update_lead(self, sm, CS, dRel, vRel):
         self.map_spdlimit_offset = int(Params().get("OpkrSpeedLimitOffset", encoding='utf8'))
 
         plan = sm['longitudinalPlan']
         dRele = plan.dRel1 #EON Lead
-        yRele = plan.yRel1 #EON Lead
         vRele = plan.vRel1 * 3.6 + 0.5 #EON Lead
         dRelef = plan.dRel2 #EON Lead
-        yRelef = plan.yRel2 #EON Lead
         vRelef = plan.vRel2 * 3.6 + 0.5 #EON Lead
         lead2_status = plan.status2
         self.target_speed_camera = plan.targetSpeedCamera + round(plan.targetSpeedCamera*0.01*self.map_spdlimit_offset)
@@ -66,7 +64,7 @@ class Spdctrl(SpdController):
         dRel2 = 140
         vRel2 = 0
 
-        #dRel, yRel, vRel = self.get_lead( sm, CS )
+        #dRel, vRel = self.get_lead( sm, CS )
         if 1 < dRele < 149:
             dRel = int(dRele) # dRele(이온 차간간격)값 사용
             vRel = int(vRele)
