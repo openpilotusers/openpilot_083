@@ -8,7 +8,7 @@
 #include "common/params.h"
 #include "clutil.h"
 
-const int  POLYFIT_DEGREE = 4;
+const int POLYFIT_DEGREE = 4;
 const int MODEL_PATH_DISTANCE = 192;
 const int MIN_VALID_LEN = 10;
 
