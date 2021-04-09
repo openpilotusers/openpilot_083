@@ -134,9 +134,9 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.GENESIS_G90:
       ret.mass = 2200
       ret.wheelbase = 3.15
-    elif candidate in [CAR.SANTA_FE]:
+    elif candidate == CAR.SANTA_FE:
       ret.mass = 1694 + STD_CARGO_KG
-      ret.wheelbase = 2.766
+      ret.wheelbase = 2.765
     elif candidate in [CAR.SONATA, CAR.SONATA_HEV]:
       ret.mass = 1513. + STD_CARGO_KG
       ret.wheelbase = 2.84
@@ -162,7 +162,7 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 1490. + STD_CARGO_KG   #weight per hyundai site https://www.hyundaiusa.com/ioniq-electric/specifications.aspx
       ret.wheelbase = 2.7
     elif candidate in [CAR.GRANDEUR, CAR.GRANDEUR_HEV]:
-      ret.mass = 1640. + STD_CARGO_KG
+      ret.mass = 1675. + STD_CARGO_KG
       ret.wheelbase = 2.845
     elif candidate == CAR.VELOSTER:
       ret.mass = 3558. * CV.LB_TO_KG
@@ -175,14 +175,14 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 1985. + STD_CARGO_KG
       ret.wheelbase = 2.78
     elif candidate in [CAR.K5, CAR.K5_HEV]:
-      ret.wheelbase = 2.80
-      ret.mass = 1595. + STD_CARGO_KG
+      ret.wheelbase = 2.805
+      ret.mass = 1600. + STD_CARGO_KG
     elif candidate == CAR.STINGER:
       ret.mass = 1825.0 + STD_CARGO_KG
       ret.wheelbase = 2.906 # https://www.kia.com/us/en/stinger/specs
     elif candidate == CAR.K3:
-      ret.mass = 3558. * CV.LB_TO_KG
-      ret.wheelbase = 2.80
+      ret.mass = 1260. + STD_CARGO_KG
+      ret.wheelbase = 2.70
     elif candidate == CAR.CEED:
       ret.mass = 1350. + STD_CARGO_KG
       ret.wheelbase = 2.65
@@ -193,8 +193,8 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 1737. + STD_CARGO_KG
       ret.wheelbase = 2.7
     elif candidate in [CAR.K7, CAR.K7_HEV]:
-      ret.mass = 1640. + STD_CARGO_KG
-      ret.wheelbase = 2.845
+      ret.mass = 1680. + STD_CARGO_KG
+      ret.wheelbase = 2.855
     elif candidate == CAR.SELTOS:
       ret.mass = 1310. + STD_CARGO_KG
       ret.wheelbase = 2.6
