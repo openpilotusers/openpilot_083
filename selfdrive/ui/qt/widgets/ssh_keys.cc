@@ -1818,7 +1818,7 @@ SteerMaxBase::SteerMaxBase() : AbstractControl("SteerMax기본값", "SteerMax기
   QObject::connect(&btnminus, &QPushButton::released, [=]() {
     auto str = QString::fromStdString(Params().get("SteerMaxBaseAdj"));
     int value = str.toInt();
-    value = value - 1;
+    value = value - 2;
     if (value <= 200 ) {
       value = 200;
     } else {
@@ -1831,7 +1831,7 @@ SteerMaxBase::SteerMaxBase() : AbstractControl("SteerMax기본값", "SteerMax기
   QObject::connect(&btnplus, &QPushButton::released, [=]() {
     auto str = QString::fromStdString(Params().get("SteerMaxBaseAdj"));
     int value = str.toInt();
-    value = value + 1;
+    value = value + 2;
     if (value >= 384 ) {
       value = 384;
     } else {
@@ -1879,9 +1879,9 @@ SteerMaxMax::SteerMaxMax() : AbstractControl("SteerMax최대값", "SteerMax최�
   QObject::connect(&btnminus, &QPushButton::released, [=]() {
     auto str = QString::fromStdString(Params().get("SteerMaxAdj"));
     int value = str.toInt();
-    value = value - 1;
-    if (value <= 255 ) {
-      value = 255;
+    value = value - 2;
+    if (value <= 254 ) {
+      value = 254;
     } else {
     }
     QString values = QString::number(value);
@@ -1892,7 +1892,7 @@ SteerMaxMax::SteerMaxMax() : AbstractControl("SteerMax최대값", "SteerMax최�
   QObject::connect(&btnplus, &QPushButton::released, [=]() {
     auto str = QString::fromStdString(Params().get("SteerMaxAdj"));
     int value = str.toInt();
-    value = value + 1;
+    value = value + 2;
     if (value >= 1000 ) {
       value = 1000;
     } else {
