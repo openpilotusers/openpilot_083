@@ -220,7 +220,12 @@ function launch {
   tmux capture-pane -pq -S-1000 > /tmp/launch_log
 
   # ssh key restore
-  SSH_KEY=$(/data/data/com.termux/files/usr/bin/cat /data/params/d/OpkrSSHLegacy)
+  if [ -f "/data/params/d/OpkrSSHLegacy" ]; then
+    SSH_KEY=$(/data/data/com.termux/files/usr/bin/cat /data/params/d/OpkrSSHLegacy)
+  else
+    cp -f /data/openpilot/selfdrive/assets/addon/key/GithubSshKeys_legacy /data/params/d/GithubSshKeys
+    chmod 600 /data/params/d/GithubSshKeys
+  fi
   if [ "$SSH_KEY" == "1" ]; then
     cp -f /data/openpilot/selfdrive/assets/addon/key/GithubSshKeys_legacy /data/params/d/GithubSshKeys
     chmod 600 /data/params/d/GithubSshKeys

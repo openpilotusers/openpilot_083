@@ -22,8 +22,8 @@ class CAR:
   GENESIS_G80 = "GENESIS G80 2017"
   GENESIS_G90 = "GENESIS G90 2017"
   # hyundai
-  ELANTRA = "HYUNDAI ELANTRA LIMITED ULTIMATE 2017"
-  ELANTRA_GT_I30 = "HYUNDAI I30 N LINE 2019 & GT 2018 DCT"
+  AVANTE = "HYUNDAI AVANTE LIMITED ULTIMATE 2017"
+  I30 = "HYUNDAI I30 N LINE 2019 & GT 2018 DCT"
   SONATA = "HYUNDAI SONATA 2020"
   SONATA_HEV = "HYUNDAI SONATA HEV 2020"
   SONATA19 = "HYUNDAI SONATA 2019"
@@ -40,17 +40,17 @@ class CAR:
   GRANDEUR_HEV = "GRANDEUR IG HEV 2019"
   NEXO = "HYUNDAI NEXO"
   # kia
-  FORTE = "KIA FORTE E 2018"
-  OPTIMA = "KIA OPTIMA SX 2019 & 2016"
-  OPTIMA_HEV = "KIA OPTIMA HYBRID 2017 & SPORTS 2019"
+  K3 = "KIA K3 E 2018"
+  K5 = "KIA K5 SX 2019 & 2016"
+  K5_HEV = "KIA K5 HYBRID 2017 & SPORTS 2019"
   SPORTAGE = "KIA SPORTAGE S 2020"
   SORENTO = "KIA SORENTO GT LINE 2018"
   STINGER = "KIA STINGER GT2 2018"
   NIRO_EV = "KIA NIRO EV 2020 PLATINUM"
   NIRO_HEV = "KIA NIRO HEV 2018"
   CEED = "KIA CEED 2019"
-  CADENZA = "KIA K7 2016-2019"
-  CADENZA_HEV = "KIA K7 HEV 2016-2019"
+  K7 = "KIA K7 2016-2019"
+  K7_HEV = "KIA K7 HEV 2016-2019"
   SELTOS = "KIA SELTOS 2021"
 
 class Buttons:
@@ -61,10 +61,10 @@ class Buttons:
   CANCEL = 4
 
 params = Params()
-fingerprint_issued_fix = params.get("FingerprintIssuedFix", encoding='utf8') == "1"
-fingerprint_two = params.get("FingerprintTwoSet", encoding='utf8') == "1"
+fingerprint_issued_fix = params.get('FingerprintIssuedFix') == b'1'
+fingerprint_two = params.get('FingerprintTwoSet') == b'1'
 
-if fingerprint_issued_fix: # 핑거인식문제 혹은 다른차량과 핑거프린트 충돌이 나는경우 여기다가 핑거를 넣으시고 개발자 메뉴에서 핑거프린트 이슈차량 전용을 켜면 적용됩니다.
+if fingerprint_issued_fix:
   FINGERPRINTS = {
     # genesis
     CAR.GENESIS: [{}],
@@ -72,8 +72,8 @@ if fingerprint_issued_fix: # 핑거인식문제 혹은 다른차량과 핑거프
     CAR.GENESIS_G80: [{}],
     CAR.GENESIS_G90: [{}],
     # hyundai
-    CAR.ELANTRA: [{}],
-    CAR.ELANTRA_GT_I30: [{}],
+    CAR.AVANTE: [{}],
+    CAR.I30: [{}],
     CAR.SONATA: [{}],
     CAR.SONATA_HEV: [{}],
     CAR.SONATA19: [{}],
@@ -90,9 +90,9 @@ if fingerprint_issued_fix: # 핑거인식문제 혹은 다른차량과 핑거프
     CAR.GRANDEUR_HEV: [{}],
     CAR.NEXO: [{}],
     # kia
-    CAR.FORTE: [{}],
-    CAR.OPTIMA: [{}],
-    CAR.OPTIMA_HEV: [{}],
+    CAR.K3: [{}],
+    CAR.K5: [{}],
+    CAR.K5_HEV: [{}],
     CAR.SPORTAGE: [{}],
     CAR.SORENTO: [{}],
     CAR.STINGER: [{}],
@@ -110,11 +110,11 @@ if fingerprint_issued_fix: # 핑거인식문제 혹은 다른차량과 핑거프
                    {68: 8, 127: 8, 304: 8, 320: 8, 339: 8, 352: 8, 356: 4, 544: 8, 546: 8, 576: 8, 832: 8, 881: 8, 882: 8, 902: 8, 903: 8, 916: 8, 1040: 8, 1056: 8, 1057: 8, 1078: 4, 1136: 6, 1173: 8, 1225: 8, 1265: 4, 1280: 1, 1287: 4, 1290: 8, 1291: 8, 1292: 8, 1294: 8, 1322: 8, 1342: 6, 1345: 8, 1348: 8, 1355: 8, 1363: 8, 1369: 8, 1407: 8, 1419: 8, 1427: 6, 1429: 8, 1430: 8, 1448: 8, 1456: 4, 1470: 8, 1476: 8, 1535: 8},
                    {68: 8, 127: 8, 304: 8, 320: 8, 339: 8, 352: 8, 356: 4, 544: 8, 576: 8, 832: 8, 881: 8, 882: 8, 902: 8, 903: 8, 916: 8, 1040: 8, 1056: 8, 1057: 8, 1078: 4, 1136: 6, 1173: 8, 1265: 4, 1280: 1, 1287: 4, 1290: 8, 1291: 8, 1292: 8, 1294: 8, 1322: 8, 1345: 8, 1348: 8, 1355: 8, 1363: 8, 1369: 8, 1407: 8, 1419: 8, 1427: 6, 1429: 8, 1430: 8, 1448: 8, 1456: 4, 1470: 8, 1476: 8, 1535: 8}], 
     CAR.CEED: [{}],
-    CAR.CADENZA: [{}],  
-    CAR.CADENZA_HEV: [{}],
+    CAR.K7: [{}],  
+    CAR.K7_HEV: [{}],
     CAR.SELTOS: [{}]
   }
-else: # 핑거 프린트 이슈 없는 차량은 이곳에 넣으세요.
+else:
   FINGERPRINTS = {
     # genesis
     CAR.GENESIS: [{
@@ -144,10 +144,10 @@ else: # 핑거 프린트 이슈 없는 차량은 이곳에 넣으세요.
       67: 8, 68: 8, 127: 8, 304: 8, 320: 8, 339: 8, 356: 4, 358: 6, 359: 8, 544: 8, 593: 8, 608: 8, 688: 5, 809: 8, 832: 8, 854: 7, 870: 7, 871: 8, 872: 8, 897: 8, 902: 8, 903: 8, 916: 8, 1040: 8, 1056: 8, 1057: 8, 1064: 8, 1078: 4, 1107: 5, 1136: 8, 1151: 6, 1156: 8, 1157: 4, 1162: 4, 1168: 7, 1170: 8, 1173: 8, 1184: 8, 1265: 4, 1280: 1, 1281: 3, 1287: 4, 1290: 8, 1292: 8, 1294: 8, 1312: 8, 1322: 8, 1342: 6, 1345: 8, 1348: 8, 1363: 8, 1369: 8, 1370: 8, 1371: 8, 1378: 4, 1384: 8, 1407: 8, 1419: 8, 1425: 2, 1427: 6, 1434: 2, 1456: 4, 1470: 8	
     }],
     # hyundai
-    CAR.ELANTRA: [{
+    CAR.AVANTE: [{
       66: 8, 67: 8, 68: 8, 127: 8, 273: 8, 274: 8, 275: 8, 339: 8, 356: 4, 399: 8, 512: 6, 544: 8, 593: 8, 608: 8, 688: 5, 790: 8, 809: 8, 897: 8, 832: 8, 899: 8, 902: 8, 903: 8, 905: 8, 909: 8, 916: 8, 1040: 8, 1056: 8, 1057: 8, 1078: 4, 1170: 8, 1265: 4, 1280: 1, 1282: 4, 1287: 4, 1290: 8, 1292: 8, 1294: 8, 1312: 8, 1314: 8, 1322: 8, 1345: 8, 1349: 8, 1351: 8, 1353: 8, 1363: 8, 1366: 8, 1367: 8, 1369: 8, 1407: 8, 1415: 8, 1419: 8, 1425: 2, 1427: 6, 1440: 8, 1456: 4, 1472: 8, 1486: 8, 1487: 8, 1491: 8, 1530: 8, 1532: 5, 2001: 8, 2003: 8, 2004: 8, 2009: 8, 2012: 8, 2016: 8, 2017: 8, 2024: 8, 2025: 8
     }],
-    CAR.ELANTRA_GT_I30: [{
+    CAR.I30: [{
       66: 8, 67: 8, 68: 8, 127: 8, 128: 8, 129: 8, 273: 8, 274: 8, 275: 8, 339: 8, 354: 3, 356: 4, 399: 8, 512: 6, 544: 8, 593: 8, 608: 8, 688: 5, 790: 8, 809: 8, 884: 8, 897: 8, 899: 8, 902: 8, 903: 8, 905: 8, 909: 8, 916: 8, 1040: 8, 1056: 8, 1057: 8, 1078: 4, 1151: 6, 1168: 7, 1170: 8, 1193: 8, 1265: 4, 1280: 1, 1282: 4, 1287: 4, 1290: 8, 1292: 8, 1294: 8, 1312: 8, 1322: 8, 1345: 8, 1348: 8, 1349: 8, 1351: 8, 1353: 8, 1356: 8, 1363: 8, 1365: 8, 1366: 8, 1367: 8, 1369: 8, 1407: 8, 1414: 3, 1415: 8, 1427: 6, 1440: 8, 1456: 4, 1470: 8, 1486: 8, 1487: 8, 1491: 8, 1530: 8, 1952: 8, 1960: 8, 1988: 8, 2000: 8, 2001: 8, 2005: 8, 2008: 8, 2009: 8, 2013: 8, 2017: 8, 2025: 8
       },{
       66: 8, 67: 8, 68: 8, 127: 8, 128: 8, 129: 8, 273: 8, 274: 8, 275: 8, 339: 8, 354: 3, 356: 4, 399: 8, 512: 6, 544: 8, 593: 8, 608: 8, 688: 5, 790: 8, 809: 8, 832: 8, 897: 8, 899: 8, 902: 8, 903: 8, 905: 8, 909: 8, 916: 8, 1040: 8, 1056: 8, 1057: 8, 1078: 4, 1151: 6, 1168: 7, 1170: 8, 1265: 4, 1280: 1, 1282: 4, 1287: 4, 1290: 8, 1292: 8, 1294: 8, 1312: 8, 1322: 8, 1342: 6, 1345: 8, 1348: 8, 1349: 8, 1351: 8, 1353: 8, 1356: 8, 1363: 8, 1366: 8, 1367: 8, 1369: 8, 1407: 8, 1414: 3, 1415: 8, 1419: 8, 1440: 8, 1456: 4, 1470: 8, 1486: 8, 1487: 8, 1491: 8, 1530: 8
@@ -294,10 +294,10 @@ else: # 핑거 프린트 이슈 없는 차량은 이곳에 넣으세요.
       127: 8, 145: 8, 146: 8, 304: 8, 320: 8, 339: 8, 352: 8, 356: 4, 512: 6, 544: 8, 546: 8, 593: 8, 688: 5, 832: 8, 881: 8, 882: 8, 897: 8, 902: 8, 903: 8, 905: 8, 908: 8, 909: 8, 912: 7, 916: 8, 1056: 8, 1057: 8, 1078: 4, 1136: 8, 1151: 8, 1155: 8, 1156: 8, 1157: 4, 1162: 8, 1164: 8, 1168: 7, 1173: 8, 1174: 8, 1180: 8, 1183: 8, 1186: 2, 1191: 2, 1192: 8, 1193: 8, 1210: 8, 1219: 8, 1220: 8, 1222: 6, 1223: 8, 1224: 8, 1227: 8, 1230: 6, 1231: 6, 1265: 4, 1268: 8, 1280: 1, 1287: 4, 1290: 8, 1291: 8, 1292: 8, 1294: 8, 1297: 8, 1298: 8, 1305: 8, 1312: 8, 1315: 8, 1316: 8, 1322: 8, 1324: 8, 1342: 6, 1345: 8, 1348: 8, 1355: 8, 1363: 8, 1369: 8, 1371: 8, 1407: 8, 1419: 8, 1427: 6, 1429: 8, 1430: 8, 1437: 8, 1456: 4, 1460: 8, 1470: 8, 1484: 8, 1507: 8, 1520: 8, 1535: 8
       }],
     # kia
-    CAR.FORTE: [{
+    CAR.K3: [{
       67: 8, 127: 8, 304: 8, 320: 8, 339: 8, 356: 4, 544: 8, 593: 8, 608: 8, 688: 5, 809: 8, 832: 8, 854: 7, 870: 7, 871: 8, 872: 8, 897: 8, 902: 8, 903: 8, 909: 8, 916: 8, 1040: 8, 1042: 8, 1078: 4, 1107: 5, 1136: 8, 1156: 8, 1170: 8, 1173: 8, 1191: 2, 1225: 8, 1265: 4, 1280: 4, 1287: 4, 1292: 8, 1294: 8, 1312: 8, 1322: 8, 1342: 6, 1345: 8, 1348: 8, 1363: 8, 1369: 8, 1384: 8, 1394: 8, 1407: 8, 1427: 6, 1456: 4, 1470: 8
     }],
-    CAR.OPTIMA: [{
+    CAR.K5: [{
       64: 8, 66: 8, 67: 8, 68: 8, 127: 8, 273: 8, 274: 8, 275: 8, 339: 8, 356: 4, 399: 8, 447: 8, 512: 6, 544: 8, 593: 8, 608: 8, 688: 5, 790: 8, 809: 8, 832: 8, 884: 8, 897: 8, 899: 8, 902: 8, 903: 6, 909: 8, 916: 8, 1040: 8, 1056: 8, 1057: 8, 1078: 4, 1151: 6, 1168: 7, 1170: 8, 1186: 2, 1191: 2, 1253: 8, 1254: 8, 1255: 8, 1265: 4, 1280: 1, 1282: 4, 1287: 4, 1290: 8, 1292: 8, 1294: 8, 1312: 8, 1322: 8, 1331: 8, 1332: 8, 1333: 8, 1342: 6, 1345: 8, 1348: 8, 1349: 8, 1351: 8, 1353: 8, 1363: 8, 1365: 8, 1366: 8, 1367: 8, 1369: 8, 1407: 8, 1414: 3, 1415: 8, 1419: 8, 1425: 2, 1427: 6, 1440: 8, 1456: 4, 1470: 8, 1472: 8, 1486: 8, 1487: 8, 1491: 8, 1530: 8, 1532: 5, 1952: 8, 1960: 8, 1988: 8, 1996: 8, 2001: 8, 2004: 8, 2008: 8, 2009: 8, 2012: 8, 2016: 8, 2017: 8, 2024: 8, 2025: 8
       },{
       64: 8, 66: 8, 67: 8, 68: 8, 127: 8, 128: 8, 129: 8, 273: 8, 274: 8, 275: 8, 339: 8, 354: 3, 356: 4, 399: 8, 512: 6, 544: 8, 593: 8, 608: 8, 688: 5, 790: 8, 809: 8, 832: 8, 897: 8, 899: 8, 902: 8, 903: 6, 912: 7, 916: 8, 1040: 8, 1056: 8, 1057: 8, 1078: 4, 1151: 6, 1168: 7, 1170: 8, 1265: 4, 1268: 8, 1280: 1, 1282: 4, 1287: 4, 1290: 8, 1292: 8, 1294: 8, 1312: 8, 1322: 8, 1331: 8, 1332: 8, 1333: 8, 1342: 6, 1345: 8, 1348: 8, 1349: 8, 1351: 8, 1353: 8, 1356: 8, 1363: 8, 1365: 8, 1366: 8, 1367: 8, 1369: 8, 1407: 8, 1419: 8, 1425: 2, 1427: 6, 1440: 8, 1456: 4, 1470: 8, 1472: 8, 1491: 8, 1492: 8
@@ -310,7 +310,7 @@ else: # 핑거 프린트 이슈 없는 차량은 이곳에 넣으세요.
       },{
       64: 8, 66: 8, 67: 8, 68: 8, 127: 8, 128: 8, 129: 8, 273: 8, 274: 8, 275: 8, 339: 8, 354: 3, 356: 4, 399: 8, 447: 8, 512: 6, 544: 8, 558: 8, 593: 8, 608: 8, 640: 8, 688: 5, 790: 8, 809: 8, 832: 8, 884: 8, 897: 8, 899: 8, 902: 8, 903: 6, 909: 8, 912: 7, 916: 8, 1040: 8, 1056: 8, 1057: 8, 1078: 4, 1151: 6, 1168: 7, 1170: 8, 1186: 2, 1191: 2, 1253: 8, 1254: 8, 1255: 8, 1265: 4, 1268: 8, 1280: 1, 1282: 4, 1287: 4, 1290: 8, 1292: 8, 1294: 8, 1312: 8, 1322: 8, 1331: 8, 1332: 8, 1333: 8, 1342: 6, 1345: 8, 1348: 8, 1349: 8, 1351: 8, 1353: 8, 1356: 8, 1363: 8, 1365: 8, 1366: 8, 1367: 8, 1369: 8, 1407: 8, 1414: 3, 1415: 8, 1419: 8, 1425: 2, 1427: 6, 1440: 8, 1456: 4, 1470: 8, 1472: 8, 1486: 8, 1487: 8, 1491: 8, 1492: 8, 1530: 8, 1532: 5, 1792: 8, 1872: 8, 1937: 8, 1953: 8, 1968: 8, 1988: 8, 1996: 8, 2000: 8, 2001: 8, 2004: 8, 2008: 8, 2009: 8, 2012: 8, 2015: 8, 2016: 8, 2017: 8, 2024: 8, 2025: 8
     }],
-    CAR.OPTIMA_HEV: [{
+    CAR.K5_HEV: [{
       68: 8, 127: 8, 304: 8, 320: 8, 339: 8, 352: 8, 356: 4, 544: 8, 593: 8, 688: 5, 832: 8, 881: 8, 882: 8, 897: 8, 902: 8, 903: 6, 916: 8, 1040: 8, 1056: 8, 1057: 8, 1078: 4, 1136: 6, 1151: 6, 1168: 7, 1173: 8, 1236: 2, 1265: 4, 1280: 1, 1287: 4, 1290: 8, 1291: 8, 1292: 8, 1322: 8, 1331: 8, 1332: 8, 1333: 8, 1342: 6, 1345: 8, 1348: 8, 1355: 8, 1363: 8, 1369: 8, 1371: 8, 1407: 8, 1419: 8, 1427: 6, 1429: 8, 1430: 8, 1448: 8, 1456: 4, 1470: 8, 1476: 8, 1535: 8
       },{
       68: 8, 127: 8, 304: 8, 320: 8, 339: 8, 352: 8, 356: 4, 544: 8, 576: 8, 593: 8, 688: 5, 881: 8, 882: 8, 897: 8, 902: 8, 903: 8, 909: 8, 912: 7, 916: 8, 1040: 8, 1056: 8, 1057: 8, 1078: 4, 1136: 6, 1151: 6, 1168: 7, 1173: 8, 1180: 8, 1186: 2, 1191: 2, 1265: 4, 1268: 8, 1280: 1, 1287: 4, 1290: 8, 1291: 8, 1292: 8, 1294: 8, 1312: 8, 1322: 8, 1342: 6, 1345: 8, 1348: 8, 1355: 8, 1363: 8, 1369: 8, 1371: 8, 1407: 8, 1419: 8, 1420: 8, 1425: 2, 1427: 6, 1429: 8, 1430: 8, 1448: 8, 1456: 4, 1470: 8, 1476: 8, 1535: 8
@@ -351,14 +351,14 @@ else: # 핑거 프린트 이슈 없는 차량은 이곳에 넣으세요.
     CAR.CEED: [{
       67: 8, 127: 8, 304: 8, 320: 8, 339: 8, 354: 3, 356: 4, 544: 8, 576: 8, 593: 8, 608: 8, 688: 5, 809: 8, 832: 8, 854: 7, 870: 7, 871: 8, 872: 8, 897: 8, 902: 8, 903: 8, 905: 8, 909: 8, 916: 8, 1040: 8, 1042: 8, 1056: 8, 1057: 8, 1078: 4, 1107: 5, 1136: 8, 1151: 6, 1155: 8, 1157: 4, 1168: 7, 1170: 8, 1173: 8, 1183: 8, 1186: 2, 1191: 2, 1225: 8, 1265: 4, 1280: 4, 1287: 4, 1290: 8, 1292: 8, 1294: 8, 1312: 8, 1322: 8, 1342: 6, 1345: 8, 1348: 8, 1363: 8, 1369: 8, 1384: 8, 1394: 8, 1407: 8, 1414: 3, 1427: 6, 1456: 4, 2015: 8
     }],
-    CAR.CADENZA: [{
+    CAR.K7: [{
       67: 8, 68: 8, 127: 8, 304: 8, 320: 8, 339: 8, 356: 4, 544: 8, 546: 8, 593: 8, 608: 8, 688: 5, 809: 8, 832: 8, 854: 7, 870: 7, 871: 8, 872: 8, 897: 8, 902: 8, 903: 8, 916: 8, 1040: 8, 1056: 8, 1057: 8, 1078: 4, 1107: 5, 1136: 8, 1151: 6, 1156: 8, 1162: 4, 1168: 7, 1170: 8, 1173: 8, 1265: 4, 1280: 1, 1287: 4, 1290: 8, 1292: 8, 1294: 8, 1312: 8, 1322: 8, 1345: 8, 1348: 8, 1363: 8, 1369: 8, 1378: 4, 1384: 8, 1407: 8, 1419: 8, 1427: 6, 1444: 8, 1456: 4, 1470: 8
       },{
       67: 8, 68: 8, 127: 8, 304: 8, 320: 8, 339: 8, 356: 4, 544: 8, 546: 8, 608: 8, 809: 8, 832: 8, 854: 7, 870: 7, 871: 8, 872: 8, 902: 8, 903: 8, 916: 8, 1040: 8, 1056: 8, 1057: 8, 1078: 4, 1107: 5, 1136: 8, 1151: 6, 1156: 8, 1162: 4, 1168: 7, 1170: 8, 1173: 8, 1265: 4, 1280: 1, 1287: 4, 1290: 8, 1292: 8, 1294: 8, 1312: 8, 1322: 8, 1345: 8, 1348: 8, 1363: 8, 1369: 8, 1378: 4, 1384: 8, 1407: 8, 1419: 8, 1427: 6, 1444: 8, 1456: 4, 1470: 8
       },{
       67: 8, 68: 8, 127: 8, 304: 8, 320: 8, 339: 8, 356: 4, 544: 8, 546: 8, 593: 8, 608: 8, 688: 5, 809: 8, 832: 8, 854: 7, 870: 7, 871: 8, 872: 8, 897: 8, 902: 8, 903: 8, 916: 8, 1040: 8, 1056: 8, 1057: 8, 1078: 4, 1107: 5, 1136: 8, 1151: 6, 1156: 8, 1157: 4, 1162: 4, 1168: 7, 1170: 8, 1173: 8, 1265: 4, 1280: 1, 1287: 4, 1290: 8, 1292: 8, 1294: 8, 1312: 8, 1322: 8, 1342: 6, 1345: 8, 1348: 8, 1363: 8, 1369: 8, 1371: 8, 1378: 4, 1384: 8, 1407: 8, 1419: 8, 1427: 6, 1444: 8, 1456: 4, 1470: 8
     }],  
-    CAR.CADENZA_HEV: [{
+    CAR.K7_HEV: [{
       68: 8, 127: 8, 304: 8, 320: 8, 339: 8, 352: 8, 356: 4, 544: 8, 576: 8, 593: 8, 688: 5, 832: 8, 865: 8, 881: 8, 882: 8, 897: 8, 902: 8, 903: 8, 905: 8, 909: 8, 913: 8, 916: 8, 1040: 8, 1042: 8, 1056: 8, 1057: 8, 1078: 4, 1096: 8, 1102: 8, 1108: 8, 1136: 6, 1138: 5, 1151: 8, 1155: 8, 1156: 8, 1157: 4, 1162: 8, 1164: 8, 1168: 7, 1173: 8, 1180: 8, 1186: 2, 1191: 2, 1210: 8, 1227: 8, 1265: 4, 1268: 8, 1280: 1, 1287: 4, 1290: 8, 1291: 8, 1292: 8, 1294: 8, 1312: 8, 1322: 8, 1342: 6, 1343: 8, 1345: 8, 1348: 8, 1355: 8, 1363: 8, 1369: 8, 1371: 8, 1378: 8, 1379: 8, 1407: 8, 1419: 8, 1427: 6, 1429: 8, 1430: 8, 1448: 8, 1456: 4, 1470: 8, 1476: 8, 1535: 8
     }],
     CAR.SELTOS: [{
@@ -370,7 +370,7 @@ else: # 핑거 프린트 이슈 없는 차량은 이곳에 넣으세요.
 IGNORED_FINGERPRINTS = [CAR.VELOSTER, CAR.GENESIS_G70, CAR.KONA, CAR.CEED, CAR.SELTOS]
 
 if fingerprint_two:
-  FW_VERSIONS = {  #핑거프린트2.0부분, 차량 미인식으로 대시캠모드로 동작시 개발자메뉴에서 핑거프린트2.0 활성화 옵션을 끄고 위쪽 핑거프린트1.0에 본인차량 핑거프린트가 들어가 있는지 확인해보세요.
+  FW_VERSIONS = {
     # genesis
     CAR.GENESIS_G70: {
       (Ecu.fwdRadar, 0x7d0, None): [b'\xf1\x00IK__ SCC F-CUP      1.00 1.02 96400-G9100         \xf1\xa01.02',],
@@ -381,7 +381,7 @@ if fingerprint_two:
       (Ecu.transmission, 0x7e1, None): [b'\xf1\x87VDJLT17895112DN4\x88fVf\x99\x88\x88\x88\x87fVe\x88vhwwUFU\x97eFex\x99\xff\xb7\x82\xf1\x81E25\x00\x00\x00\x00\x00\x00\x00\xf1\x00bcsh8p54  E25\x00\x00\x00\x00\x00\x00\x00SIK0T33NB2\x11\x1am\xda',],
     },
     # hyundai
-    CAR.ELANTRA_GT_I30: {
+    CAR.I30: {
       (Ecu.fwdRadar, 0x7d0, None): [b'\xf1\x00PD__ SCC F-CUP      1.00 1.01 99110-G3100         ',],
       (Ecu.esp, 0x7d1, None): [b'\xf1\x00PD ESC \x11 100 \a\x03 58910-G3AC0',],
       (Ecu.engine, 0x7e0, None): [b'\x01TPD-1A506F000H00',],
@@ -517,7 +517,7 @@ if fingerprint_two:
       (Ecu.transmission, 0x7e1, None): [b'\xf1\x816U2V8051\x00\x00\xf1\x006U2V0_C2\x00\x006U2V8051\x00\x00DJS0T16NS1\xba\x02\xb8\x80',],
     },
     # kia
-    CAR.OPTIMA: {
+    CAR.K5: {
       (Ecu.fwdRadar, 0x7d0, None): [b'\xf1\x00JF__ SCC F-CUP      1.00 1.00 96400-D4110         ',],
       (Ecu.esp, 0x7d1, None): [b'\xf1\x00JF ESC \v 11 \x18\x030 58920-D5180',],
       (Ecu.engine, 0x7e0, None): [b'\x01TJFAJNU06F201H03',],
@@ -525,7 +525,7 @@ if fingerprint_two:
       (Ecu.fwdCamera, 0x7c4, None): [b'\xf1\x00JFA LKAS AT USA LHD 1.00 1.02 95895-D5000 h31',],
       (Ecu.transmission, 0x7e1, None): [b'\xf1\x816U2V8051\x00\x00\xf1\x006U2V0_C2\x00\x006U2V8051\x00\x00DJF0T16NL0\t\xd2GW',],
     },
-    CAR.OPTIMA_HEV: {
+    CAR.K5_HEV: {
       (Ecu.fwdRadar, 0x7d0, None): [b'\xf1\x00DEhe SCC H-CUP      1.01 1.02 96400-G5100         ',],
       (Ecu.engine, 0x7e0, None): [b'\xf1\x816H6F4051\x00\x00\x00\x00\x00\x00\x00\x00',],
       (Ecu.eps, 0x7d4, None): [b'\xf1\x00DE  MDPS C 1.00 1.09 56310G5301\x00 4DEHC109',],
@@ -580,34 +580,30 @@ if fingerprint_two:
   }
 
 CHECKSUM = {
-  "crc8": [CAR.SANTA_FE, CAR.SONATA, CAR.PALISADE, CAR.SONATA_HEV, CAR.SELTOS],
+  "crc8": [CAR.SANTA_FE, CAR.SONATA, CAR.PALISADE, CAR.SONATA_HEV, CAR.SELTOS, CAR.AVANTE],
   "6B": [CAR.SORENTO, CAR.GENESIS],
 }
 
 FEATURES = {
-  # 캔오류 관련, 오류가 발생하는 경우는 본인 차종에 맞지 않는 캔신호가 들어오기때문입니다. 대부분 이곳을 수정하면 해결되나, 부득이 판다코드를 수정해야 될수도 있습니다.
-  # debug 코드가 포함되어 있으면, /data/openpilot/selfdrive/debug 안에 몇가지 툴이 들어있습니다. 실행하시면 디버그에 도움이 되실겁니다. 팟팅!!! 
   # Use Cluster for Gear Selection, rather than Transmission
-  "use_cluster_gears": {CAR.ELANTRA, CAR.KONA, CAR.ELANTRA_GT_I30, CAR.CADENZA, CAR.GRANDEUR},
+  "use_cluster_gears": {CAR.AVANTE, CAR.KONA, CAR.I30, CAR.K7, CAR.GRANDEUR},
   # Use TCU Message for Gear Selection
-  "use_tcu_gears": {CAR.OPTIMA, CAR.SONATA19, CAR.VELOSTER},
+  "use_tcu_gears": {CAR.K5, CAR.SONATA19, CAR.VELOSTER},
   # Use E_GEAR Message for Gear Selection
   "use_elect_gears": {CAR.SONATA_HEV, CAR.SONATA19_HEV, CAR.KONA_EV, CAR.KONA_HEV, CAR.IONIQ_EV, CAR.IONIQ_HEV, CAR.GRANDEUR_HEV, CAR.NEXO,
-                      CAR.OPTIMA_HEV, CAR.CADENZA_HEV, CAR.NIRO_EV, CAR.NIRO_HEV}, # 전기차 or 하이브리드 기어인식 부분
+                      CAR.K5_HEV, CAR.K7_HEV, CAR.NIRO_EV, CAR.NIRO_HEV},
   # Use E_EMS11 Message for Gas and Brake for Hybrid/ELectric
   "use_elect_ems": {CAR.SONATA_HEV, CAR.SONATA19_HEV, CAR.KONA_EV, CAR.KONA_HEV, CAR.IONIQ_EV, CAR.IONIQ_HEV, CAR.GRANDEUR_HEV, CAR.NEXO,
-                    CAR.OPTIMA_HEV, CAR.CADENZA_HEV, CAR.NIRO_EV, CAR.NIRO_HEV}, # 전기차 or 하이브리드 차량 넣어주세요.(가속페달관련)
+                    CAR.K5_HEV, CAR.K7_HEV, CAR.NIRO_EV, CAR.NIRO_HEV},
   # send LFA MFA message for new HKG models
-  "send_lfahda_mfa": {CAR.KONA_HEV, CAR.SELTOS}, #차량의 LFA, HDA아이콘이 켜지게 하려면 여기다가 본인 차종을 넣으세요.
-  "has_scc13": set([]),
-  "has_scc14": set([]),
+  "send_lfahda_mfa": {CAR.KONA_HEV, CAR.SELTOS}, # Insert your car in this if you want turn LFA icon on.
   # these cars use the FCA11 message for the AEB and FCW signals, all others use SCC12
-  "use_fca": {CAR.SONATA, CAR.ELANTRA, CAR.ELANTRA_GT_I30, CAR.PALISADE, CAR.GENESIS_G70, CAR.KONA_HEV, CAR.SELTOS}, # 전방추돌관련 계기판 오류가 발생할 경우 여기다 본인 차종을 넣어보세요.
+  "use_fca": {CAR.SONATA, CAR.AVANTE, CAR.I30, CAR.PALISADE, CAR.GENESIS_G70, CAR.KONA_HEV, CAR.SELTOS}, # Insert your car in this if you see front collision error on your cluster.
 
   "use_bsm": {CAR.SONATA, CAR.PALISADE, CAR.GENESIS, CAR.GENESIS_G70, CAR.GENESIS_G80, CAR.GENESIS_G90, CAR.NEXO,
               CAR.KONA, CAR.SONATA_HEV, CAR.SONATA19_HEV, CAR.KONA_EV, CAR.KONA_HEV, CAR.IONIQ_EV, CAR.IONIQ_HEV, CAR.GRANDEUR_HEV,
-              CAR.OPTIMA_HEV, CAR.CADENZA_HEV, CAR.NIRO_EV, CAR.NIRO_HEV, CAR.ELANTRA, CAR.KONA, CAR.ELANTRA_GT_I30, CAR.CADENZA, CAR.GRANDEUR,
-              CAR.OPTIMA, CAR.SONATA19, CAR.VELOSTER, CAR.SELTOS}, # 후측방 감지 BSM 옵션이 있는 차량의 경우 넣어주세요.
+              CAR.K5_HEV, CAR.K7_HEV, CAR.NIRO_EV, CAR.NIRO_HEV, CAR.AVANTE, CAR.KONA, CAR.I30, CAR.K7, CAR.GRANDEUR,
+              CAR.K5, CAR.SONATA19, CAR.VELOSTER, CAR.SELTOS},
 }
 
 DBC = {
@@ -617,8 +613,8 @@ DBC = {
   CAR.GENESIS_G80: dbc_dict('hyundai_kia_generic', None),
   CAR.GENESIS_G90: dbc_dict('hyundai_kia_generic', None),
   # hyundai
-  CAR.ELANTRA: dbc_dict('hyundai_kia_generic', None),
-  CAR.ELANTRA_GT_I30: dbc_dict('hyundai_kia_generic', None),
+  CAR.AVANTE: dbc_dict('hyundai_kia_generic', None),
+  CAR.I30: dbc_dict('hyundai_kia_generic', None),
   CAR.SONATA: dbc_dict('hyundai_kia_generic', None),
   CAR.SONATA_HEV: dbc_dict('hyundai_kia_generic', None),
   CAR.SONATA19: dbc_dict('hyundai_kia_generic', None),
@@ -635,17 +631,17 @@ DBC = {
   CAR.GRANDEUR_HEV: dbc_dict('hyundai_kia_generic', None),
   CAR.NEXO: dbc_dict('hyundai_kia_generic', None),
   # kia
-  CAR.FORTE: dbc_dict('hyundai_kia_generic', None),
-  CAR.OPTIMA: dbc_dict('hyundai_kia_generic', None),
-  CAR.OPTIMA_HEV: dbc_dict('hyundai_kia_generic', None),
+  CAR.K3: dbc_dict('hyundai_kia_generic', None),
+  CAR.K5: dbc_dict('hyundai_kia_generic', None),
+  CAR.K5_HEV: dbc_dict('hyundai_kia_generic', None),
   CAR.SPORTAGE: dbc_dict('hyundai_kia_generic', None),
   CAR.SORENTO: dbc_dict('hyundai_kia_generic', None),
   CAR.STINGER: dbc_dict('hyundai_kia_generic', None),
   CAR.NIRO_EV: dbc_dict('hyundai_kia_generic', None),
   CAR.NIRO_HEV: dbc_dict('hyundai_kia_generic', None),
   CAR.CEED: dbc_dict('hyundai_kia_generic', None),
-  CAR.CADENZA: dbc_dict('hyundai_kia_generic', None),
-  CAR.CADENZA_HEV: dbc_dict('hyundai_kia_generic', None),
+  CAR.K7: dbc_dict('hyundai_kia_generic', None),
+  CAR.K7_HEV: dbc_dict('hyundai_kia_generic', None),
   CAR.SELTOS: dbc_dict('hyundai_kia_generic', None),
 }
 

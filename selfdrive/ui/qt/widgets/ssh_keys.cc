@@ -109,8 +109,44 @@ void SshControl::parseResponse(){
   reply = nullptr;
 }
 
+OpenpilotView::OpenpilotView() : AbstractControl("오픈파일럿 주행화면 미리보기", "오픈파일럿 주행화면을 미리보기 합니다.", "") {
 
-CarForceSet::CarForceSet() : AbstractControl("차량강제인식", "핑거프린트 문제로 차량인식이 안될경우 차량명을 입력하시면 강제 인식 합니다. 입력예시 GENESIS, SELTOS, KONA 등 차량명만 입력하면 됩니다. 대문자로 스펠링을 정확히 입력하시기 바랍니다.(자세한 차량명은 values.py 파일내에서 확인가능합니다.)", "../assets/offroad/icon_shell.png") {
+  // setup widget
+  hlayout->addStretch(1);
+
+  btn.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btn.setFixedSize(250, 100);
+  hlayout->addWidget(&btn);
+
+  QObject::connect(&btn, &QPushButton::released, [=]() {
+    QString stat = QString::fromStdString(Params().get("IsOpenpilotViewEnabled"));
+    if (stat == "1") {
+      Params().write_db_value("IsOpenpilotViewEnabled", "0", 1);
+    } else {
+      Params().write_db_value("IsOpenpilotViewEnabled", "1", 1);
+    }
+    refresh();
+  });
+  refresh();
+}
+
+void OpenpilotView::refresh() {
+  QString param = QString::fromStdString(Params().get("IsOpenpilotViewEnabled"));
+  if (param == "1") {
+    btn.setText("미리보기해제");
+  } else {
+    btn.setText("미리보기");
+  }
+}
+
+CarForceSet::CarForceSet() : AbstractControl("차량강제인식", "핑거프린트 문제로 차량인식이 안될경우 차량명을 입력하시면 강제 인식 합니다.\n\n입력방법) 아래 참조하여 대문자로 차량명만 입력\nGENESIS, GENESIS_G70, GENESIS_G80, GENESIS_G90, AVANTE, I30, SONATA, SONATA_HEV, SONATA19, SONATA19_HEV, KONA, KONA_EV, KONA_HEV, IONIQ_EV, IONIQ_HEV, SANTA_FE, PALISADE, VELOSTER, GRANDEUR, GRANDEUR_HEV, NEXO, K3, K5, K5_HEV, SPORTAGE, SORENTO, STINGER, NIRO_EV, NIRO_HEV, CEED, K7, K7_HEV, SELTOS", "../assets/offroad/icon_shell.png") {
 
   // setup widget
   //hlayout->addStretch(1);
@@ -132,7 +168,7 @@ CarForceSet::CarForceSet() : AbstractControl("차량강제인식", "핑거프린
 
   QObject::connect(&btnc, &QPushButton::released, [=]() {
     if (btnc.text() == "설정") {
-      carname = InputDialog::getText("차량명을 입력하세요. 예) GENESIS, KONA 등)");
+      carname = InputDialog::getText("차량명은 이전메뉴 차량강제인식을 클릭하여 학인");
       if (carname.length() > 0) {
         btnc.setText("완료");
         btnc.setEnabled(false);
@@ -1118,7 +1154,7 @@ MaxSteer::MaxSteer() : AbstractControl("MAX_STEER", "판다 MAX_STEER 값을 수
   QObject::connect(&btnminus, &QPushButton::released, [=]() {
     auto str = QString::fromStdString(Params().get("MaxSteer"));
     int value = str.toInt();
-    value = value - 1;
+    value = value - 2;
     if (value <= 384 ) {
       value = 384;
     } else {
@@ -1131,7 +1167,7 @@ MaxSteer::MaxSteer() : AbstractControl("MAX_STEER", "판다 MAX_STEER 값을 수
   QObject::connect(&btnplus, &QPushButton::released, [=]() {
     auto str = QString::fromStdString(Params().get("MaxSteer"));
     int value = str.toInt();
-    value = value + 1;
+    value = value + 2;
     if (value >= 1000 ) {
       value = 1000;
     } else {
@@ -1179,7 +1215,7 @@ MaxRTDelta::MaxRTDelta() : AbstractControl("RT_DELTA", "판다 RT_DELTA 값을 �
   QObject::connect(&btnminus, &QPushButton::released, [=]() {
     auto str = QString::fromStdString(Params().get("MaxRTDelta"));
     int value = str.toInt();
-    value = value - 1;
+    value = value - 2;
     if (value <= 50 ) {
       value = 50;
     } else {
@@ -1192,7 +1228,7 @@ MaxRTDelta::MaxRTDelta() : AbstractControl("RT_DELTA", "판다 RT_DELTA 값을 �
   QObject::connect(&btnplus, &QPushButton::released, [=]() {
     auto str = QString::fromStdString(Params().get("MaxRTDelta"));
     int value = str.toInt();
-    value = value + 1;
+    value = value + 2;
     if (value >= 500 ) {
       value = 500;
     } else {
@@ -1818,7 +1854,7 @@ SteerMaxBase::SteerMaxBase() : AbstractControl("SteerMax기본값", "SteerMax기
   QObject::connect(&btnminus, &QPushButton::released, [=]() {
     auto str = QString::fromStdString(Params().get("SteerMaxBaseAdj"));
     int value = str.toInt();
-    value = value - 1;
+    value = value - 2;
     if (value <= 200 ) {
       value = 200;
     } else {
@@ -1831,7 +1867,7 @@ SteerMaxBase::SteerMaxBase() : AbstractControl("SteerMax기본값", "SteerMax기
   QObject::connect(&btnplus, &QPushButton::released, [=]() {
     auto str = QString::fromStdString(Params().get("SteerMaxBaseAdj"));
     int value = str.toInt();
-    value = value + 1;
+    value = value + 2;
     if (value >= 384 ) {
       value = 384;
     } else {
@@ -1879,9 +1915,9 @@ SteerMaxMax::SteerMaxMax() : AbstractControl("SteerMax최대값", "SteerMax최�
   QObject::connect(&btnminus, &QPushButton::released, [=]() {
     auto str = QString::fromStdString(Params().get("SteerMaxAdj"));
     int value = str.toInt();
-    value = value - 1;
-    if (value <= 255 ) {
-      value = 255;
+    value = value - 2;
+    if (value <= 254 ) {
+      value = 254;
     } else {
     }
     QString values = QString::number(value);
@@ -1892,7 +1928,7 @@ SteerMaxMax::SteerMaxMax() : AbstractControl("SteerMax최대값", "SteerMax최�
   QObject::connect(&btnplus, &QPushButton::released, [=]() {
     auto str = QString::fromStdString(Params().get("SteerMaxAdj"));
     int value = str.toInt();
-    value = value + 1;
+    value = value + 2;
     if (value >= 1000 ) {
       value = 1000;
     } else {

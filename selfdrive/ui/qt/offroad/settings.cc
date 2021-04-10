@@ -21,12 +21,6 @@
 QWidget * toggles_panel() {
   QVBoxLayout *toggles_list = new QVBoxLayout();
 
-  toggles_list->addWidget(new ParamControl("IsOpenpilotViewEnabled",
-                                            "오픈파일럿 주행화면 미리보기",
-                                            "오픈파일럿 주행화면을 미리보기 합니다.",
-                                            "../assets/offroad/icon_openpilot.png"
-                                              ));
-  toggles_list->addWidget(horizontal_line());
   toggles_list->addWidget(new ParamControl("OpenpilotEnabledToggle",
                                             "오픈파일럿 사용",
                                             "어댑티브 크루즈 컨트롤 및 차선 유지 지원을 위해 오픈파일럿 시스템을 사용하십시오. 이 기능을 사용하려면 항상 주의를 기울여야 합니다. 이 설정을 변경하는 것은 자동차의 전원이 꺼졌을 때 적용됩니다.",
@@ -276,6 +270,8 @@ QWidget * network_panel(QWidget * parent) {
   QVBoxLayout *layout = new QVBoxLayout;
   layout->setSpacing(30);
 
+  layout->addWidget(new OpenpilotView());
+  layout->addWidget(horizontal_line());
   // wifi + tethering buttons
   layout->addWidget(new ButtonControl("WiFi 설정", "열기", "",
                                       [=]() { HardwareEon::launch_wifi(); }));
@@ -396,7 +392,7 @@ QWidget * user_panel(QWidget * parent) {
   layout->addWidget(new LDWSToggle());
   layout->addWidget(new GearDToggle());
   layout->addWidget(new ComIssueToggle());
-  const char* cal_ok = "cp -f /data/openpilot/selfdrive/assets/addon/param/CalibrationParams /data/params/d/ ''";
+  const char* cal_ok = "cp -f /data/openpilot/selfdrive/assets/addon/param/CalibrationParams /data/params/d/";
   layout->addWidget(new ButtonControl("캘리브레이션 강제 활성화", "실행", "실주행으로 캘리브레이션을 설정하지 않고 이온을 초기화 한경우 인게이지 확인용도로 캘리브레이션을 강제 설정합니다.",
                                       [=]() { 
                                         if (ConfirmationDialog::confirm("캘리브레이션을 강제로 설정합니다. 인게이지 확인용이니 실 주행시에는 초기화 하시기 바랍니다.")){

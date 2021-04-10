@@ -3,15 +3,14 @@
 import math
 import numpy as np
 
-from cereal import car, log
+from cereal import log
 import cereal.messaging as messaging
 
 from selfdrive.config import Conversions as CV
-from selfdrive.controls.lib.longitudinal_planner import calc_cruise_accel_limits
 from selfdrive.controls.lib.speed_smoother import speed_smoother
 from selfdrive.controls.lib.long_mpc import LongitudinalMpc
 from selfdrive.controls.lib.lane_planner import TRAJECTORY_SIZE
-from selfdrive.car.hyundai.values import Buttons, CarControllerParams
+from selfdrive.car.hyundai.values import Buttons
 from common.numpy_fast import clip, interp
 from common.params import Params
 
@@ -107,6 +106,7 @@ class SpdController():
 
         self.params = Params()
         self.cruise_set_mode = int(self.params.get("CruiseStatemodeSelInit", encoding='utf8'))
+        self.map_spd_limit_offset = int(self.params.get("OpkrSpeedLimitOffset", encoding='utf8'))
 
         self.map_spd_enable = False
         self.map_spd_camera = 0
@@ -345,8 +345,6 @@ class SpdController():
         else:
             self.map_spd_enable = False
             self.map_spd_camera = 0
-          
-        self.map_spd_limit_offset = int(Params().get("OpkrSpeedLimitOffset", encoding='utf8'))
 
         if self.long_curv_timer < long_wait_cmd:
             pass

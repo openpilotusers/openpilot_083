@@ -1,9 +1,5 @@
 #!/usr/bin/bash
 
-if [ ! -f "/data/no_ota_updates" ]; then
-    /usr/bin/touch /data/no_ota_updates
-fi
-
 ALIAS_CHECK=$(/usr/bin/grep gitpull /system/comma/home/.bash_profile)
 
 if [ "$ALIAS_CHECK" == "" ]; then
