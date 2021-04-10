@@ -302,40 +302,40 @@ static void ui_draw_tpms(UIState *s) {
   snprintf(tpmsRl, sizeof(tpmsRl), "%.1f", s->scene.tpmsPressureRl);
   snprintf(tpmsRr, sizeof(tpmsRr), "%.1f", s->scene.tpmsPressureRr);
   if (s->scene.tpmsPressureFl < 34) {
-    ui_draw_text(s, pos_x-55, pos_y+50, tpmsFl, 64, COLOR_RED, "sans-bold");
+    ui_draw_text(s, pos_x-55, pos_y+50, tpmsFl, 63, COLOR_RED, "sans-bold");
   } else if (s->scene.tpmsPressureFl > 50) {
-    ui_draw_text(s, pos_x-55, pos_y+50, "N/A", 64, COLOR_WHITE_ALPHA(200), "sans-semibold");
+    ui_draw_text(s, pos_x-55, pos_y+50, "N/A", 63, COLOR_WHITE_ALPHA(200), "sans-semibold");
   } else {
-    ui_draw_text(s, pos_x-55, pos_y+50, tpmsFl, 64, COLOR_WHITE_ALPHA(200), "sans-semibold");
+    ui_draw_text(s, pos_x-55, pos_y+50, tpmsFl, 63, COLOR_WHITE_ALPHA(200), "sans-semibold");
   }
   if (s->scene.tpmsPressureFr < 34) {
-    ui_draw_text(s, pos_x+55, pos_y+50, tpmsFr, 64, COLOR_RED, "sans-bold");
+    ui_draw_text(s, pos_x+55, pos_y+50, tpmsFr, 63, COLOR_RED, "sans-bold");
   } else if (s->scene.tpmsPressureFr > 50) {
-    ui_draw_text(s, pos_x+55, pos_y+50, "N/A", 64, COLOR_WHITE_ALPHA(200), "sans-semibold");
+    ui_draw_text(s, pos_x+55, pos_y+50, "N/A", 63, COLOR_WHITE_ALPHA(200), "sans-semibold");
   } else {
-    ui_draw_text(s, pos_x+55, pos_y+50, tpmsFr, 64, COLOR_WHITE_ALPHA(200), "sans-semibold");
+    ui_draw_text(s, pos_x+55, pos_y+50, tpmsFr, 63, COLOR_WHITE_ALPHA(200), "sans-semibold");
   }
   if (s->scene.tpmsPressureRl < 34) {
-    ui_draw_text(s, pos_x-55, pos_y+100, tpmsRl, 64, COLOR_RED, "sans-bold");
+    ui_draw_text(s, pos_x-55, pos_y+100, tpmsRl, 63, COLOR_RED, "sans-bold");
   } else if (s->scene.tpmsPressureRl > 50) {
-    ui_draw_text(s, pos_x-55, pos_y+100, "N/A", 64, COLOR_WHITE_ALPHA(200), "sans-semibold");
+    ui_draw_text(s, pos_x-55, pos_y+100, "N/A", 63, COLOR_WHITE_ALPHA(200), "sans-semibold");
   } else {
-    ui_draw_text(s, pos_x-55, pos_y+100, tpmsRl, 64, COLOR_WHITE_ALPHA(200), "sans-semibold");
+    ui_draw_text(s, pos_x-55, pos_y+100, tpmsRl, 63, COLOR_WHITE_ALPHA(200), "sans-semibold");
   }
   if (s->scene.tpmsPressureRr < 34) {
-    ui_draw_text(s, pos_x+55, pos_y+100, tpmsRr, 64, COLOR_RED, "sans-bold");
+    ui_draw_text(s, pos_x+55, pos_y+100, tpmsRr, 63, COLOR_RED, "sans-bold");
   } else if (s->scene.tpmsPressureRr > 50) {
-    ui_draw_text(s, pos_x+55, pos_y+100, "N/A", 64, COLOR_WHITE_ALPHA(200), "sans-semibold");
+    ui_draw_text(s, pos_x+55, pos_y+100, "N/A", 63, COLOR_WHITE_ALPHA(200), "sans-semibold");
   } else {
-    ui_draw_text(s, pos_x+55, pos_y+100, tpmsRr, 64, COLOR_WHITE_ALPHA(200), "sans-semibold");
+    ui_draw_text(s, pos_x+55, pos_y+100, tpmsRr, 63, COLOR_WHITE_ALPHA(200), "sans-semibold");
   }
 }
 
 static void ui_draw_standstill(UIState *s) {
   UIScene &scene = s->scene;
 
-  int viz_standstill_x = s->viz_rect.x + s->viz_rect.w - 560;
-  int viz_standstill_y = s->viz_rect.y + (bdr_s) + 160 + 250;
+  int viz_standstill_x = s->viz_rect.x + s->viz_rect.w - 570;
+  int viz_standstill_y = s->viz_rect.y + (bdr_s) + 160 + 300;
   
   int minute = 0;
   int second = 0;
@@ -345,10 +345,10 @@ static void ui_draw_standstill(UIState *s) {
 
   if (scene.standStill) {
     nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
-    nvgFontSize(s->vg, 125);
+    nvgFontSize(s->vg, 130);
     nvgFillColor(s->vg, COLOR_ORANGE_ALPHA(240));
     ui_print(s, viz_standstill_x, viz_standstill_y, "STOP");
-    nvgFontSize(s->vg, 150);
+    nvgFontSize(s->vg, 155);
     nvgFillColor(s->vg, COLOR_WHITE_ALPHA(240));
     ui_print(s, viz_standstill_x, viz_standstill_y+150, "%01d:%02d", minute, second);
   }
@@ -365,8 +365,8 @@ static void ui_draw_debug(UIState *s)
   nvgTextAlign(s->vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
 
   if (s->nDebugUi1 == 1) {
-    ui_draw_text(s, 0, 1035, scene.alertTextMsg1.c_str(), 53, COLOR_WHITE_ALPHA(125), "sans-semibold");
-    ui_draw_text(s, 0, 1078, scene.alertTextMsg2.c_str(), 53, COLOR_WHITE_ALPHA(125), "sans-semibold");
+    ui_draw_text(s, 0, 1035, scene.alertTextMsg1.c_str(), 48, COLOR_WHITE_ALPHA(125), "sans-semibold");
+    ui_draw_text(s, 0, 1078, scene.alertTextMsg2.c_str(), 48, COLOR_WHITE_ALPHA(125), "sans-semibold");
   }
 
   
@@ -376,7 +376,7 @@ static void ui_draw_debug(UIState *s)
     //  nvgFontSize(s->vg, 34);
     //  ui_print(s, 28, 28, "LAT／LON: %.5f／%.5f", scene.latitudeUblox, scene.longitudeUblox);
     //}
-    nvgFontSize(s->vg, 45);
+    nvgFontSize(s->vg, 43);
     //ui_print(s, ui_viz_rx, ui_viz_ry, "Live Parameters");
     ui_print(s, ui_viz_rx, ui_viz_ry+250, "SR:%.2f", scene.liveParams.steerRatio);
     //ui_print(s, ui_viz_rx, ui_viz_ry+100, "AOfs:%.2f", scene.liveParams.angleOffset);
@@ -388,7 +388,7 @@ static void ui_draw_debug(UIState *s)
     ui_print(s, ui_viz_rx, ui_viz_ry+450, "OS:%.2f", abs(scene.output_scale));
     ui_print(s, ui_viz_rx, ui_viz_ry+500, "Prob:");
     ui_print(s, ui_viz_rx, ui_viz_ry+550, "%.2f|%.2f", scene.lateralPlan.lProb, scene.lateralPlan.rProb);
-    nvgFontSize(s->vg, 45);
+    nvgFontSize(s->vg, 43);
     nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
     if (s->lat_control == 0) {
       ui_print(s, ui_viz_rx_center, ui_viz_ry+310, "PID");
