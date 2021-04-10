@@ -146,7 +146,7 @@ class CarController():
 
     self.p = CarControllerParams
   def update(self, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert,
-             left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, sm):
+             left_lane, right_lane, left_lane_depart, right_lane_depart, sm):
 
     # *** compute control surfaces ***
     param = self.p
