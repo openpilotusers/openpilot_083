@@ -18,7 +18,6 @@ else:
   PATH_OFFSET = 0.0
 
 
-
 class LanePlanner:
   def __init__(self):
     self.ll_t = np.zeros((TRAJECTORY_SIZE,))
@@ -38,7 +37,8 @@ class LanePlanner:
 
     self.l_lane_change_prob = 0.
     self.r_lane_change_prob = 0.
-
+    self.leftCurvOffset = int(Params().get("LeftCurvOffsetAdj", encoding='utf8'))
+    self.rightCurvOffset = int(Params().get("RightCurvOffsetAdj", encoding='utf8'))
 
   def parse_model(self, md, sm, v_ego):
     curvature = sm['controlsState'].curvature
@@ -53,25 +53,24 @@ class LanePlanner:
     else:
       lean_offset = 0
 
-    if (int(Params().get("LeftCurvOffsetAdj", encoding='utf8')) != 0 or int(Params().get("RightCurvOffsetAdj", encoding='utf8')) != 0) and v_ego > 8:
-      leftCurvOffsetAdj = int(Params().get("LeftCurvOffsetAdj", encoding='utf8'))
-      rightCurvOffsetAdj = int(Params().get("RightCurvOffsetAdj", encoding='utf8'))
-      if curvature > 0.0008 and leftCurvOffsetAdj < 0 and lane_differ >= 0: # left curve
+    if (self.leftCurvOffset != 0 or self.rightCurvOffset != 0) and v_ego > 8:
+      if curvature > 0.0008 and self.leftCurvOffset < 0 and lane_differ >= 0: # left curve
         if lane_differ > 0.6:
           lane_differ = 0.6          
-        lean_offset = +(abs(leftCurvOffsetAdj) * lane_differ * 0.05) # move to left
-      elif curvature > 0.0008 and leftCurvOffsetAdj > 0 and lane_differ <= 0:
+        lean_offset = +(abs(self.leftCurvOffset) * lane_differ * 0.05) # move to left
+      elif curvature > 0.0008 and self.leftCurvOffset > 0 and lane_differ <= 0:
         if lane_differ > 0.6:
           lane_differ = 0.6
-        lean_offset = -(abs(leftCurvOffsetAdj) * lane_differ * 0.05) # move to right
-      elif curvature < -0.0008 and rightCurvOffsetAdj < 0 and lane_differ >= 0: # right curve
+        lean_offset = -(abs(self.leftCurvOffset) * lane_differ * 0.05) # move to right
+
+      elif curvature < -0.0008 and self.rightCurvOffset < 0 and lane_differ >= 0: # right curve
         if lane_differ > 0.6:
           lane_differ = 0.6    
-        lean_offset = +(abs(rightCurvOffsetAdj) * lane_differ * 0.05) # move to left
-      elif curvature < -0.0008 and rightCurvOffsetAdj > 0 and lane_differ <= 0:
+        lean_offset = +(abs(self.rightCurvOffset) * lane_differ * 0.05) # move to left
+      elif curvature < -0.0008 and self.rightCurvOffset > 0 and lane_differ <= 0:
         if lane_differ > 0.6:
           lane_differ = 0.6    
-        lean_offset = -(abs(rightCurvOffsetAdj) * lane_differ * 0.05) # move to right
+        lean_offset = -(abs(self.rightCurvOffset) * lane_differ * 0.05) # move to right
       else:
         lean_offset = 0
 

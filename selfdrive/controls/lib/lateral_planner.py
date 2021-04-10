@@ -115,7 +115,7 @@ class LateralPlanner():
 
   def update(self, sm, CP):
     self.use_lanelines = Params().get('EndToEndToggle') != b'1'
-    self.laneless_mode = int(Params().get("LanelessMode", encoding='utf8'))
+    self.laneless_mode = int(Params().get('LanelessMode'))
     self.v_cruise_kph = sm['controlsState'].vCruise
     self.stand_still = sm['carState'].standStill
     try:

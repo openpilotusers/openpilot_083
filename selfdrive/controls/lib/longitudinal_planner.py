@@ -158,8 +158,8 @@ class Planner():
       self.target_speed_map_counter1 = 0
       self.target_speed_map_counter = 0
       self.target_speed_map_counter_check = False
-      mapspeed = self.params.get("LimitSetSpeedCamera", encoding="utf8")
-      mapspeeddist = self.params.get("LimitSetSpeedCameraDist", encoding="utf8")
+      mapspeed = self.params.get('LimitSetSpeedCamera')
+      mapspeeddist = self.params.get('LimitSetSpeedCameraDist')
       if mapspeed is not None and mapspeeddist is not None:
         mapspeed = int(float(mapspeed.rstrip('\n')))
         mapspeeddist = int(float(mapspeeddist.rstrip('\n')))
