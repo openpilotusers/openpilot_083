@@ -15,6 +15,29 @@ class CarInterface(CarInterfaceBase):
     super().__init__(CP, CarController, CarState)
     self.cp2 = self.CS.get_can2_parser(CP)
 
+    params = Params()
+    self.PidKp = float(int(params.get("PidKp", encoding='utf8')) * 0.01)
+    self.PidKi = float(int(params.get("PidKi", encoding='utf8')) * 0.001)
+    self.PidKd = float(int(params.get("PidKd", encoding='utf8')) * 0.01)
+    self.PidKf = float(int(params.get("PidKf", encoding='utf8')) * 0.00001)
+    self.InnerLoopGain = float(int(params.get("InnerLoopGain", encoding='utf8')) * 0.1)
+    self.OuterLoopGain = float(int(params.get("OuterLoopGain", encoding='utf8')) * 0.1)
+    self.TimeConstant = float(int(params.get("TimeConstant", encoding='utf8')) * 0.1)
+    self.ActuatorEffectiveness = float(int(params.get("ActuatorEffectiveness", encoding='utf8')) * 0.1)
+    self.Scale = float(int(params.get("Scale", encoding='utf8')) * 1.0)
+    self.LqrKi = float(int(params.get("LqrKi", encoding='utf8')) * 0.001)
+    self.DcGain = float(int(params.get("DcGain", encoding='utf8')) * 0.0001)
+    self.SteerMaxV = float(int(params.get("SteerMaxvAdj", encoding='utf8')) * 0.1)
+
+    self.tire_stiffness_factor = float(int(params.get("TireStiffnessFactorAdj", encoding='utf8')) * 0.01)
+    self.steerActuatorDelay = float(int(params.get("SteerActuatorDelayAdj", encoding='utf8')) * 0.01)
+    self.steerRateCost = float(int(params.get("SteerRateCostAdj", encoding='utf8')) * 0.01)
+    self.steerLimitTimer = float(int(params.get("SteerLimitTimerAdj", encoding='utf8')) * 0.01)
+    self.steerRatio = float(int(params.get("SteerRatioAdj", encoding='utf8')) * 0.1)
+
+    self.controlMethod = int(params.get("LateralControlMethod", encoding='utf8'))
+    self.feedForward = True if params.get('ShaneFeedForward') == b'1' else False # Shane's feedforward
+
   @staticmethod
   def compute_gb(accel, speed):
     return float(accel) / 3.0
@@ -44,50 +67,36 @@ class CarInterface(CarInterfaceBase):
     else:
       ret.safetyModel = car.CarParams.SafetyModel.hyundaiLegacy
 
-    params = Params()
-    PidKp = float(int(params.get("PidKp", encoding='utf8')) * 0.01)
-    PidKi = float(int(params.get("PidKi", encoding='utf8')) * 0.001)
-    PidKd = float(int(params.get("PidKd", encoding='utf8')) * 0.01)
-    PidKf = float(int(params.get("PidKf", encoding='utf8')) * 0.00001)
-    InnerLoopGain = float(int(params.get("InnerLoopGain", encoding='utf8')) * 0.1)
-    OuterLoopGain = float(int(params.get("OuterLoopGain", encoding='utf8')) * 0.1)
-    TimeConstant = float(int(params.get("TimeConstant", encoding='utf8')) * 0.1)
-    ActuatorEffectiveness = float(int(params.get("ActuatorEffectiveness", encoding='utf8')) * 0.1)
-    Scale = float(int(params.get("Scale", encoding='utf8')) * 1.0)
-    LqrKi = float(int(params.get("LqrKi", encoding='utf8')) * 0.001)
-    DcGain = float(int(params.get("DcGain", encoding='utf8')) * 0.0001)
-    LqrSteerMaxV = float(int(params.get("SteerMaxvAdj", encoding='utf8')) * 0.1)
-
     # Most Hyundai car ports are community features for now
     ret.communityFeature = False
     
     ret.startAccel = 1.0
 
-    tire_stiffness_factor = float(int(params.get("TireStiffnessFactorAdj", encoding='utf8')) * 0.01)
-    ret.steerActuatorDelay = float(int(params.get("SteerActuatorDelayAdj", encoding='utf8')) * 0.01)
-    ret.steerRateCost = float(int(params.get("SteerRateCostAdj", encoding='utf8')) * 0.01)
-    ret.steerLimitTimer = float(int(params.get("SteerLimitTimerAdj", encoding='utf8')) * 0.01)
-    ret.steerRatio = float(int(params.get("SteerRatioAdj", encoding='utf8')) * 0.1)
+    tire_stiffness_factor = self.tire_stiffness_factor
+    ret.steerActuatorDelay = self.steerActuatorDelay
+    ret.steerRateCost = self.steerRateCost
+    ret.steerLimitTimer = self.steerLimitTimer
+    ret.steerRatio = self.steerRatio
 
-    if int(params.get("LateralControlMethod", encoding='utf8')) == 0:
-      ret.lateralTuning.pid.kf = PidKf
+    if self.controlMethod == 0:
+      ret.lateralTuning.pid.kf = self.PidKf
       ret.lateralTuning.pid.kpBP = [0., 9.]
-      ret.lateralTuning.pid.kpV = [0.1, PidKp]
+      ret.lateralTuning.pid.kpV = [0.1, self.PidKp]
       ret.lateralTuning.pid.kiBP = [0., 9.]
-      ret.lateralTuning.pid.kiV = [0.01, PidKi]
+      ret.lateralTuning.pid.kiV = [0.01, self.PidKi]
       ret.lateralTuning.pid.kdBP = [0.]
-      ret.lateralTuning.pid.kdV = [PidKd]
-      ret.lateralTuning.pid.newKfTuned = True if params.get("ShaneFeedForward", encoding='utf8') == "1" else False # Shane's feedforward
-    elif int(params.get("LateralControlMethod", encoding='utf8')) == 1:
+      ret.lateralTuning.pid.kdV = [self.PidKd]
+      ret.lateralTuning.pid.newKfTuned = self.feedForward
+    elif self.controlMethod == 1:
       ret.lateralTuning.init('indi')
       ret.lateralTuning.indi.innerLoopGainBP = [0., 9.]
-      ret.lateralTuning.indi.innerLoopGainV = [3.0, InnerLoopGain] # third tune. Highest value that still gives smooth control. Effects turning into curves.
+      ret.lateralTuning.indi.innerLoopGainV = [3.0, self.InnerLoopGain] # third tune. Highest value that still gives smooth control. Effects turning into curves.
       ret.lateralTuning.indi.outerLoopGainBP = [0., 9.]
-      ret.lateralTuning.indi.outerLoopGainV = [1.5, OuterLoopGain] # forth tune. Highest value that still gives smooth control. Effects lane centering.
+      ret.lateralTuning.indi.outerLoopGainV = [1.5, self.OuterLoopGain] # forth tune. Highest value that still gives smooth control. Effects lane centering.
       ret.lateralTuning.indi.timeConstantBP = [0., 9.]
-      ret.lateralTuning.indi.timeConstantV = [2.0, TimeConstant] # second tune. Lowest value with smooth actuation. Avoid the noise of actuator gears thrashing.
+      ret.lateralTuning.indi.timeConstantV = [2.0, self.TimeConstant] # second tune. Lowest value with smooth actuation. Avoid the noise of actuator gears thrashing.
       ret.lateralTuning.indi.actuatorEffectivenessBP = [0., 9.]
-      ret.lateralTuning.indi.actuatorEffectivenessV = [3.0, ActuatorEffectiveness] # first tune. Lowest value without oversteering. May vary with speed.
+      ret.lateralTuning.indi.actuatorEffectivenessV = [3.0, self.ActuatorEffectiveness] # first tune. Lowest value without oversteering. May vary with speed.
       # lateralTuning.indi.actuatorEffectiveness
         # As effectiveness increases, actuation strength decreases
         # Too high: weak, sloppy lane centering, slow oscillation, can't follow high curvature, high steering error causes snappy corrections
@@ -108,18 +117,18 @@ class CarInterface(CarInterfaceBase):
         # Too high: twitchy hyper lane centering, oversteering
         # Too low: sloppy, all over lane
         # Just right: crisp lane centering
-    elif int(params.get("LateralControlMethod", encoding='utf8')) == 2:
+    elif self.controlMethod == 2:
       ret.lateralTuning.init('lqr')
-      ret.lateralTuning.lqr.scale = Scale
-      ret.lateralTuning.lqr.ki = LqrKi
+      ret.lateralTuning.lqr.scale = self.Scale
+      ret.lateralTuning.lqr.ki = self.LqrKi
       ret.lateralTuning.lqr.a = [0., 1., -0.22619643, 1.21822268]
       ret.lateralTuning.lqr.b = [-1.92006585e-04, 3.95603032e-05]
       ret.lateralTuning.lqr.c = [1., 0.]
       ret.lateralTuning.lqr.k = [-110., 451.]
       ret.lateralTuning.lqr.l = [0.33, 0.318]
-      ret.lateralTuning.lqr.dcGain = DcGain
+      ret.lateralTuning.lqr.dcGain = self.DcGain
 
-    ret.steerMaxV = [LqrSteerMaxV]
+    ret.steerMaxV = [self.SteerMaxV]
     ret.steerMaxBP = [0.]
 
     if candidate == CAR.GENESIS:

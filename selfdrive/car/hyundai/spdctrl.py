@@ -32,10 +32,10 @@ class Spdctrl(SpdController):
         self.target_speed_map_counter2 = 0
         self.hesitant_status = False
         self.hesitant_timer = 0
-        self.map_decel_only = Params().get("OpkrMapDecelOnly", encoding='utf8') == "1"
+        self.map_decel_only = Params().get('OpkrMapDecelOnly') == b'1'
+        self.map_spdlimit_offset = int(Params().get("OpkrSpeedLimitOffset", encoding='utf8'))
 
     def update_lead(self, sm, CS, dRel, vRel):
-        self.map_spdlimit_offset = int(Params().get("OpkrSpeedLimitOffset", encoding='utf8'))
 
         plan = sm['longitudinalPlan']
         dRele = plan.dRel1 #EON Lead

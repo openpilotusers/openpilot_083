@@ -45,8 +45,7 @@ def create_lkas11(packer, frame, car_fingerprint, apply_steer, steer_req,
   elif car_fingerprint in [CAR.K5, CAR.K5_HEV, CAR.K7, CAR.K7_HEV]:
     values["CF_Lkas_LdwsActivemode"] = 0
 
-  ldws_car_fix = Params().get("LdwsCarFix", encoding='utf8') == "1"
-  if ldws_car_fix:
+  if Params().get('LdwsCarFix') == b'1':
   	values["CF_Lkas_LdwsOpt_USM"] = 3
 
   dat = packer.make_can_msg("LKAS11", 0, values)[2]

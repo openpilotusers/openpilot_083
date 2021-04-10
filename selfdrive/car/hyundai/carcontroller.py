@@ -85,16 +85,16 @@ class CarController():
     self.params = Params()
 
     self.mode_change_switch = int(self.params.get("CruiseStatemodeSelInit", encoding='utf8'))
-    self.opkr_variablecruise = self.params.get("OpkrVariableCruise", encoding='utf8') == "1"
-    self.opkr_autoresume = self.params.get("OpkrAutoResume", encoding='utf8') == "1"
-    self.opkr_turnsteeringdisable = self.params.get("OpkrTurnSteeringDisable", encoding='utf8') == "1"
+    self.opkr_variablecruise = self.params.get('OpkrVariableCruise') == b'1'
+    self.opkr_autoresume = self.params.get('OpkrAutoResume') == b'1'
+    self.opkr_turnsteeringdisable = self.params.get('OpkrTurnSteeringDisable') == b'1'
     self.opkr_maxanglelimit = float(int(self.params.get("OpkrMaxAngleLimit", encoding='utf8')))
 
     self.timer1 = tm.CTime1000("time")
 
-    if self.params.get("OpkrVariableCruiseProfile", encoding='utf8') == "0":
+    if int(self.params.get("OpkrVariableCruiseProfile", encoding='utf8')) == 0:
       self.SC = Spdctrl()
-    elif self.params.get("OpkrVariableCruiseProfile", encoding='utf8') == "1":
+    elif int(self.params.get("OpkrVariableCruiseProfile", encoding='utf8')) == 1:
       self.SC = SpdctrlRelaxed()
     else:
       self.SC = Spdctrl()
@@ -121,17 +121,21 @@ class CarController():
 
     self.lkas_button_on = True
 
+    self.steerMax = 0
+    self.steerDeltaUp = 0
+    self.steerDeltaDown = 0
+
+    self.steerMaxBase = int(self.params.get("SteerMaxBaseAdj", encoding='utf8'))
+    self.steerDeltaUpBase = int(self.params.get("SteerDeltaUpBaseAdj", encoding='utf8'))
+    self.steerDeltaDownBase = int(self.params.get("SteerDeltaDownBaseAdj", encoding='utf8'))
+
     self.model_speed_range = [30, 90, 255]
-    self.steerMax_range = [CarControllerParams.STEER_MAX, int(self.params.get("SteerMaxBaseAdj", encoding='utf8')), int(self.params.get("SteerMaxBaseAdj", encoding='utf8'))]
-    self.steerDeltaUp_range = [CarControllerParams.STEER_DELTA_UP, int(self.params.get("SteerDeltaUpBaseAdj", encoding='utf8')), int(self.params.get("SteerDeltaUpBaseAdj", encoding='utf8'))]
-    self.steerDeltaDown_range = [CarControllerParams.STEER_DELTA_DOWN, int(self.params.get("SteerDeltaDownBaseAdj", encoding='utf8')), int(self.params.get("SteerDeltaDownBaseAdj", encoding='utf8'))]
+    self.steerMax_range = [CarControllerParams.STEER_MAX, self.steerMaxBase, self.steerMaxBase]
+    self.steerDeltaUp_range = [CarControllerParams.STEER_DELTA_UP, self.steerDeltaUpBase, self.steerDeltaUpBase]
+    self.steerDeltaDown_range = [CarControllerParams.STEER_DELTA_DOWN, self.steerDeltaDownBase, self.steerDeltaDownBase]
 
-    self.steerMax = int(self.params.get("SteerMaxBaseAdj", encoding='utf8'))
-    self.steerDeltaUp = int(self.params.get("SteerDeltaUpBaseAdj", encoding='utf8'))
-    self.steerDeltaDown = int(self.params.get("SteerDeltaDownBaseAdj", encoding='utf8'))
-
-    self.variable_steer_max = self.params.get('OpkrVariableSteerMax', encoding='utf8') == "1"
-    self.variable_steer_delta = self.params.get('OpkrVariableSteerDelta', encoding='utf8') == "1"
+    self.variable_steer_max = self.params.get('OpkrVariableSteerMax') == b'1'
+    self.variable_steer_delta = self.params.get('OpkrVariableSteerDelta') == b'1'
 
     if CP.lateralTuning.which() == 'pid':
       self.str_log2 = 'T={:0.2f}/{:0.3f}/{:0.2f}/{:0.5f}'.format(CP.lateralTuning.pid.kpV[1], CP.lateralTuning.pid.kiV[1], CP.lateralTuning.pid.kdV[0], CP.lateralTuning.pid.kf)
@@ -139,7 +143,6 @@ class CarController():
       self.str_log2 = 'T={:03.1f}/{:03.1f}/{:03.1f}/{:03.1f}'.format(CP.lateralTuning.indi.innerLoopGainV[1], CP.lateralTuning.indi.outerLoopGainV[1], CP.lateralTuning.indi.timeConstantV[1], CP.lateralTuning.indi.actuatorEffectivenessV[1])
     elif CP.lateralTuning.which() == 'lqr':
       self.str_log2 = 'T={:04.0f}/{:05.3f}/{:06.4f}'.format(CP.lateralTuning.lqr.scale, CP.lateralTuning.lqr.ki, CP.lateralTuning.lqr.dcGain)
-
 
     self.p = CarControllerParams
   def update(self, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert,
@@ -173,17 +176,17 @@ class CarController():
       if self.variable_steer_max:
         self.steerMax = interp(int(abs(self.model_speed)), self.model_speed_range, self.steerMax_range)
       else:
-        self.steerMax = int(self.params.get("SteerMaxBaseAdj", encoding='utf8'))
+        self.steerMax = self.steerMaxBase
       if self.variable_steer_delta:
         self.steerDeltaUp = interp(int(abs(self.model_speed)), self.model_speed_range, self.steerDeltaUp_range)
         self.steerDeltaDown = interp(int(abs(self.model_speed)), self.model_speed_range, self.steerDeltaDown_range)
       else:
-        self.steerDeltaUp = int(self.params.get("SteerDeltaUpBaseAdj", encoding='utf8'))
-        self.steerDeltaDown = int(self.params.get("SteerDeltaDownBaseAdj", encoding='utf8'))
+        self.steerDeltaUp = self.steerDeltaUpBase
+        self.steerDeltaDown = self.steerDeltaDownBase
     else:
-      self.steerMax = int(self.params.get("SteerMaxBaseAdj", encoding='utf8'))
-      self.steerDeltaUp = int(self.params.get("SteerDeltaUpBaseAdj", encoding='utf8'))
-      self.steerDeltaDown = int(self.params.get("SteerDeltaDownBaseAdj", encoding='utf8'))
+      self.steerMax = self.steerMaxBase
+      self.steerDeltaUp = self.steerDeltaUpBase
+      self.steerDeltaDown = self.steerDeltaDownBase
 
     param.STEER_MAX = min(CarControllerParams.STEER_MAX, self.steerMax) # variable steermax
     param.STEER_DELTA_UP = min(CarControllerParams.STEER_DELTA_UP, self.steerDeltaUp) # variable deltaUp
@@ -270,15 +273,6 @@ class CarController():
       can_sends.append(create_mdps12(self.packer, frame, CS.mdps12))
 
     str_log1 = 'CV={:03.0f}  TQ={:03.0f}  R={:03.0f}  ST={:03.0f}/{:01.0f}/{:01.0f}'.format(abs(self.model_speed), abs(new_steer), self.timer1.sampleTime(), self.steerMax, self.steerDeltaUp, self.steerDeltaDown)
-
-    if self.params.get("OpkrLiveTune", encoding='utf8') == "1":
-      if int(self.params.get("LateralControlMethod", encoding='utf8')) == 0:
-        self.str_log2 = 'T={:0.2f}/{:0.3f}/{:0.2f}/{:0.5f}'.format(float(int(self.params.get("PidKp", encoding='utf8')) * 0.01), float(int(self.params.get("PidKi", encoding='utf8')) * 0.001), float(int(self.params.get("PidKd", encoding='utf8')) * 0.01), float(int(self.params.get("PidKf", encoding='utf8')) * 0.00001))
-      elif int(self.params.get("LateralControlMethod", encoding='utf8')) == 1:
-        self.str_log2 = 'T={:03.1f}/{:03.1f}/{:03.1f}/{:03.1f}'.format(float(int(self.params.get("InnerLoopGain", encoding='utf8')) * 0.1), float(int(self.params.get("OuterLoopGain", encoding='utf8')) * 0.1), float(int(self.params.get("TimeConstant", encoding='utf8')) * 0.1), float(int(self.params.get("ActuatorEffectiveness", encoding='utf8')) * 0.1))
-      elif int(self.params.get("LateralControlMethod", encoding='utf8')) == 2:
-        self.str_log2 = 'T={:04.0f}/{:05.3f}/{:06.4f}'.format(float(int(self.params.get("Scale", encoding='utf8')) * 1.0), float(int(self.params.get("LqrKi", encoding='utf8')) * 0.001), float(int(self.params.get("DcGain", encoding='utf8')) * 0.0001))
-
     trace1.printf1('{}  {}'.format(str_log1, self.str_log2))
 
     if CS.out.cruiseState.modeSel == 0 and self.mode_change_switch == 3:

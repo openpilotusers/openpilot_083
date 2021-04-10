@@ -61,8 +61,8 @@ class Buttons:
   CANCEL = 4
 
 params = Params()
-fingerprint_issued_fix = params.get("FingerprintIssuedFix", encoding='utf8') == "1"
-fingerprint_two = params.get("FingerprintTwoSet", encoding='utf8') == "1"
+fingerprint_issued_fix = params.get('FingerprintIssuedFix') == b'1'
+fingerprint_two = params.get('FingerprintTwoSet') == b'1'
 
 if fingerprint_issued_fix:
   FINGERPRINTS = {
@@ -370,7 +370,7 @@ else:
 IGNORED_FINGERPRINTS = [CAR.VELOSTER, CAR.GENESIS_G70, CAR.KONA, CAR.CEED, CAR.SELTOS]
 
 if fingerprint_two:
-  FW_VERSIONS = {  #핑거프린트2.0부분, 차량 미인식으로 대시캠모드로 동작시 개발자메뉴에서 핑거프린트2.0 활성화 옵션을 끄고 위쪽 핑거프린트1.0에 본인차량 핑거프린트가 들어가 있는지 확인해보세요.
+  FW_VERSIONS = {
     # genesis
     CAR.GENESIS_G70: {
       (Ecu.fwdRadar, 0x7d0, None): [b'\xf1\x00IK__ SCC F-CUP      1.00 1.02 96400-G9100         \xf1\xa01.02',],
