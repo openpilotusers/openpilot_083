@@ -6,10 +6,6 @@ from common.realtime import DT_DMON
 from common.filter_simple import FirstOrderFilter
 from common.stat_live import RunningStatFilter
 
-from common.params import Params
-
-EnableLogger = Params().get("OpkrEnableLogger", encoding='utf8') == "1"
-EnableDriverMonitoring = Params().get("OpkrEnableDriverMonitoring", encoding='utf8') == "1"
 EventName = car.CarEvent.EventName
 
 # ******************************************************************************************
@@ -18,24 +14,15 @@ EventName = car.CarEvent.EventName
 #  We recommend that you do not change these numbers from the defaults.
 # ******************************************************************************************
 
-if not EnableLogger:
-  _AWARENESS_TIME = 3600.
-else:
-  _AWARENESS_TIME = 35.  # passive wheel touch total timeout
+_AWARENESS_TIME = 35.  # passive wheel touch total timeout
 _AWARENESS_PRE_TIME_TILL_TERMINAL = 12.
 _AWARENESS_PROMPT_TIME_TILL_TERMINAL = 6.
-if not EnableDriverMonitoring and not EnableLogger:
-  _DISTRACTED_TIME = 3600.
-else:
-  _DISTRACTED_TIME = 11.
+_DISTRACTED_TIME = 11.
 _DISTRACTED_PRE_TIME_TILL_TERMINAL = 8.
 _DISTRACTED_PROMPT_TIME_TILL_TERMINAL = 6.
 
-if not EnableLogger:
-  _FACE_THRESHOLD = 0.99
-else:
-  _FACE_THRESHOLD = 0.6
-_PARTIAL_FACE_THRESHOLD = 0.6
+_FACE_THRESHOLD = 0.5
+_PARTIAL_FACE_THRESHOLD = 0.5
 _EYE_THRESHOLD = 0.5
 _SG_THRESHOLD = 0.5
 _BLINK_THRESHOLD = 0.5
@@ -227,7 +214,7 @@ class DriverStatus():
     elif self.face_detected and self.pose.low_std:
       self.hi_stds = 0
 
-  def update(self, events, driver_engaged, ctrl_active, standstill, car_speed):
+  def update(self, events, driver_engaged, ctrl_active, standstill):
     if (driver_engaged and self.awareness > 0) or not ctrl_active:
       # reset only when on disengagement if red reached
       self.awareness = 1.
@@ -239,7 +226,7 @@ class DriverStatus():
     awareness_prev = self.awareness
 
     if self.face_detected and self.hi_stds * DT_DMON > _HI_STD_TIMEOUT and self.hi_std_alert_enabled:
-      #events.add(EventName.driverMonitorLowAcc)
+      events.add(EventName.driverMonitorLowAcc)
       self.hi_std_alert_enabled = False # only showed once until orange prompt resets it
 
     if (driver_attentive and self.face_detected and self.pose.low_std and self.awareness > 0):
@@ -259,20 +246,17 @@ class DriverStatus():
     alert = None
     if self.awareness <= 0.:
       # terminal red alert: disengagement required
-      if self.active_monitoring_mode and car_speed > 1:
-        alert = EventName.driverDistracted
+      alert = EventName.driverDistracted if self.active_monitoring_mode else EventName.driverUnresponsive
       self.hi_std_alert_enabled = True
       self.terminal_time += 1
       if awareness_prev > 0.:
         self.terminal_alert_cnt += 1
     elif self.awareness <= self.threshold_prompt:
       # prompt orange alert
-      if self.active_monitoring_mode and car_speed > 1:
-        alert = EventName.promptDriverDistracted
+      alert = EventName.promptDriverDistracted if self.active_monitoring_mode else EventName.promptDriverUnresponsive
     elif self.awareness <= self.threshold_pre:
       # pre green alert
-      if self.active_monitoring_mode and car_speed > 1:
-        alert = EventName.preDriverDistracted
+      alert = EventName.preDriverDistracted if self.active_monitoring_mode else EventName.preDriverUnresponsive
 
     if alert is not None:
       events.add(alert)

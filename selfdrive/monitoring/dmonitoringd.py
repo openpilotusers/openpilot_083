@@ -18,7 +18,6 @@ def dmonitoringd_thread(sm=None, pm=None):
 
   sm['liveCalibration'].calStatus = Calibration.INVALID
   sm['liveCalibration'].rpyCalib = [0, 0, 0]
-  sm['carState'].vEgo = 0.
   sm['carState'].buttonEvents = []
   sm['carState'].standstill = True
 
@@ -40,7 +39,7 @@ def dmonitoringd_thread(sm=None, pm=None):
                         sm['carState'].steeringPressed or \
                         sm['carState'].gasPressed
       if driver_engaged:
-        driver_status.update(Events(), True, sm['controlsState'].enabled, sm['carState'].standstill, sm['carState'].vEgo)
+        driver_status.update(Events(), True, sm['controlsState'].enabled, sm['carState'].standstill)
       v_cruise_last = v_cruise
 
     if sm.updated['modelV2']:
@@ -55,7 +54,7 @@ def dmonitoringd_thread(sm=None, pm=None):
       events.add(car.CarEvent.EventName.tooDistracted)
 
     # Update events from driver state
-    driver_status.update(events, driver_engaged, sm['controlsState'].enabled, sm['carState'].standstill, sm['carState'].vEgo)
+    driver_status.update(events, driver_engaged, sm['controlsState'].enabled, sm['carState'].standstill)
 
     # build driverMonitoringState packet
     dat = messaging.new_message('driverMonitoringState')
