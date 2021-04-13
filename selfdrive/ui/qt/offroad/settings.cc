@@ -417,6 +417,13 @@ QWidget * user_panel(QWidget * parent) {
                                           std::system(p_edit_go);
                                         }
                                       }));
+  const char* m_edit_go = "/data/openpilot/m_edit.sh ''";
+  layout->addWidget(new ButtonControl("모니터링 파라미터 수정", "실행", "야간 감시 및 터널안 원활한 모니터링을 위하여 파라미터를 수정합니다.",
+                                      [=]() { 
+                                        if (ConfirmationDialog::confirm("야간감시 및 터널안 원활한 모니터링을 위하여 파라미터를 수정합니다.")){
+                                          std::system(m_edit_go);
+                                        }
+                                      }));
   //layout->addWidget(horizontal_line());
 
   layout->addStretch(1);
